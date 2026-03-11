@@ -1,0 +1,39 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home">
+  <div class="text-center py-16">
+    <h1 class="text-4xl font-bold mb-4">Runners In Need</h1>
+    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+      Connecting runners who have extra gear with organizations serving runners in need.
+      Whether you're a coach looking for shoes for your team or a runner with gear to give,
+      we make it easy to help.
+    </p>
+    <div class="flex gap-4 justify-center">
+      <a href="/browse" class="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800">
+        Browse Needs
+      </a>
+      <a href="/about" class="border border-green-700 text-green-700 px-6 py-3 rounded-lg hover:bg-green-50">
+        Learn More
+      </a>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-8 mt-12">
+    <div class="p-6 border rounded-lg">
+      <h2 class="text-xl font-semibold mb-2">For Organizers</h2>
+      <p class="text-gray-600">
+        Coaches, schools, and community programs can post specific gear needs
+        for their runners. Tell donors exactly what sizes and types of gear would help most.
+      </p>
+    </div>
+    <div class="p-6 border rounded-lg">
+      <h2 class="text-xl font-semibold mb-2">For Donors</h2>
+      <p class="text-gray-600">
+        Browse needs near you, pledge gear you have available, and coordinate
+        delivery directly with organizers. Every pair of shoes makes a difference.
+      </p>
+    </div>
+  </div>
+</Layout>

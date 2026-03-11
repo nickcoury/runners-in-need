@@ -1,0 +1,18 @@
+---
+// This page will be server-rendered (requires auth)
+// export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Dashboard">
+  <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+  <p class="text-gray-600 mb-8">
+    Manage your needs, pledges, and account settings.
+  </p>
+
+  <div class="border rounded-lg p-8 text-center text-gray-400">
+    <p>Sign in to access your dashboard.</p>
+    <p class="text-sm mt-2">Authentication coming soon.</p>
+  </div>
+</Layout>

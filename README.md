@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Runners In Need
 
-## Getting Started
+Connecting runners who have extra gear with organizations serving runners in need.
 
-First, run the development server:
+## Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env  # Fill in your values
+npm run dev            # http://localhost:4321
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Astro** — Static-first framework with React islands for interactivity
+- **Tailwind CSS** — Utility-first styling
+- **Turso** — SQLite database (via Drizzle ORM)
+- **Auth.js** — Magic links + OAuth authentication
+- **Cloudflare Pages** — Hosting (free tier)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── actions/        # Server-side form handlers
+├── components/     # React islands and Astro components
+├── db/             # Database schema and connection
+├── layouts/        # Page layouts
+├── lib/            # Shared utilities
+├── pages/          # Routes and API endpoints
+└── styles/         # Tailwind CSS
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Product Requirements](docs/PRODUCT.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [TODO](TODO.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Secrets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Copy `.env.example` to `.env` and fill in values. See the example file for all required keys. Keep a backup of your `.env` somewhere secure — it's the only file not tracked in git.

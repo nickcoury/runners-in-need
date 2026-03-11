@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Browse Needs">
+  <h1 class="text-3xl font-bold mb-6">Browse Needs</h1>
+  <p class="text-gray-600 mb-8">
+    Find organizations near you that need running gear. Use the map or search to find needs you can help with.
+  </p>
+
+  <!-- Map and search will be React islands -->
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="md:col-span-2">
+      <div class="bg-gray-100 rounded-lg h-80 flex items-center justify-center text-gray-400">
+        Map (Leaflet + OpenStreetMap)
+      </div>
+    </div>
+    <div>
+      <input
+        type="text"
+        placeholder="Search by location or keyword..."
+        class="w-full border rounded-lg px-4 py-2 mb-4"
+      />
+      <div class="space-y-4">
+        <p class="text-sm text-gray-500">Needs will appear here as cards.</p>
+      </div>
+    </div>
+  </div>
+</Layout>
