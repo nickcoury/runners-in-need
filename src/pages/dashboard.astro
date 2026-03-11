@@ -3,16 +3,118 @@
 // export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
+import DashboardTabs from '../components/DashboardTabs';
+
+// Mock organizer info
+const orgName = "Portland Running Project";
+const orgEmail = "info@portlandrunningproject.org";
+
+// Mock needs data
+const needs = [
+  {
+    id: "need-001",
+    title: "Running shoes for Wilson High cross country team",
+    categoryTag: "shoes",
+    status: "active" as const,
+    pledgeCount: 4,
+    daysLeft: 52,
+    location: "Portland, OR",
+  },
+  {
+    id: "need-002",
+    title: "Winter running tights and base layers",
+    categoryTag: "apparel",
+    status: "active" as const,
+    pledgeCount: 1,
+    daysLeft: 8,
+    location: "Portland, OR",
+  },
+  {
+    id: "need-003",
+    title: "Headlamps and reflective vests for evening training",
+    categoryTag: "accessories",
+    status: "fulfilled" as const,
+    pledgeCount: 6,
+    daysLeft: 0,
+    location: "Portland, OR",
+  },
+  {
+    id: "need-004",
+    title: "Trail shoes for summer camp program",
+    categoryTag: "shoes",
+    status: "expired" as const,
+    pledgeCount: 2,
+    daysLeft: 0,
+    location: "Bend, OR",
+  },
+];
+
+// Mock pledges data
+const pledges = [
+  {
+    id: "pledge-001",
+    needId: "need-001",
+    needTitle: "Running shoes for Wilson High cross country team",
+    donorName: "Sarah Mitchell",
+    donorEmail: "sarah.m@gmail.com",
+    description: "I have 3 pairs of men's running shoes (sizes 9, 9.5, 10) — Brooks Ghost 15, lightly used. Happy to drop off in Portland.",
+    status: "pending" as const,
+    createdAt: "Mar 8, 2026",
+  },
+  {
+    id: "pledge-002",
+    needId: "need-001",
+    needTitle: "Running shoes for Wilson High cross country team",
+    donorName: "Mike Chen",
+    donorEmail: "mchen@outlook.com",
+    description: "Two pairs of women's Nike Pegasus (size 7 and 8), barely worn. Can ship this week.",
+    status: "accepted" as const,
+    createdAt: "Mar 5, 2026",
+  },
+  {
+    id: "pledge-003",
+    needId: "need-001",
+    needTitle: "Running shoes for Wilson High cross country team",
+    donorName: "RunClub PDX",
+    donorEmail: "gear@runclubpdx.org",
+    description: "We collected 8 pairs from our members — mixed sizes, all in good condition. Men's and women's.",
+    status: "shipped" as const,
+    createdAt: "Mar 2, 2026",
+  },
+  {
+    id: "pledge-004",
+    needId: "need-002",
+    needTitle: "Winter running tights and base layers",
+    donorName: "Jamie Torres",
+    donorEmail: "jtorres@proton.me",
+    description: "I have 5 pairs of running tights (S/M) and 3 long-sleeve base layers from last season. All washed and in great shape.",
+    status: "pending" as const,
+    createdAt: "Mar 10, 2026",
+  },
+  {
+    id: "pledge-005",
+    needId: "need-003",
+    needTitle: "Headlamps and reflective vests for evening training",
+    donorName: "Fleet Feet Portland",
+    donorEmail: "community@fleetfeetpdx.com",
+    description: "Donating 12 reflective vests and 6 headlamps. Brand new, from our community outreach stock.",
+    status: "received" as const,
+    createdAt: "Feb 20, 2026",
+  },
+];
 ---
 
 <Layout title="Dashboard">
-  <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
-  <p class="text-gray-600 mb-8">
-    Manage your needs, pledges, and account settings.
+  <h1 class="text-3xl font-bold mb-2">Dashboard</h1>
+  <p class="text-gray-500 text-sm mb-6">
+    {orgName} &mdash; Manage your needs, pledges, and account.
   </p>
 
-  <div class="border rounded-lg p-8 text-center text-gray-400">
-    <p>Sign in to access your dashboard.</p>
-    <p class="text-sm mt-2">Authentication coming soon.</p>
-  </div>
+  <DashboardTabs
+    client:load
+    needs={needs}
+    pledges={pledges}
+    orgName={orgName}
+    orgEmail={orgEmail}
+  />
 </Layout>

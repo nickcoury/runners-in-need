@@ -1,6 +1,4 @@
 ---
-// This page will be server-rendered to load need data
-// For now, it's a static placeholder showing the layout
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
@@ -12,25 +10,263 @@ const { id } = Astro.params;
 // const db = getDb();
 // const need = await db.query.needs.findFirst({ where: eq(schema.needs.id, id) });
 
-const need = null; // Placeholder until DB is connected
+// Mock data for development
+const need = {
+  id: id || "need-7f3a",
+  title: "Running Shoes Needed for Youth Track Program (Sizes 4-8)",
+  categoryTag: "shoes",
+  body: `Our youth track program serves 45 middle-school students in East Portland. Many of our athletes are training in worn-out shoes or shoes that don't fit properly — some are running in basketball shoes or even sandals.
+
+We're looking for gently used or new running shoes in youth and small adult sizes (4-8). Neutral road shoes work best for our mix of track and cross-country training.
+
+Any brand is welcome. We can accept shoes with moderate wear as long as the midsole still has cushion and the outsole has tread.
+
+Drop-off is available at our facility Mon-Fri 3-6pm, or we can arrange pickup within the Portland metro area.`,
+  orgName: "Rose City Youth Athletics",
+  location: "Portland, OR",
+  extrasWelcome: true,
+  status: "open",
+  expiresAt: new Date("2026-04-15"),
+  pledgeCount: 3,
+  continuedFromId: null as string | null,
+  continuedFromTitle: null as string | null,
+  createdAt: new Date("2026-02-28"),
+};
+
+const pledges = [
+  {
+    id: "pledge-a1",
+    donorName: "Maria Chen",
+    description: "I have 4 pairs of kids' running shoes from my daughter's team — sizes 5, 5.5, 6, and 7. All Nike Pegasus, used one season. Still plenty of life in them.",
+    status: "accepted",
+    createdAt: new Date("2026-03-02"),
+    updatedAt: new Date("2026-03-03"),
+    messages: [
+      {
+        id: "msg-1",
+        author: "Maria Chen",
+        isOrg: false,
+        body: "Hi! I can drop these off Thursday afternoon if that works.",
+        createdAt: new Date("2026-03-03T14:22:00"),
+      },
+      {
+        id: "msg-2",
+        author: "Rose City Youth Athletics",
+        isOrg: true,
+        body: "Thursday works great! Come to the back entrance on SE Division — look for the blue awning. Ask for Coach Davis.",
+        createdAt: new Date("2026-03-03T16:05:00"),
+      },
+    ],
+  },
+  {
+    id: "pledge-b2",
+    donorName: "Anonymous",
+    description: "I work at a running store and we have 6 pairs of last-season models (sizes 4, 5, 6, 6.5, 7, 8) that we can donate. Brand new, just discontinued colorways.",
+    status: "pending",
+    createdAt: new Date("2026-03-08"),
+    updatedAt: new Date("2026-03-08"),
+    messages: [],
+  },
+  {
+    id: "pledge-c3",
+    donorName: "James Whitfield",
+    description: "I have 2 pairs of Brooks Ghost 15 in size 7 and 8. Ran about 50 miles in each, still in great shape.",
+    status: "accepted",
+    createdAt: new Date("2026-03-10"),
+    updatedAt: new Date("2026-03-11"),
+    messages: [
+      {
+        id: "msg-3",
+        author: "James Whitfield",
+        isOrg: false,
+        body: "Happy to ship these — can you DM me the mailing address?",
+        createdAt: new Date("2026-03-11T09:30:00"),
+      },
+    ],
+  },
+];
+
+// Precompute all derived values
+const categoryStyleMap: Record<string, string> = {
+  shoes: "bg-[#2D4A2D] text-white",
+  apparel: "bg-blue-600 text-white",
+  accessories: "bg-amber-600 text-white",
+  other: "bg-gray-500 text-white",
+};
+
+const categoryLabelMap: Record<string, string> = {
+  shoes: "Shoes",
+  apparel: "Apparel",
+  accessories: "Accessories",
+  other: "Other",
+};
+
+const categoryStyle = categoryStyleMap[need.categoryTag] || categoryStyleMap.other;
+const categoryLabel = categoryLabelMap[need.categoryTag] || "Other";
+
+const msPerDay = 1000 * 60 * 60 * 24;
+const daysUntilExpiry = Math.ceil((need.expiresAt.getTime() - Date.now()) / msPerDay);
+const isExpiringSoon = daysUntilExpiry <= 14 && daysUntilExpiry > 0;
+const isExpired = daysUntilExpiry <= 0;
+const expiryText = isExpired ? "Expired" : `${daysUntilExpiry} days left`;
+const expiryClass = isExpiringSoon ? "text-amber-600 font-medium" : isExpired ? "text-red-600 font-medium" : "text-gray-500";
+
+const hasContinuation = need.continuedFromId !== null;
+const continuationUrl = hasContinuation ? `/needs/${need.continuedFromId}` : "";
+
+const createdDateStr = need.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+const expiresDateStr = need.expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+const statusBadgeMap: Record<string, string> = {
+  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  accepted: "bg-green-50 text-green-700 border-green-200",
+  declined: "bg-red-50 text-red-700 border-red-200",
+  fulfilled: "bg-blue-50 text-blue-700 border-blue-200",
+};
+
+const statusLabelMap: Record<string, string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  declined: "Declined",
+  fulfilled: "Fulfilled",
+};
+
+const pledgesWithComputed = pledges.map((p) => {
+  const badge = statusBadgeMap[p.status] || statusBadgeMap.pending;
+  const label = statusLabelMap[p.status] || "Pending";
+  const dateStr = p.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const messagesWithDates = p.messages.map((m) => {
+    const timeStr = m.createdAt.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    return { ...m, timeStr };
+  });
+  return { ...p, badge, label, dateStr, messagesWithDates };
+});
+
+const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
 ---
 
-<Layout title="Need Detail">
-  {need ? (
-    <div>
-      <!-- Need details will render here -->
-    </div>
-  ) : (
-    <div class="text-center py-16">
-      <h1 class="text-2xl font-bold mb-4">Need Detail</h1>
-      <p class="text-gray-500 mb-4">
-        This page will show the full details of a need once the database is connected.
-      </p>
-      <p class="text-sm text-gray-400">Need ID: {id}</p>
+<Layout title={need.title}>
+  <div class="max-w-3xl mx-auto">
+    {/* Back link */}
+    <a href="/browse" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] mb-4">
+      &larr; Back to browse
+    </a>
 
-      <div class="max-w-lg mx-auto mt-8">
-        <PledgeForm client:load needId={id || ""} />
+    {/* Continued-from banner */}
+    {hasContinuation && (
+      <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm text-blue-800">
+        This need continues from a previous request.
+        <a href={continuationUrl} class="underline font-medium hover:text-blue-900 ml-1">
+          View original need &rarr;
+        </a>
+      </div>
+    )}
+
+    {/* Main need card */}
+    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      {/* Header: category + extras + expiry */}
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class:list={["text-xs font-medium px-2.5 py-1 rounded-full", categoryStyle]}>
+          {categoryLabel}
+        </span>
+        {need.extrasWelcome && (
+          <span class="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-200">
+            + Extras welcome
+          </span>
+        )}
+        <span class:list={["text-xs ml-auto", expiryClass]}>
+          {expiryText}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">{need.title}</h1>
+
+      {/* Org + location + date */}
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4">
+        <span class="font-medium text-gray-700">{need.orgName}</span>
+        <span>&middot;</span>
+        <span>{need.location}</span>
+        <span>&middot;</span>
+        <span>Posted {createdDateStr}</span>
+      </div>
+
+      {/* Metadata bar */}
+      <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400 border-t border-b border-gray-100 py-3 mb-4">
+        <span>{pledgeCountText}</span>
+        <span>Expires {expiresDateStr}</span>
+        <span class="capitalize">Status: {need.status}</span>
+      </div>
+
+      {/* Body text */}
+      <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{need.body}</div>
+    </div>
+
+    {/* Pledges section */}
+    <div class="mb-6">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Pledges ({need.pledgeCount})</h2>
+
+      <div class="space-y-4">
+        {pledgesWithComputed.map((pledge) => (
+          <div class="bg-white border border-gray-200 rounded-lg p-4">
+            {/* Pledge header */}
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <span class="font-semibold text-gray-900 text-sm">{pledge.donorName}</span>
+                <span class="text-xs text-gray-400 ml-2">{pledge.dateStr}</span>
+              </div>
+              <span class:list={["text-xs font-medium px-2 py-0.5 rounded-full border", pledge.badge]}>
+                {pledge.label}
+              </span>
+            </div>
+
+            {/* Pledge description */}
+            <p class="text-sm text-gray-600 whitespace-pre-line mb-3">{pledge.description}</p>
+
+            {/* Messages thread */}
+            {pledge.messagesWithDates.length > 0 && (
+              <div class="border-t border-gray-100 pt-3 mt-3">
+                <p class="text-xs font-medium text-gray-500 mb-2">Messages</p>
+                <div class="space-y-2">
+                  {pledge.messagesWithDates.map((msg) => (
+                    <div class:list={[
+                      "rounded-lg px-3 py-2 text-sm",
+                      msg.isOrg ? "bg-green-50 border border-green-100 ml-4" : "bg-gray-50 border border-gray-100 mr-4",
+                    ]}>
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class:list={[
+                          "text-xs font-medium",
+                          msg.isOrg ? "text-green-700" : "text-gray-700",
+                        ]}>
+                          {msg.author}
+                        </span>
+                        {msg.isOrg && (
+                          <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
+                            ORG
+                          </span>
+                        )}
+                        <span class="text-xs text-gray-400 ml-auto">{msg.timeStr}</span>
+                      </div>
+                      <p class="text-gray-700">{msg.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
-  )}
+
+    {/* Pledge form */}
+    <div class="mb-8">
+      <h2 class="text-lg font-bold text-gray-900 mb-4">Make a Pledge</h2>
+      <PledgeForm client:load needId={need.id} />
+    </div>
+  </div>
 </Layout>

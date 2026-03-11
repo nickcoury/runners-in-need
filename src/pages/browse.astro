@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import NeedCard from '../components/NeedCard.astro';
+import MapView from '../components/MapView';
 
 // TODO: Fetch from database
 // For now, show placeholder cards
@@ -12,6 +13,8 @@ const sampleNeeds = [
     body: "We need running shoes for our cross country team:\n- 3 pairs men's size 9-9.5\n- 1 pair men's size 10-10.5\n- 2 pairs women's size 7-8\n\nNew or lightly used preferred.",
     orgName: "Wilson High School",
     location: "Portland, OR",
+    lat: 45.5152,
+    lng: -122.6784,
     extrasWelcome: true,
     status: "active",
     expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
@@ -24,6 +27,8 @@ const sampleNeeds = [
     body: "Our youth running club needs warm-up gear for the fall season:\n- 8 youth jackets (sizes S-L)\n- 10 pairs running shorts (various sizes)\n\nAny brand, new or gently used.",
     orgName: "Eastside Youth Runners",
     location: "Denver, CO",
+    lat: 39.7392,
+    lng: -104.9903,
     extrasWelcome: false,
     status: "active",
     expiresAt: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
@@ -36,6 +41,8 @@ const sampleNeeds = [
     body: "We run a youth fitness program and use race medals to motivate kids who complete running milestones. Any finisher medals welcome — marathon, half, 5K, etc.",
     orgName: "Run for Joy Foundation",
     location: "Austin, TX",
+    lat: 30.2672,
+    lng: -97.7431,
     extrasWelcome: true,
     status: "active",
     expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
@@ -48,6 +55,8 @@ const sampleNeeds = [
     body: "Our track team needs racing flats and spikes:\n- 4 pairs men's racing flats (8.5-10)\n- 2 pairs women's spikes (6-7)\n- 3 pairs women's racing flats (7-8.5)",
     orgName: "MLK Community Center",
     location: "Atlanta, GA",
+    lat: 33.7490,
+    lng: -84.3880,
     extrasWelcome: true,
     status: "active",
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -60,6 +69,8 @@ const sampleNeeds = [
     body: "Our community running group meets after work and we need visibility gear:\n- Reflective vests (any size, 10+ needed)\n- LED clip-on lights\n- Reflective armbands",
     orgName: "Sunset Stride Club",
     location: "Seattle, WA",
+    lat: 47.6062,
+    lng: -122.3321,
     extrasWelcome: true,
     status: "active",
     expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
@@ -72,6 +83,8 @@ const sampleNeeds = [
     body: "New girls' XC program launching — starting from scratch:\n- 6 pairs women's running shoes (sizes 6-9)\n- 6 sports bras (S/M)\n- Running socks\n\nNew preferred for hygiene items, used shoes OK.",
     orgName: "Riverside Middle School",
     location: "Chicago, IL",
+    lat: 41.8781,
+    lng: -87.6298,
     extrasWelcome: true,
     status: "active",
     expiresAt: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000),
@@ -85,6 +98,13 @@ const urgentNeeds = sampleNeeds
     return days <= 30;
   })
   .slice(0, 3);
+
+const mapNeeds = sampleNeeds.map((n) => ({
+  id: n.id,
+  title: n.title,
+  lat: n.lat,
+  lng: n.lng,
+}));
 
 const categories = [
   { tag: "all", label: "All", icon: "" },
@@ -128,9 +148,7 @@ const categories = [
       {/* Map */}
       <div>
         <h3 class="font-semibold text-sm text-gray-900 mb-2">LOCAL NEEDS MAP</h3>
-        <div id="map" class="bg-gray-200 rounded-lg h-56 flex items-center justify-center text-gray-400 text-sm">
-          Map (Leaflet + OSM)
-        </div>
+        <MapView client:visible needs={mapNeeds} />
       </div>
 
       {/* Urgent needs */}
