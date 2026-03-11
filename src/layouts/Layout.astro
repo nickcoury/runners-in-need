@@ -4,9 +4,10 @@ import '../styles/global.css'
 interface Props {
   title: string;
   description?: string;
+  fullWidth?: boolean;
 }
 
-const { title, description = 'Connecting runners who have extra gear with organizations serving runners in need.' } = Astro.props;
+const { title, description = 'Connecting runners who have extra gear with organizations serving runners in need.', fullWidth = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -18,25 +19,41 @@ const { title, description = 'Connecting runners who have extra gear with organi
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Runners In Need</title>
   </head>
-  <body class="min-h-screen bg-white text-gray-900 flex flex-col">
-    <header class="border-b border-gray-200">
-      <nav class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/" class="text-xl font-bold text-green-700">Runners In Need</a>
-        <div class="flex gap-6 text-sm">
-          <a href="/browse" class="hover:text-green-700">Browse Needs</a>
-          <a href="/about" class="hover:text-green-700">About</a>
-          <a href="/dashboard" class="hover:text-green-700">Dashboard</a>
+  <body class="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+    <header class="bg-[#2D4A2D] text-white sticky top-0 z-50">
+      <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-6">
+        <a href="/" class="text-xl font-bold shrink-0">Runners In Need</a>
+
+        <div class="flex-1 max-w-md hidden md:block">
+          <input
+            type="text"
+            placeholder="Search needs, items, locations..."
+            class="w-full rounded-lg px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 bg-white border-0 focus:ring-2 focus:ring-white/50"
+          />
+        </div>
+
+        <div class="flex items-center gap-5 text-sm ml-auto">
+          <a href="/browse" class="hover:text-green-200 transition-colors">Explore</a>
+          <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
+          <a href="/browse#map" class="hover:text-green-200 transition-colors hidden sm:block">Map</a>
+          <a href="/about" class="hover:text-green-200 transition-colors hidden sm:block">About</a>
+          <a href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Sign In</a>
         </div>
       </nav>
     </header>
 
-    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 w-full">
+    <main class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>
       <slot />
     </main>
 
-    <footer class="border-t border-gray-200 mt-auto">
-      <div class="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+    <footer class="bg-[#2D4A2D] text-green-100 mt-auto">
+      <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
         <p>Runners In Need &mdash; Connecting gear with those who need it most.</p>
+        <div class="flex gap-4 text-green-300">
+          <a href="/about" class="hover:text-white">About</a>
+          <a href="/privacy" class="hover:text-white">Privacy</a>
+          <a href="/contact" class="hover:text-white">Contact</a>
+        </div>
       </div>
     </footer>
   </body>

@@ -1,29 +1,176 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import NeedCard from '../components/NeedCard.astro';
+
+// TODO: Fetch from database
+// For now, show placeholder cards
+const sampleNeeds = [
+  {
+    id: "sample-1",
+    title: "Running Shoes for Wilson High XC Team",
+    categoryTag: "shoes",
+    body: "We need running shoes for our cross country team:\n- 3 pairs men's size 9-9.5\n- 1 pair men's size 10-10.5\n- 2 pairs women's size 7-8\n\nNew or lightly used preferred.",
+    orgName: "Wilson High School",
+    location: "Portland, OR",
+    extrasWelcome: true,
+    status: "active",
+    expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+    pledgeCount: 1,
+  },
+  {
+    id: "sample-2",
+    title: "Youth Running Club Apparel",
+    categoryTag: "apparel",
+    body: "Our youth running club needs warm-up gear for the fall season:\n- 8 youth jackets (sizes S-L)\n- 10 pairs running shorts (various sizes)\n\nAny brand, new or gently used.",
+    orgName: "Eastside Youth Runners",
+    location: "Denver, CO",
+    extrasWelcome: false,
+    status: "active",
+    expiresAt: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+    pledgeCount: 0,
+  },
+  {
+    id: "sample-3",
+    title: "Race Medals for Kids' Motivation Program",
+    categoryTag: "accessories",
+    body: "We run a youth fitness program and use race medals to motivate kids who complete running milestones. Any finisher medals welcome — marathon, half, 5K, etc.",
+    orgName: "Run for Joy Foundation",
+    location: "Austin, TX",
+    extrasWelcome: true,
+    status: "active",
+    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    pledgeCount: 3,
+  },
+  {
+    id: "sample-4",
+    title: "Track Shoes for Spring Season",
+    categoryTag: "shoes",
+    body: "Our track team needs racing flats and spikes:\n- 4 pairs men's racing flats (8.5-10)\n- 2 pairs women's spikes (6-7)\n- 3 pairs women's racing flats (7-8.5)",
+    orgName: "MLK Community Center",
+    location: "Atlanta, GA",
+    extrasWelcome: true,
+    status: "active",
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    pledgeCount: 0,
+  },
+  {
+    id: "sample-5",
+    title: "Reflective Gear for Evening Running Group",
+    categoryTag: "accessories",
+    body: "Our community running group meets after work and we need visibility gear:\n- Reflective vests (any size, 10+ needed)\n- LED clip-on lights\n- Reflective armbands",
+    orgName: "Sunset Stride Club",
+    location: "Seattle, WA",
+    extrasWelcome: true,
+    status: "active",
+    expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+    pledgeCount: 2,
+  },
+  {
+    id: "sample-6",
+    title: "Girls' Cross Country Startup Kit",
+    categoryTag: "shoes",
+    body: "New girls' XC program launching — starting from scratch:\n- 6 pairs women's running shoes (sizes 6-9)\n- 6 sports bras (S/M)\n- Running socks\n\nNew preferred for hygiene items, used shoes OK.",
+    orgName: "Riverside Middle School",
+    location: "Chicago, IL",
+    extrasWelcome: true,
+    status: "active",
+    expiresAt: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000),
+    pledgeCount: 1,
+  },
+];
+
+const urgentNeeds = sampleNeeds
+  .filter((n) => {
+    const days = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return days <= 30;
+  })
+  .slice(0, 3);
+
+const categories = [
+  { tag: "all", label: "All", icon: "" },
+  { tag: "shoes", label: "Shoes", icon: "👟" },
+  { tag: "apparel", label: "Apparel", icon: "👕" },
+  { tag: "accessories", label: "Accessories", icon: "🎽" },
+  { tag: "other", label: "Other", icon: "📦" },
+];
 ---
 
 <Layout title="Browse Needs">
-  <h1 class="text-3xl font-bold mb-6">Browse Needs</h1>
-  <p class="text-gray-600 mb-8">
-    Find organizations near you that need running gear. Use the map or search to find needs you can help with.
-  </p>
+  {/* Category filter pills */}
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+    {categories.map((cat, i) => (
+      <button
+        class:list={[
+          "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+          i === 0
+            ? "bg-[#2D4A2D] text-white"
+            : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
+        ]}
+      >
+        {cat.icon} {cat.label}
+      </button>
+    ))}
+  </div>
 
-  <!-- Map and search will be React islands -->
-  <div class="grid md:grid-cols-3 gap-6">
-    <div class="md:col-span-2">
-      <div class="bg-gray-100 rounded-lg h-80 flex items-center justify-center text-gray-400">
-        Map (Leaflet + OpenStreetMap)
+  {/* Main content: cards + sidebar */}
+  <div class="flex gap-6">
+    {/* Card grid */}
+    <div class="flex-1 min-w-0">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sampleNeeds.map((need) => (
+          <NeedCard {...need} />
+        ))}
       </div>
     </div>
-    <div>
-      <input
-        type="text"
-        placeholder="Search by location or keyword..."
-        class="w-full border rounded-lg px-4 py-2 mb-4"
-      />
-      <div class="space-y-4">
-        <p class="text-sm text-gray-500">Needs will appear here as cards.</p>
+
+    {/* Sidebar */}
+    <aside class="hidden lg:block w-72 shrink-0 space-y-6">
+      {/* Map */}
+      <div>
+        <h3 class="font-semibold text-sm text-gray-900 mb-2">LOCAL NEEDS MAP</h3>
+        <div id="map" class="bg-gray-200 rounded-lg h-56 flex items-center justify-center text-gray-400 text-sm">
+          Map (Leaflet + OSM)
+        </div>
       </div>
-    </div>
+
+      {/* Urgent needs */}
+      <div>
+        <h3 class="font-semibold text-sm text-gray-900 mb-2">URGENT NEEDS</h3>
+        <div class="space-y-2">
+          {urgentNeeds.map((n) => {
+            const daysLeft = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000*60*60*24));
+            return (
+              <a href={`/needs/${n.id}`} class="block text-sm hover:text-[#2D4A2D]">
+                <p class="font-medium text-gray-900 truncate">{n.title}</p>
+                <p class="text-xs text-amber-600">{daysLeft} days left</p>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div>
+        <h3 class="font-semibold text-sm text-gray-900 mb-2">HOW IT WORKS</h3>
+        <ol class="text-sm text-gray-600 space-y-2">
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">1</span>
+            <span>Organizers post what their runners need</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">2</span>
+            <span>Donors browse and pledge gear</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">3</span>
+            <span>Coordinate delivery or drop-off</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">4</span>
+            <span>Organizer confirms receipt</span>
+          </li>
+        </ol>
+      </div>
+    </aside>
   </div>
 </Layout>

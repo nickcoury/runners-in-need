@@ -3,37 +3,63 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Home">
+  {/* Hero */}
   <div class="text-center py-16">
-    <h1 class="text-4xl font-bold mb-4">Runners In Need</h1>
+    <h1 class="text-4xl font-bold mb-4 text-[#2D4A2D]">Runners In Need</h1>
     <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
       Connecting runners who have extra gear with organizations serving runners in need.
       Whether you're a coach looking for shoes for your team or a runner with gear to give,
       we make it easy to help.
     </p>
     <div class="flex gap-4 justify-center">
-      <a href="/browse" class="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800">
+      <a href="/browse" class="bg-[#2D4A2D] text-white px-6 py-3 rounded-lg hover:bg-[#1F361F] font-medium transition-colors">
         Browse Needs
       </a>
-      <a href="/about" class="border border-green-700 text-green-700 px-6 py-3 rounded-lg hover:bg-green-50">
+      <a href="/about" class="border border-[#2D4A2D] text-[#2D4A2D] px-6 py-3 rounded-lg hover:bg-green-50 font-medium transition-colors">
         Learn More
       </a>
     </div>
   </div>
 
-  <div class="grid md:grid-cols-2 gap-8 mt-12">
-    <div class="p-6 border rounded-lg">
-      <h2 class="text-xl font-semibold mb-2">For Organizers</h2>
-      <p class="text-gray-600">
+  {/* How it works */}
+  <div class="grid md:grid-cols-4 gap-6 mb-16">
+    {[
+      { step: "1", title: "Organizers Post", desc: "Schools, clubs, and programs share what their runners need — sizes, types, quantities." },
+      { step: "2", title: "Donors Browse", desc: "Find needs near you by location and category. See exactly what's needed." },
+      { step: "3", title: "Pledge & Deliver", desc: "Commit to providing gear and coordinate shipping or local drop-off." },
+      { step: "4", title: "Confirm Receipt", desc: "Organizers mark deliveries complete. Remaining needs auto-update." },
+    ].map((item) => (
+      <div class="text-center">
+        <div class="w-10 h-10 bg-[#2D4A2D] text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">
+          {item.step}
+        </div>
+        <h3 class="font-semibold mb-1">{item.title}</h3>
+        <p class="text-sm text-gray-600">{item.desc}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* Two-sided value prop */}
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 border border-gray-200 rounded-lg">
+      <h2 class="text-xl font-semibold mb-2 text-[#2D4A2D]">For Organizers</h2>
+      <p class="text-gray-600 mb-4">
         Coaches, schools, and community programs can post specific gear needs
         for their runners. Tell donors exactly what sizes and types of gear would help most.
       </p>
+      <a href="/post" class="text-sm font-medium text-[#2D4A2D] hover:underline">
+        Post a need &rarr;
+      </a>
     </div>
-    <div class="p-6 border rounded-lg">
-      <h2 class="text-xl font-semibold mb-2">For Donors</h2>
-      <p class="text-gray-600">
+    <div class="bg-white p-6 border border-gray-200 rounded-lg">
+      <h2 class="text-xl font-semibold mb-2 text-[#2D4A2D]">For Donors</h2>
+      <p class="text-gray-600 mb-4">
         Browse needs near you, pledge gear you have available, and coordinate
         delivery directly with organizers. Every pair of shoes makes a difference.
       </p>
+      <a href="/browse" class="text-sm font-medium text-[#2D4A2D] hover:underline">
+        Browse needs &rarr;
+      </a>
     </div>
   </div>
 </Layout>
