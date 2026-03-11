@@ -1,0 +1,36 @@
+---
+// This page will be server-rendered to load need data
+// For now, it's a static placeholder showing the layout
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import PledgeForm from "../../components/PledgeForm";
+
+const { id } = Astro.params;
+
+// TODO: Fetch need from database
+// const db = getDb();
+// const need = await db.query.needs.findFirst({ where: eq(schema.needs.id, id) });
+
+const need = null; // Placeholder until DB is connected
+---
+
+<Layout title="Need Detail">
+  {need ? (
+    <div>
+      <!-- Need details will render here -->
+    </div>
+  ) : (
+    <div class="text-center py-16">
+      <h1 class="text-2xl font-bold mb-4">Need Detail</h1>
+      <p class="text-gray-500 mb-4">
+        This page will show the full details of a need once the database is connected.
+      </p>
+      <p class="text-sm text-gray-400">Need ID: {id}</p>
+
+      <div class="max-w-lg mx-auto mt-8">
+        <PledgeForm client:load needId={id || ""} />
+      </div>
+    </div>
+  )}
+</Layout>

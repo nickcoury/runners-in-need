@@ -1,7 +1,7 @@
 {
 	"compatibility_date": "2026-03-10",
-	"compatibility_flags": ["global_fetch_strictly_public"],
-	"name": "astro-rin",
+	"compatibility_flags": ["global_fetch_strictly_public", "nodejs_compat"],
+	"name": "runners-in-need",
 	"main": "@astrojs/cloudflare/entrypoints/server",
 	"assets": {
 		"directory": "./dist",

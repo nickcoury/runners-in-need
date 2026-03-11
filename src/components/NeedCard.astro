@@ -1,0 +1,50 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  categoryTag: string;
+  body: string;
+  orgName: string;
+  location: string;
+  extrasWelcome: boolean;
+  status: string;
+  expiresAt: Date;
+  pledgeCount?: number;
+}
+
+const { id, title, categoryTag, body, orgName, location, extrasWelcome, status, expiresAt, pledgeCount = 0 } = Astro.props;
+
+const categoryIcons: Record<string, string> = {
+  shoes: "👟",
+  apparel: "👕",
+  accessories: "🎽",
+  other: "📦",
+};
+
+const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+---
+
+<a href={`/needs/${id}`} class="block border rounded-lg p-4 hover:border-green-700 transition-colors">
+  <div class="flex items-start justify-between mb-2">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">{categoryIcons[categoryTag] || "📦"}</span>
+      <h3 class="font-semibold text-gray-900">{title}</h3>
+    </div>
+    {extrasWelcome && (
+      <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+        Extras welcome
+      </span>
+    )}
+  </div>
+
+  <p class="text-sm text-gray-500 mb-2">{orgName} &middot; {location}</p>
+
+  <p class="text-sm text-gray-600 line-clamp-3 mb-3 whitespace-pre-line">{body}</p>
+
+  <div class="flex items-center justify-between text-xs text-gray-400">
+    <span>{pledgeCount} pledge{pledgeCount !== 1 ? "s" : ""}</span>
+    <span class={daysUntilExpiry <= 14 ? "text-amber-600" : ""}>
+      {daysUntilExpiry > 0 ? `${daysUntilExpiry} days left` : "Expired"}
+    </span>
+  </div>
+</a>
