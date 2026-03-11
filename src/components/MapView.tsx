@@ -72,12 +72,18 @@ export default function MapView({ needs }: MapViewProps) {
             .marker([need.lat, need.lng], { icon: greenIcon })
             .addTo(map);
 
-          marker.bindPopup(
-            `<div style="font-size:13px">
-              <strong>${need.title}</strong><br/>
-              <a href="/needs/${need.id}" style="color:#2D4A2D">View details &rarr;</a>
-            </div>`,
-          );
+          // Build popup with DOM methods to avoid XSS
+          const popupDiv = document.createElement("div");
+          popupDiv.style.fontSize = "13px";
+          const strong = document.createElement("strong");
+          strong.textContent = need.title;
+          const br = document.createElement("br");
+          const link = document.createElement("a");
+          link.href = `/needs/${encodeURIComponent(need.id)}`;
+          link.style.color = "#2D4A2D";
+          link.innerHTML = "View details &rarr;";
+          popupDiv.append(strong, br, link);
+          marker.bindPopup(popupDiv);
 
           bounds.extend([need.lat, need.lng]);
         }

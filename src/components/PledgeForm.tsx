@@ -12,6 +12,8 @@ export default function PledgeForm({
   userName,
 }: PledgeFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   if (submitted) {
     return (
@@ -25,12 +27,30 @@ export default function PledgeForm({
     );
   }
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    try {
+      const res = await fetch("/api/pledges", {
+        method: "POST",
+        body: data,
+      });
+      if (!res.ok) throw new Error("Failed to submit pledge");
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <form
-      method="POST"
-      action="/api/pledges"
       className="space-y-4 border rounded-lg p-4"
-      onSubmit={() => setSubmitted(true)}
+      onSubmit={handleSubmit}
     >
       <input type="hidden" name="needId" value={needId} />
 
@@ -94,11 +114,16 @@ export default function PledgeForm({
         />
       </div>
 
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
+
       <button
         type="submit"
-        className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 text-sm"
+        disabled={submitting}
+        className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
       >
-        Submit Pledge
+        {submitting ? "Submitting..." : "Submit Pledge"}
       </button>
     </form>
   );

@@ -16,6 +16,12 @@ const { title, description = 'Connecting runners who have extra gear with organi
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#2D4A2D" />
+    <meta property="og:title" content={`${title} | Runners In Need`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Runners In Need" />
+    <meta name="twitter:card" content="summary" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Runners In Need</title>
   </head>
@@ -32,15 +38,47 @@ const { title, description = 'Connecting runners who have extra gear with organi
           />
         </div>
 
-        <div class="flex items-center gap-5 text-sm ml-auto">
+        <div class="hidden md:flex items-center gap-5 text-sm ml-auto">
           <a href="/browse" class="hover:text-green-200 transition-colors">Explore</a>
           <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
-          <a href="/browse#map" class="hover:text-green-200 transition-colors hidden sm:block">Map</a>
-          <a href="/about" class="hover:text-green-200 transition-colors hidden sm:block">About</a>
+          <a href="/browse#map" class="hover:text-green-200 transition-colors">Map</a>
+          <a href="/about" class="hover:text-green-200 transition-colors">About</a>
           <a href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Sign In</a>
         </div>
+
+        <button id="mobile-menu-btn" class="md:hidden ml-auto p-1" aria-label="Toggle menu" aria-expanded="false">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </nav>
+
+      <div id="mobile-menu" class="hidden md:hidden bg-[#2D4A2D] border-t border-white/10 px-4 pb-4">
+        <div class="py-2">
+          <input
+            type="text"
+            placeholder="Search needs, items, locations..."
+            class="w-full rounded-lg px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 bg-white border-0 focus:ring-2 focus:ring-white/50"
+          />
+        </div>
+        <div class="flex flex-col gap-3 text-sm pt-2">
+          <a href="/browse" class="hover:text-green-200 transition-colors">Explore</a>
+          <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
+          <a href="/browse#map" class="hover:text-green-200 transition-colors">Map</a>
+          <a href="/about" class="hover:text-green-200 transition-colors">About</a>
+          <a href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Sign In</a>
+        </div>
+      </div>
     </header>
+
+    <script>
+      const btn = document.getElementById('mobile-menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      btn?.addEventListener('click', () => {
+        const open = menu?.classList.toggle('hidden') === false;
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    </script>
 
     <main class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>
       <slot />

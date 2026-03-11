@@ -3,16 +3,23 @@ export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
 
-const error = Astro.url.searchParams.get("error") || "Unknown error";
+const rawError = Astro.url.searchParams.get("error") || "Unknown";
+
+// Sanitize error param to prevent XSS — only allow known error codes
+const knownErrors: Record<string, string> = {
+  Configuration: "There's a server configuration issue.",
+  AccessDenied: "Access was denied.",
+  Verification: "The verification link may have expired.",
+  Default: "There was a problem signing you in.",
+  Unknown: "An unknown error occurred.",
+};
+const errorMessage = knownErrors[rawError] || knownErrors.Default;
 ---
 
 <Layout title="Authentication Error">
   <div class="max-w-sm mx-auto py-16 text-center">
     <h1 class="text-2xl font-bold mb-4">Something went wrong</h1>
-    <p class="text-gray-600 mb-6">
-      There was a problem signing you in. Please try again.
-    </p>
-    <p class="text-xs text-gray-400 mb-6">Error: {error}</p>
+    <p class="text-gray-600 mb-6">{errorMessage}</p>
     <a
       href="/auth/signin"
       class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm"
