@@ -81,15 +81,17 @@ const categories = [
   {/* Search + category filter pills */}
   <div class="mb-6 space-y-3">
     <input
+      id="search-input"
       type="text"
       placeholder="Search needs, items, locations..."
       class="w-full rounded-lg px-4 py-2 text-sm text-gray-900 placeholder-gray-400 bg-white border border-gray-300 focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
     />
-    <div class="flex gap-2 overflow-x-auto pb-1">
+    <div id="category-filters" class="flex gap-2 overflow-x-auto pb-1">
       {categories.map((cat, i) => (
         <button
+          data-category={cat.tag}
           class:list={[
-            "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+            "category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
             i === 0
               ? "bg-[#2D4A2D] text-white"
               : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
@@ -231,5 +233,36 @@ const categories = [
 
     tabListings?.addEventListener('click', showListings);
     tabMap?.addEventListener('click', showMap);
+
+    // Search + category filtering
+    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+    const categoryBtns = document.querySelectorAll<HTMLButtonElement>('.category-btn');
+    const needCards = document.querySelectorAll<HTMLElement>('.need-card');
+    let activeCategory = 'all';
+
+    function filterCards() {
+      const query = searchInput?.value.toLowerCase().trim() || '';
+      needCards.forEach((card) => {
+        const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchesSearch = !query || (card.dataset.searchable || '').includes(query);
+        card.style.display = matchesCategory && matchesSearch ? '' : 'none';
+      });
+    }
+
+    searchInput?.addEventListener('input', filterCards);
+
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.dataset.category || 'all';
+        categoryBtns.forEach((b) => {
+          if (b === btn) {
+            b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-[#2D4A2D] text-white';
+          } else {
+            b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]';
+          }
+        });
+        filterCards();
+      });
+    });
   </script>
 </Layout>

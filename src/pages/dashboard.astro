@@ -4,7 +4,7 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import DashboardTabs from '../components/DashboardTabs';
 import { getDb, schema } from '../db';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 // Session is set by middleware (which redirects if not authenticated)
 const session = (Astro.locals as any).session;
@@ -65,29 +65,23 @@ if (userRole === 'organizer' && user?.orgId) {
     };
   });
 
-  // Show pledges for their org's needs
-  const orgPledges = await db.query.pledges.findMany({
-    where: eq(schema.pledges.needId, orgNeeds[0]?.id ?? ''),
-    with: { need: true },
-  });
-  // Actually get all pledges for all org needs
+  // Show pledges for their org's needs (scoped query)
   const allOrgNeedIds = orgNeeds.map((n) => n.id);
   if (allOrgNeedIds.length > 0) {
-    const allPledges = await db.query.pledges.findMany({
+    const orgPledges = await db.query.pledges.findMany({
+      where: inArray(schema.pledges.needId, allOrgNeedIds),
       with: { need: true },
     });
-    pledges = allPledges
-      .filter((p) => allOrgNeedIds.includes(p.needId))
-      .map((p) => ({
-        id: p.id,
-        needId: p.needId,
-        needTitle: p.need.title,
-        donorName: p.donorName || 'Anonymous',
-        donorEmail: p.donorEmail,
-        description: p.description,
-        status: p.status,
-        createdAt: p.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      }));
+    pledges = orgPledges.map((p) => ({
+      id: p.id,
+      needId: p.needId,
+      needTitle: p.need.title,
+      donorName: p.donorName || 'Anonymous',
+      donorEmail: p.donorEmail,
+      description: p.description,
+      status: p.status,
+      createdAt: p.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    }));
   }
 } else {
   // Donor: show their pledges
