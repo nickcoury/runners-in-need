@@ -1,65 +1,168 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
+import NeedCard from '../components/NeedCard.astro';
+import MapView from '../components/MapView';
+import { getDb, schema } from '../db';
+import { inArray, desc } from 'drizzle-orm';
+
+const db = getDb();
+const needsWithOrg = await db.query.needs.findMany({
+  where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),
+  with: {
+    organization: true,
+    pledges: true,
+  },
+  orderBy: [desc(schema.needs.createdAt)],
+});
+
+const allNeeds = needsWithOrg.map((n) => ({
+  id: n.id,
+  title: n.title,
+  categoryTag: n.categoryTag,
+  body: n.body,
+  orgName: n.organization.name,
+  location: n.location,
+  lat: n.latitude,
+  lng: n.longitude,
+  extrasWelcome: n.extrasWelcome,
+  status: n.status,
+  expiresAt: n.expiresAt,
+  pledgeCount: n.pledges.length,
+}));
+
+const urgentNeeds = allNeeds
+  .filter((n) => {
+    const days = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return days <= 30;
+  })
+  .slice(0, 3);
+
+const mapNeeds = allNeeds
+  .filter((n) => n.lat != null && n.lng != null)
+  .map((n) => ({
+    id: n.id,
+    title: n.title,
+    lat: n.lat!,
+    lng: n.lng!,
+  }));
+
+const categories = [
+  { tag: "all", label: "All", icon: "" },
+  { tag: "shoes", label: "Shoes", icon: "👟" },
+  { tag: "apparel", label: "Apparel", icon: "👕" },
+  { tag: "accessories", label: "Accessories", icon: "🎽" },
+  { tag: "other", label: "Other", icon: "📦" },
+];
 ---
 
 <Layout title="Home">
-  {/* Hero */}
-  <div class="text-center py-16">
-    <h1 class="text-4xl font-bold mb-4 text-[#2D4A2D]">Runners In Need</h1>
-    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-      Connecting runners who have extra gear with organizations serving runners in need.
-      Whether you're a coach looking for shoes for your team or a runner with gear to give,
-      we make it easy to help.
-    </p>
-    <div class="flex gap-4 justify-center">
-      <a href="/browse" class="bg-[#2D4A2D] text-white px-6 py-3 rounded-lg hover:bg-[#1F361F] font-medium transition-colors">
-        Browse Needs
+  {/* Compact hero */}
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-[#2D4A2D]">Runners In Need</h1>
+      <p class="text-sm text-gray-600 mt-1">
+        Connecting runners who have extra gear with organizations serving runners in need.
+      </p>
+    </div>
+    <div class="flex gap-3 shrink-0">
+      <a href="/post" class="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg hover:bg-[#1F361F] text-sm font-medium transition-colors">
+        Post a Need
       </a>
-      <a href="/about" class="border border-[#2D4A2D] text-[#2D4A2D] px-6 py-3 rounded-lg hover:bg-green-50 font-medium transition-colors">
+      <a href="/about" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:border-[#2D4A2D] hover:text-[#2D4A2D] text-sm font-medium transition-colors">
         Learn More
       </a>
     </div>
   </div>
 
-  {/* How it works */}
-  <div class="grid md:grid-cols-4 gap-6 mb-16">
-    {[
-      { step: "1", title: "Organizers Post", desc: "Schools, clubs, and programs share what their runners need — sizes, types, quantities." },
-      { step: "2", title: "Donors Browse", desc: "Find needs near you by location and category. See exactly what's needed." },
-      { step: "3", title: "Pledge & Deliver", desc: "Commit to providing gear and coordinate shipping or local drop-off." },
-      { step: "4", title: "Confirm Receipt", desc: "Organizers mark deliveries complete. Remaining needs auto-update." },
-    ].map((item) => (
-      <div class="text-center">
-        <div class="w-10 h-10 bg-[#2D4A2D] text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">
-          {item.step}
-        </div>
-        <h3 class="font-semibold mb-1">{item.title}</h3>
-        <p class="text-sm text-gray-600">{item.desc}</p>
-      </div>
+  {/* Category filter pills + search area */}
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+    {categories.map((cat, i) => (
+      <button
+        class:list={[
+          "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+          i === 0
+            ? "bg-[#2D4A2D] text-white"
+            : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
+        ]}
+      >
+        {cat.icon} {cat.label}
+      </button>
     ))}
   </div>
 
-  {/* Two-sided value prop */}
-  <div class="grid md:grid-cols-2 gap-6">
-    <div class="bg-white p-6 border border-gray-200 rounded-lg">
-      <h2 class="text-xl font-semibold mb-2 text-[#2D4A2D]">For Organizers</h2>
-      <p class="text-gray-600 mb-4">
-        Coaches, schools, and community programs can post specific gear needs
-        for their runners. Tell donors exactly what sizes and types of gear would help most.
-      </p>
-      <a href="/post" class="text-sm font-medium text-[#2D4A2D] hover:underline">
-        Post a need &rarr;
-      </a>
+  {/* Main content: cards + sidebar */}
+  <div class="flex gap-6">
+    {/* Card grid */}
+    <div class="flex-1 min-w-0">
+      {allNeeds.length === 0 ? (
+        <div class="text-center py-12 text-gray-500">
+          <p class="text-lg font-medium mb-2">No needs posted yet</p>
+          <p class="text-sm mb-4">Be the first to post a need for your running organization.</p>
+          <a href="/post" class="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F]">
+            Post a Need
+          </a>
+        </div>
+      ) : (
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {allNeeds.map((need) => (
+            <NeedCard {...need} />
+          ))}
+        </div>
+      )}
     </div>
-    <div class="bg-white p-6 border border-gray-200 rounded-lg">
-      <h2 class="text-xl font-semibold mb-2 text-[#2D4A2D]">For Donors</h2>
-      <p class="text-gray-600 mb-4">
-        Browse needs near you, pledge gear you have available, and coordinate
-        delivery directly with organizers. Every pair of shoes makes a difference.
-      </p>
-      <a href="/browse" class="text-sm font-medium text-[#2D4A2D] hover:underline">
-        Browse needs &rarr;
-      </a>
-    </div>
+
+    {/* Sidebar — hidden on mobile */}
+    <aside class="hidden lg:block w-72 shrink-0 space-y-6">
+      {/* Map */}
+      {mapNeeds.length > 0 && (
+        <div>
+          <h3 class="font-semibold text-sm text-gray-900 mb-2">NEEDS MAP</h3>
+          <MapView client:visible needs={mapNeeds} />
+        </div>
+      )}
+
+      {/* Urgent needs */}
+      {urgentNeeds.length > 0 && (
+        <div>
+          <h3 class="font-semibold text-sm text-gray-900 mb-2">URGENT NEEDS</h3>
+          <div class="space-y-2">
+            {urgentNeeds.map((n) => {
+              const daysLeft = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000*60*60*24));
+              return (
+                <a href={`/needs/${n.id}`} class="block text-sm hover:text-[#2D4A2D]">
+                  <p class="font-medium text-gray-900 truncate">{n.title}</p>
+                  <p class="text-xs text-amber-600">{daysLeft} days left</p>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* How it works */}
+      <div>
+        <h3 class="font-semibold text-sm text-gray-900 mb-2">HOW IT WORKS</h3>
+        <ol class="text-sm text-gray-600 space-y-2">
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">1</span>
+            <span>Organizers post what their runners need</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">2</span>
+            <span>Donors browse and pledge gear</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">3</span>
+            <span>Coordinate delivery or drop-off</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="bg-[#2D4A2D] text-white w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0">4</span>
+            <span>Organizer confirms receipt</span>
+          </li>
+        </ol>
+      </div>
+    </aside>
   </div>
 </Layout>
