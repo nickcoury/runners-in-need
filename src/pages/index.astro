@@ -6,7 +6,9 @@ import NeedCard from '../components/NeedCard.astro';
 import MapView from '../components/MapView';
 import { getDb, schema } from '../db';
 import { inArray, desc } from 'drizzle-orm';
+import { expireOverdueNeeds } from '../lib/expire-needs';
 
+await expireOverdueNeeds();
 const db = getDb();
 const needsWithOrg = await db.query.needs.findMany({
   where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),
