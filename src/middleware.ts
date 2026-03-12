@@ -1,0 +1,67 @@
+import { defineMiddleware } from "astro:middleware";
+import { Auth } from "@auth/core";
+import type { Session } from "@auth/core/types";
+
+const protectedRoutes = ["/post", "/dashboard"];
+const adminRoutes = ["/admin"];
+
+function isProtected(pathname: string): boolean {
+  return (
+    protectedRoutes.some((r) => pathname === r || pathname.startsWith(r + "/")) ||
+    pathname.startsWith("/api/") ||
+    adminRoutes.some((r) => pathname === r || pathname.startsWith(r + "/"))
+  );
+}
+
+function isAdminRoute(pathname: string): boolean {
+  return adminRoutes.some((r) => pathname === r || pathname.startsWith(r + "/"));
+}
+
+async function getSession(req: Request): Promise<Session | null> {
+  const { default: authConfig } = await import("./lib/auth");
+  const config = { ...authConfig };
+  // @ts-ignore
+  config.secret ??= import.meta.env.AUTH_SECRET;
+  config.trustHost ??= true;
+
+  const prefix = "/api/auth";
+  const url = new URL(`${prefix}/session`, req.url);
+  const response = await Auth(new Request(url, { headers: req.headers }), config);
+
+  if (response.status !== 200) return null;
+  const data = await response.json();
+  if (!data || !Object.keys(data).length) return null;
+  return data as Session;
+}
+
+export const onRequest = defineMiddleware(async (context, next) => {
+  const { pathname } = context.url;
+
+  // Skip auth routes themselves to avoid circular redirects
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/auth/")) {
+    return next();
+  }
+
+  if (!isProtected(pathname)) {
+    return next();
+  }
+
+  const session = await getSession(context.request);
+
+  if (!session?.user) {
+    const callbackUrl = encodeURIComponent(context.url.pathname);
+    return context.redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
+  }
+
+  if (isAdminRoute(pathname)) {
+    const role = (session.user as any).role;
+    if (role !== "admin") {
+      return new Response("Forbidden", { status: 403 });
+    }
+  }
+
+  // Store session on locals for downstream use
+  (context.locals as any).session = session;
+
+  return next();
+});

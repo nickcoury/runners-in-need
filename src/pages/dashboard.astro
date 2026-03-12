@@ -1,107 +1,111 @@
 ---
-// This page will be server-rendered (requires auth)
-// export const prerender = false;
+export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import DashboardTabs from '../components/DashboardTabs';
+import { getDb, schema } from '../db';
+import { eq } from 'drizzle-orm';
 
-// Mock organizer info
-const orgName = "Portland Running Project";
-const orgEmail = "info@portlandrunningproject.org";
+// Session is set by middleware (which redirects if not authenticated)
+const session = (Astro.locals as any).session;
+if (!session?.user) {
+  return Astro.redirect('/auth/signin?callbackUrl=/dashboard');
+}
 
-// Mock needs data
-const needs = [
-  {
-    id: "need-001",
-    title: "Running shoes for Wilson High cross country team",
-    categoryTag: "shoes",
-    status: "active" as const,
-    pledgeCount: 4,
-    daysLeft: 52,
-    location: "Portland, OR",
-  },
-  {
-    id: "need-002",
-    title: "Winter running tights and base layers",
-    categoryTag: "apparel",
-    status: "active" as const,
-    pledgeCount: 1,
-    daysLeft: 8,
-    location: "Portland, OR",
-  },
-  {
-    id: "need-003",
-    title: "Headlamps and reflective vests for evening training",
-    categoryTag: "accessories",
-    status: "fulfilled" as const,
-    pledgeCount: 6,
-    daysLeft: 0,
-    location: "Portland, OR",
-  },
-  {
-    id: "need-004",
-    title: "Trail shoes for summer camp program",
-    categoryTag: "shoes",
-    status: "expired" as const,
-    pledgeCount: 2,
-    daysLeft: 0,
-    location: "Bend, OR",
-  },
-];
+const db = getDb();
+const userId = session.user.id!;
+const userRole = (session.user as any).role || 'donor';
 
-// Mock pledges data
-const pledges = [
-  {
-    id: "pledge-001",
-    needId: "need-001",
-    needTitle: "Running shoes for Wilson High cross country team",
-    donorName: "Sarah Mitchell",
-    donorEmail: "sarah.m@gmail.com",
-    description: "I have 3 pairs of men's running shoes (sizes 9, 9.5, 10) — Brooks Ghost 15, lightly used. Happy to drop off in Portland.",
-    status: "pending" as const,
-    createdAt: "Mar 8, 2026",
-  },
-  {
-    id: "pledge-002",
-    needId: "need-001",
-    needTitle: "Running shoes for Wilson High cross country team",
-    donorName: "Mike Chen",
-    donorEmail: "mchen@outlook.com",
-    description: "Two pairs of women's Nike Pegasus (size 7 and 8), barely worn. Can ship this week.",
-    status: "accepted" as const,
-    createdAt: "Mar 5, 2026",
-  },
-  {
-    id: "pledge-003",
-    needId: "need-001",
-    needTitle: "Running shoes for Wilson High cross country team",
-    donorName: "RunClub PDX",
-    donorEmail: "gear@runclubpdx.org",
-    description: "We collected 8 pairs from our members — mixed sizes, all in good condition. Men's and women's.",
-    status: "shipped" as const,
-    createdAt: "Mar 2, 2026",
-  },
-  {
-    id: "pledge-004",
-    needId: "need-002",
-    needTitle: "Winter running tights and base layers",
-    donorName: "Jamie Torres",
-    donorEmail: "jtorres@proton.me",
-    description: "I have 5 pairs of running tights (S/M) and 3 long-sleeve base layers from last season. All washed and in great shape.",
-    status: "pending" as const,
-    createdAt: "Mar 10, 2026",
-  },
-  {
-    id: "pledge-005",
-    needId: "need-003",
-    needTitle: "Headlamps and reflective vests for evening training",
-    donorName: "Fleet Feet Portland",
-    donorEmail: "community@fleetfeetpdx.com",
-    description: "Donating 12 reflective vests and 6 headlamps. Brand new, from our community outreach stock.",
-    status: "received" as const,
-    createdAt: "Feb 20, 2026",
-  },
-];
+// Get the user's org if they're an organizer
+const user = await db.query.users.findFirst({
+  where: eq(schema.users.id, userId),
+  with: { organization: true },
+});
+
+const orgName = user?.organization?.name || '';
+const orgEmail = session.user.email || '';
+
+let needs: Array<{
+  id: string;
+  title: string;
+  categoryTag: string;
+  status: string;
+  pledgeCount: number;
+  daysLeft: number;
+  location: string;
+}> = [];
+
+let pledges: Array<{
+  id: string;
+  needId: string;
+  needTitle: string;
+  donorName: string;
+  donorEmail: string;
+  description: string;
+  status: string;
+  createdAt: string;
+}> = [];
+
+if (userRole === 'organizer' && user?.orgId) {
+  // Organizer: show their org's needs with pledge counts
+  const orgNeeds = await db.query.needs.findMany({
+    where: eq(schema.needs.orgId, user.orgId),
+    with: { pledges: true },
+  });
+  needs = orgNeeds.map((n) => {
+    const daysLeft = Math.max(0, Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+    return {
+      id: n.id,
+      title: n.title,
+      categoryTag: n.categoryTag,
+      status: n.status,
+      pledgeCount: n.pledges.length,
+      daysLeft,
+      location: n.location,
+    };
+  });
+
+  // Show pledges for their org's needs
+  const orgPledges = await db.query.pledges.findMany({
+    where: eq(schema.pledges.needId, orgNeeds[0]?.id ?? ''),
+    with: { need: true },
+  });
+  // Actually get all pledges for all org needs
+  const allOrgNeedIds = orgNeeds.map((n) => n.id);
+  if (allOrgNeedIds.length > 0) {
+    const allPledges = await db.query.pledges.findMany({
+      with: { need: true },
+    });
+    pledges = allPledges
+      .filter((p) => allOrgNeedIds.includes(p.needId))
+      .map((p) => ({
+        id: p.id,
+        needId: p.needId,
+        needTitle: p.need.title,
+        donorName: p.donorName || 'Anonymous',
+        donorEmail: p.donorEmail,
+        description: p.description,
+        status: p.status,
+        createdAt: p.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      }));
+  }
+} else {
+  // Donor: show their pledges
+  const donorPledges = await db.query.pledges.findMany({
+    where: eq(schema.pledges.donorId, userId),
+    with: { need: true },
+  });
+  pledges = donorPledges.map((p) => ({
+    id: p.id,
+    needId: p.needId,
+    needTitle: p.need.title,
+    donorName: p.donorName || session.user!.name || 'You',
+    donorEmail: p.donorEmail,
+    description: p.description,
+    status: p.status,
+    createdAt: p.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  }));
+}
 ---
 
 <Layout title="Dashboard">

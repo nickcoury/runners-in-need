@@ -3,88 +3,64 @@ export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
 import PledgeForm from "../../components/PledgeForm";
+import { getDb, schema } from "../../db";
+import { eq } from "drizzle-orm";
 
 const { id } = Astro.params;
+const db = getDb();
 
-// TODO: Fetch need from database
-// const db = getDb();
-// const need = await db.query.needs.findFirst({ where: eq(schema.needs.id, id) });
+const needRow = await db.query.needs.findFirst({
+  where: eq(schema.needs.id, id!),
+  with: {
+    organization: true,
+    pledges: {
+      with: {
+        messages: {
+          with: {
+            sender: true,
+          },
+        },
+      },
+    },
+    continuedFrom: true,
+  },
+});
 
-// Mock data for development
+if (!needRow) {
+  return Astro.redirect("/404");
+}
+
 const need = {
-  id: id || "need-7f3a",
-  title: "Running Shoes Needed for Youth Track Program (Sizes 4-8)",
-  categoryTag: "shoes",
-  body: `Our youth track program serves 45 middle-school students in East Portland. Many of our athletes are training in worn-out shoes or shoes that don't fit properly — some are running in basketball shoes or even sandals.
-
-We're looking for gently used or new running shoes in youth and small adult sizes (4-8). Neutral road shoes work best for our mix of track and cross-country training.
-
-Any brand is welcome. We can accept shoes with moderate wear as long as the midsole still has cushion and the outsole has tread.
-
-Drop-off is available at our facility Mon-Fri 3-6pm, or we can arrange pickup within the Portland metro area.`,
-  orgName: "Rose City Youth Athletics",
-  location: "Portland, OR",
-  extrasWelcome: true,
-  status: "open",
-  expiresAt: new Date("2026-04-15"),
-  pledgeCount: 3,
-  continuedFromId: null as string | null,
-  continuedFromTitle: null as string | null,
-  createdAt: new Date("2026-02-28"),
+  id: needRow.id,
+  title: needRow.title,
+  categoryTag: needRow.categoryTag,
+  body: needRow.body,
+  orgName: needRow.organization.name,
+  location: needRow.location,
+  extrasWelcome: needRow.extrasWelcome,
+  status: needRow.status,
+  expiresAt: needRow.expiresAt,
+  pledgeCount: needRow.pledges.length,
+  continuedFromId: needRow.continuedFrom?.id ?? null,
+  continuedFromTitle: needRow.continuedFrom?.title ?? null,
+  createdAt: needRow.createdAt,
 };
 
-const pledges = [
-  {
-    id: "pledge-a1",
-    donorName: "Maria Chen",
-    description: "I have 4 pairs of kids' running shoes from my daughter's team — sizes 5, 5.5, 6, and 7. All Nike Pegasus, used one season. Still plenty of life in them.",
-    status: "accepted",
-    createdAt: new Date("2026-03-02"),
-    updatedAt: new Date("2026-03-03"),
-    messages: [
-      {
-        id: "msg-1",
-        author: "Maria Chen",
-        isOrg: false,
-        body: "Hi! I can drop these off Thursday afternoon if that works.",
-        createdAt: new Date("2026-03-03T14:22:00"),
-      },
-      {
-        id: "msg-2",
-        author: "Rose City Youth Athletics",
-        isOrg: true,
-        body: "Thursday works great! Come to the back entrance on SE Division — look for the blue awning. Ask for Coach Davis.",
-        createdAt: new Date("2026-03-03T16:05:00"),
-      },
-    ],
-  },
-  {
-    id: "pledge-b2",
-    donorName: "Anonymous",
-    description: "I work at a running store and we have 6 pairs of last-season models (sizes 4, 5, 6, 6.5, 7, 8) that we can donate. Brand new, just discontinued colorways.",
-    status: "pending",
-    createdAt: new Date("2026-03-08"),
-    updatedAt: new Date("2026-03-08"),
-    messages: [],
-  },
-  {
-    id: "pledge-c3",
-    donorName: "James Whitfield",
-    description: "I have 2 pairs of Brooks Ghost 15 in size 7 and 8. Ran about 50 miles in each, still in great shape.",
-    status: "accepted",
-    createdAt: new Date("2026-03-10"),
-    updatedAt: new Date("2026-03-11"),
-    messages: [
-      {
-        id: "msg-3",
-        author: "James Whitfield",
-        isOrg: false,
-        body: "Happy to ship these — can you DM me the mailing address?",
-        createdAt: new Date("2026-03-11T09:30:00"),
-      },
-    ],
-  },
-];
+const pledges = needRow.pledges.map((p) => ({
+  id: p.id,
+  donorName: p.donorName || "Anonymous",
+  description: p.description,
+  status: p.status,
+  createdAt: p.createdAt,
+  updatedAt: p.updatedAt,
+  messages: p.messages.map((m) => ({
+    id: m.id,
+    author: m.sender.name,
+    isOrg: m.sender.orgId === needRow.orgId,
+    body: m.body,
+    createdAt: m.createdAt,
+  })),
+}));
 
 // Precompute all derived values
 const categoryStyleMap: Record<string, string> = {
@@ -118,17 +94,17 @@ const createdDateStr = need.createdAt.toLocaleDateString("en-US", { month: "long
 const expiresDateStr = need.expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
 const statusBadgeMap: Record<string, string> = {
-  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  accepted: "bg-green-50 text-green-700 border-green-200",
-  declined: "bg-red-50 text-red-700 border-red-200",
-  fulfilled: "bg-blue-50 text-blue-700 border-blue-200",
+  collecting: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  ready_to_deliver: "bg-green-50 text-green-700 border-green-200",
+  delivered: "bg-blue-50 text-blue-700 border-blue-200",
+  withdrawn: "bg-red-50 text-red-700 border-red-200",
 };
 
 const statusLabelMap: Record<string, string> = {
-  pending: "Pending",
-  accepted: "Accepted",
-  declined: "Declined",
-  fulfilled: "Fulfilled",
+  collecting: "Collecting",
+  ready_to_deliver: "Ready to Deliver",
+  delivered: "Delivered",
+  withdrawn: "Withdrawn",
 };
 
 const pledgesWithComputed = pledges.map((p) => {

@@ -1,96 +1,36 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import NeedCard from '../components/NeedCard.astro';
 import MapView from '../components/MapView';
+import { getDb, schema } from '../db';
+import { inArray, desc } from 'drizzle-orm';
 
-// TODO: Fetch from database
-// For now, show placeholder cards
-const sampleNeeds = [
-  {
-    id: "sample-1",
-    title: "Running Shoes for Wilson High XC Team",
-    categoryTag: "shoes",
-    body: "We need running shoes for our cross country team:\n- 3 pairs men's size 9-9.5\n- 1 pair men's size 10-10.5\n- 2 pairs women's size 7-8\n\nNew or lightly used preferred.",
-    orgName: "Wilson High School",
-    location: "Portland, OR",
-    lat: 45.5152,
-    lng: -122.6784,
-    extrasWelcome: true,
-    status: "active",
-    expiresAt: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-    pledgeCount: 1,
+const db = getDb();
+const needsWithOrg = await db.query.needs.findMany({
+  where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),
+  with: {
+    organization: true,
+    pledges: true,
   },
-  {
-    id: "sample-2",
-    title: "Youth Running Club Apparel",
-    categoryTag: "apparel",
-    body: "Our youth running club needs warm-up gear for the fall season:\n- 8 youth jackets (sizes S-L)\n- 10 pairs running shorts (various sizes)\n\nAny brand, new or gently used.",
-    orgName: "Eastside Youth Runners",
-    location: "Denver, CO",
-    lat: 39.7392,
-    lng: -104.9903,
-    extrasWelcome: false,
-    status: "active",
-    expiresAt: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
-    pledgeCount: 0,
-  },
-  {
-    id: "sample-3",
-    title: "Race Medals for Kids' Motivation Program",
-    categoryTag: "accessories",
-    body: "We run a youth fitness program and use race medals to motivate kids who complete running milestones. Any finisher medals welcome — marathon, half, 5K, etc.",
-    orgName: "Run for Joy Foundation",
-    location: "Austin, TX",
-    lat: 30.2672,
-    lng: -97.7431,
-    extrasWelcome: true,
-    status: "active",
-    expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    pledgeCount: 3,
-  },
-  {
-    id: "sample-4",
-    title: "Track Shoes for Spring Season",
-    categoryTag: "shoes",
-    body: "Our track team needs racing flats and spikes:\n- 4 pairs men's racing flats (8.5-10)\n- 2 pairs women's spikes (6-7)\n- 3 pairs women's racing flats (7-8.5)",
-    orgName: "MLK Community Center",
-    location: "Atlanta, GA",
-    lat: 33.7490,
-    lng: -84.3880,
-    extrasWelcome: true,
-    status: "active",
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    pledgeCount: 0,
-  },
-  {
-    id: "sample-5",
-    title: "Reflective Gear for Evening Running Group",
-    categoryTag: "accessories",
-    body: "Our community running group meets after work and we need visibility gear:\n- Reflective vests (any size, 10+ needed)\n- LED clip-on lights\n- Reflective armbands",
-    orgName: "Sunset Stride Club",
-    location: "Seattle, WA",
-    lat: 47.6062,
-    lng: -122.3321,
-    extrasWelcome: true,
-    status: "active",
-    expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-    pledgeCount: 2,
-  },
-  {
-    id: "sample-6",
-    title: "Girls' Cross Country Startup Kit",
-    categoryTag: "shoes",
-    body: "New girls' XC program launching — starting from scratch:\n- 6 pairs women's running shoes (sizes 6-9)\n- 6 sports bras (S/M)\n- Running socks\n\nNew preferred for hygiene items, used shoes OK.",
-    orgName: "Riverside Middle School",
-    location: "Chicago, IL",
-    lat: 41.8781,
-    lng: -87.6298,
-    extrasWelcome: true,
-    status: "active",
-    expiresAt: new Date(Date.now() + 75 * 24 * 60 * 60 * 1000),
-    pledgeCount: 1,
-  },
-];
+  orderBy: [desc(schema.needs.createdAt)],
+});
+
+const sampleNeeds = needsWithOrg.map((n) => ({
+  id: n.id,
+  title: n.title,
+  categoryTag: n.categoryTag,
+  body: n.body,
+  orgName: n.organization.name,
+  location: n.location,
+  lat: n.latitude,
+  lng: n.longitude,
+  extrasWelcome: n.extrasWelcome,
+  status: n.status,
+  expiresAt: n.expiresAt,
+  pledgeCount: n.pledges.length,
+}));
 
 const urgentNeeds = sampleNeeds
   .filter((n) => {
@@ -99,12 +39,14 @@ const urgentNeeds = sampleNeeds
   })
   .slice(0, 3);
 
-const mapNeeds = sampleNeeds.map((n) => ({
-  id: n.id,
-  title: n.title,
-  lat: n.lat,
-  lng: n.lng,
-}));
+const mapNeeds = sampleNeeds
+  .filter((n) => n.lat != null && n.lng != null)
+  .map((n) => ({
+    id: n.id,
+    title: n.title,
+    lat: n.lat!,
+    lng: n.lng!,
+  }));
 
 const categories = [
   { tag: "all", label: "All", icon: "" },
