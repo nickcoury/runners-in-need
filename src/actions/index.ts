@@ -4,6 +4,28 @@ import { getDb, schema } from "../db";
 import { createId } from "../lib/id";
 import { eq } from "drizzle-orm";
 
+/** Sanitize user-supplied text: encode HTML entities, trim, collapse whitespace runs. */
+function sanitize(s: string): string {
+  return s
+    .trim()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Sanitize but preserve newlines (for multi-line body text). */
+function sanitizeBody(s: string): string {
+  return s
+    .trim()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export const server = {
   createNeed: defineAction({
     accept: "form",
@@ -31,8 +53,8 @@ export const server = {
         id: createId(),
         orgId: input.orgId,
         categoryTag: input.categoryTag,
-        title: input.title,
-        body: input.body,
+        title: sanitize(input.title),
+        body: sanitizeBody(input.body),
         extrasWelcome: input.extrasWelcome,
         location: org.location,
         latitude: org.latitude,
@@ -69,8 +91,8 @@ export const server = {
         id: createId(),
         needId: input.needId,
         donorEmail: input.donorEmail,
-        donorName: input.donorName,
-        description: input.description,
+        donorName: input.donorName ? sanitize(input.donorName) : undefined,
+        description: sanitizeBody(input.description),
         status: "collecting" as const,
       };
 
@@ -113,8 +135,8 @@ export const server = {
       const request = {
         id: createId(),
         userId: input.userId,
-        orgName: input.orgName,
-        orgDescription: input.orgDescription,
+        orgName: sanitize(input.orgName),
+        orgDescription: sanitizeBody(input.orgDescription),
         orgUrl: input.orgUrl,
         status: "pending" as const,
       };

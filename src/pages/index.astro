@@ -76,20 +76,27 @@ const categories = [
     </div>
   </div>
 
-  {/* Category filter pills + search area */}
-  <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-    {categories.map((cat, i) => (
-      <button
-        class:list={[
-          "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-          i === 0
-            ? "bg-[#2D4A2D] text-white"
-            : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
-        ]}
-      >
-        {cat.icon} {cat.label}
-      </button>
-    ))}
+  {/* Search + category filter pills */}
+  <div class="mb-6 space-y-3">
+    <input
+      type="text"
+      placeholder="Search needs, items, locations..."
+      class="w-full rounded-lg px-4 py-2 text-sm text-gray-900 placeholder-gray-400 bg-white border border-gray-300 focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+    />
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      {categories.map((cat, i) => (
+        <button
+          class:list={[
+            "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+            i === 0
+              ? "bg-[#2D4A2D] text-white"
+              : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
+          ]}
+        >
+          {cat.icon} {cat.label}
+        </button>
+      ))}
+    </div>
   </div>
 
   {/* Main content: cards + sidebar */}
