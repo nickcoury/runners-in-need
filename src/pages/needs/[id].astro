@@ -287,7 +287,13 @@ const isOrgMember = currentUserOrgId === needRow.orgId;
     {/* Pledge form */}
     <div class="mb-8">
       <h2 class="text-lg font-bold text-gray-900 mb-4">Make a Pledge</h2>
-      <PledgeForm client:load needId={need.id} turnstileSiteKey={import.meta.env.TURNSTILE_SITE_KEY} />
+      <PledgeForm
+        client:load
+        needId={need.id}
+        turnstileSiteKey={import.meta.env.TURNSTILE_SITE_KEY}
+        userEmail={session?.user?.email || undefined}
+        userName={session?.user?.name || undefined}
+      />
     </div>
   </div>
 </Layout>

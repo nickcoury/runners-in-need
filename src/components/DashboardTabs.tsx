@@ -35,9 +35,14 @@ interface DashboardTabsProps {
   userRole: string;
 }
 
-const tabs: { key: Tab; label: string }[] = [
+const organizerTabs: { key: Tab; label: string }[] = [
   { key: "needs", label: "My Needs" },
   { key: "pledges", label: "Incoming Pledges" },
+  { key: "account", label: "Account" },
+];
+
+const donorTabs: { key: Tab; label: string }[] = [
+  { key: "pledges", label: "My Pledges" },
   { key: "account", label: "Account" },
 ];
 
@@ -94,7 +99,8 @@ export default function DashboardTabs({
   userId,
   userRole,
 }: DashboardTabsProps) {
-  const [active, setActive] = useState<Tab>("needs");
+  const tabs = userRole === "organizer" ? organizerTabs : donorTabs;
+  const [active, setActive] = useState<Tab>(userRole === "organizer" ? "needs" : "pledges");
   const [pledgeStatuses, setPledgeStatuses] = useState<Record<string, string>>(
     () => Object.fromEntries(pledges.map((p) => [p.id, p.status]))
   );
