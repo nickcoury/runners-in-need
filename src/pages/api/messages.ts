@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { sendMessageNotificationEmail } from "../../lib/email";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = (locals as any).session;
@@ -54,6 +55,37 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     senderId: user.id,
     body: sanitized,
   });
+
+  // Notify the other party about the new message (fire-and-forget)
+  if (isDonor) {
+    // Donor sent a message — notify org members
+    const orgMembers = await db.query.users.findMany({
+      where: and(
+        eq(schema.users.orgId, pledge.need.orgId),
+        eq(schema.users.role, "organizer")
+      ),
+    });
+    for (const member of orgMembers) {
+      sendMessageNotificationEmail(
+        member.email,
+        pledge.need.title,
+        pledge.need.id,
+        user.name,
+        sanitized
+      );
+    }
+  } else {
+    // Org member sent a message — notify the donor
+    if (pledge.donorEmail) {
+      sendMessageNotificationEmail(
+        pledge.donorEmail,
+        pledge.need.title,
+        pledge.need.id,
+        user.name,
+        sanitized
+      );
+    }
+  }
 
   // If form submission (has Referer), redirect back to need page
   const referer = request.headers.get("Referer");

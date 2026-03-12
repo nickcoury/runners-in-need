@@ -28,7 +28,11 @@ interface DashboardTabsProps {
   pledges: Pledge[];
   orgName: string;
   orgEmail: string;
+  orgLocation: string;
+  orgDescription: string;
+  orgId: string;
   userId: string;
+  userRole: string;
 }
 
 const tabs: { key: Tab; label: string }[] = [
@@ -84,7 +88,11 @@ export default function DashboardTabs({
   pledges,
   orgName,
   orgEmail,
+  orgLocation,
+  orgDescription,
+  orgId,
   userId,
+  userRole,
 }: DashboardTabsProps) {
   const [active, setActive] = useState<Tab>("needs");
   const [pledgeStatuses, setPledgeStatuses] = useState<Record<string, string>>(
@@ -349,24 +357,12 @@ export default function DashboardTabs({
 
       {/* Account */}
       {active === "account" && (
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold text-gray-900">
             Account Settings
           </h2>
 
           <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Organization Name
-              </label>
-              <input
-                type="text"
-                defaultValue={orgName}
-                disabled
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500"
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -377,12 +373,101 @@ export default function DashboardTabs({
                 disabled
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500"
               />
+              <p className="text-xs text-gray-400 mt-1">
+                Managed by your sign-in provider
+              </p>
             </div>
 
-            <p className="text-xs text-gray-400 pt-2">
-              Account management coming soon. Contact us to update your
-              organization details.
-            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <span className="inline-block text-sm capitalize bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg">
+                {userRole}
+              </span>
+            </div>
+          </div>
+
+          {userRole === "organizer" && orgId && (
+            <form
+              className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const data = new FormData(form);
+                const res = await fetch("/api/org/update", {
+                  method: "POST",
+                  body: data,
+                });
+                if (res.ok) {
+                  const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
+                  btn.textContent = "Saved!";
+                  setTimeout(() => { btn.textContent = "Save Changes"; }, 2000);
+                }
+              }}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">
+                Organization Details
+              </h3>
+              <input type="hidden" name="orgId" value={orgId} />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organization Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  defaultValue={orgName}
+                  required
+                  minLength={2}
+                  maxLength={200}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location <span className="text-gray-400 font-normal">(City, State)</span>
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  defaultValue={orgLocation}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  defaultValue={orgDescription}
+                  rows={3}
+                  maxLength={2000}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+              >
+                Save Changes
+              </button>
+            </form>
+          )}
+
+          <div className="max-w-lg">
+            <a
+              href="/api/auth/signout"
+              className="inline-block border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+            >
+              Sign Out
+            </a>
           </div>
         </div>
       )}

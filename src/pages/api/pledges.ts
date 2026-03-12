@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { sendPledgeReceivedEmail } from "../../lib/email";
 
 function sanitize(s: string): string {
   return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -74,6 +75,23 @@ export const POST: APIRoute = async ({ request }) => {
   };
 
   await db.insert(schema.pledges).values(pledge);
+
+  // Notify org members about the new pledge (fire-and-forget)
+  const orgMembers = await db.query.users.findMany({
+    where: and(
+      eq(schema.users.orgId, need.orgId),
+      eq(schema.users.role, "organizer")
+    ),
+  });
+  for (const member of orgMembers) {
+    sendPledgeReceivedEmail(
+      member.email,
+      need.title,
+      need.id,
+      pledge.donorName ?? null,
+      pledge.description
+    );
+  }
 
   return new Response(JSON.stringify({ id: pledge.id }), {
     status: 201,

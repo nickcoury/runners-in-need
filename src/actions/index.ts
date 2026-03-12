@@ -3,8 +3,8 @@ import { z } from "astro:schema";
 import { getDb, schema } from "../db";
 import { createId } from "../lib/id";
 import { eq } from "drizzle-orm";
+import { sendPledgeStatusEmail } from "../lib/email";
 
-/** Sanitize user-supplied text: encode HTML entities, trim, collapse whitespace runs. */
 function sanitize(s: string): string {
   return s
     .trim()
@@ -15,106 +15,7 @@ function sanitize(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-/** Sanitize but preserve newlines (for multi-line body text). */
-function sanitizeBody(s: string): string {
-  return s
-    .trim()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 export const server = {
-  createNeed: defineAction({
-    accept: "form",
-    input: z.object({
-      orgId: z.string(),
-      categoryTag: z.enum(["shoes", "apparel", "accessories", "other"]),
-      title: z.string().min(5).max(200),
-      body: z.string().min(10).max(5000),
-      extrasWelcome: z.boolean().default(false),
-      expiresInDays: z.number().min(7).max(180).default(90),
-      continuedFromId: z.string().optional(),
-    }),
-    handler: async (input) => {
-      const db = getDb();
-      const org = await db.query.organizations.findFirst({
-        where: eq(schema.organizations.id, input.orgId),
-      });
-
-      if (!org) throw new Error("Organization not found");
-
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + input.expiresInDays);
-
-      const need = {
-        id: createId(),
-        orgId: input.orgId,
-        categoryTag: input.categoryTag,
-        title: sanitize(input.title),
-        body: sanitizeBody(input.body),
-        extrasWelcome: input.extrasWelcome,
-        location: org.location,
-        latitude: org.latitude,
-        longitude: org.longitude,
-        status: "active" as const,
-        continuedFromId: input.continuedFromId,
-        expiresAt,
-      };
-
-      await db.insert(schema.needs).values(need);
-      return { id: need.id };
-    },
-  }),
-
-  createPledge: defineAction({
-    accept: "form",
-    input: z.object({
-      needId: z.string(),
-      donorEmail: z.string().email(),
-      donorName: z.string().optional(),
-      description: z.string().min(5).max(2000),
-      "cf-turnstile-response": z.string().optional(),
-    }),
-    handler: async (input) => {
-      // Verify Turnstile token if secret key is configured
-      const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
-      const turnstileToken = input["cf-turnstile-response"];
-      if (turnstileSecret) {
-        if (!turnstileToken) throw new Error("Turnstile verification required");
-        const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
-        });
-        const result = await res.json() as { success: boolean };
-        if (!result.success) throw new Error("Turnstile verification failed");
-      }
-      const db = getDb();
-      const need = await db.query.needs.findFirst({
-        where: eq(schema.needs.id, input.needId),
-      });
-
-      if (!need) throw new Error("Need not found");
-      if (need.status !== "active")
-        throw new Error("This need is no longer accepting pledges");
-
-      const pledge = {
-        id: createId(),
-        needId: input.needId,
-        donorEmail: input.donorEmail,
-        donorName: input.donorName ? sanitize(input.donorName) : undefined,
-        description: sanitizeBody(input.description),
-        status: "collecting" as const,
-      };
-
-      await db.insert(schema.pledges).values(pledge);
-      return { id: pledge.id };
-    },
-  }),
-
   updatePledgeStatus: defineAction({
     accept: "form",
     input: z.object({
@@ -130,14 +31,12 @@ export const server = {
     handler: async (input) => {
       const db = getDb();
 
-      // Verify pledge exists and load parent need for ownership check
       const pledge = await db.query.pledges.findFirst({
         where: eq(schema.pledges.id, input.pledgeId),
         with: { need: true },
       });
       if (!pledge) throw new Error("Pledge not found");
 
-      // Verify caller is either the pledge donor or the org that owns the need
       const user = await db.query.users.findFirst({
         where: eq(schema.users.id, input.userId),
       });
@@ -153,6 +52,17 @@ export const server = {
         .update(schema.pledges)
         .set({ status: input.status, updatedAt: new Date() })
         .where(eq(schema.pledges.id, input.pledgeId));
+
+      // Notify donor about status change (fire-and-forget)
+      if (pledge.donorEmail) {
+        sendPledgeStatusEmail(
+          pledge.donorEmail,
+          pledge.need.title,
+          pledge.need.id,
+          input.status
+        );
+      }
+
       return { success: true };
     },
   }),
@@ -171,7 +81,7 @@ export const server = {
         id: createId(),
         userId: input.userId,
         orgName: sanitize(input.orgName),
-        orgDescription: sanitizeBody(input.orgDescription),
+        orgDescription: sanitize(input.orgDescription),
         orgUrl: input.orgUrl,
         status: "pending" as const,
       };
