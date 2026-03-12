@@ -100,9 +100,9 @@ const categories = [
   </div>
 
   {/* Main content: cards + sidebar */}
-  <div class="flex gap-6">
-    {/* Card grid */}
-    <div class="flex-1 min-w-0">
+  <div class="flex gap-6 pb-16 lg:pb-0">
+    {/* Card grid — hidden on mobile when map tab active */}
+    <div id="listings-view" class="flex-1 min-w-0">
       {allNeeds.length === 0 ? (
         <div class="text-center py-12 text-gray-500">
           <p class="text-lg font-medium mb-2">No needs posted yet</p>
@@ -120,9 +120,15 @@ const categories = [
       )}
     </div>
 
-    {/* Sidebar — hidden on mobile */}
+    {/* Fullscreen map — hidden by default on mobile, toggled by bottom nav */}
+    {mapNeeds.length > 0 && (
+      <div id="map-view" class="hidden lg:hidden fixed inset-0 top-[52px] bottom-[56px] z-40 bg-white">
+        <MapView client:visible needs={mapNeeds} fullscreen />
+      </div>
+    )}
+
+    {/* Sidebar — desktop only */}
     <aside class="hidden lg:block w-72 shrink-0 space-y-6">
-      {/* Map */}
       {mapNeeds.length > 0 && (
         <div>
           <h3 class="font-semibold text-sm text-gray-900 mb-2">NEEDS MAP</h3>
@@ -130,7 +136,6 @@ const categories = [
         </div>
       )}
 
-      {/* Urgent needs */}
       {urgentNeeds.length > 0 && (
         <div>
           <h3 class="font-semibold text-sm text-gray-900 mb-2">URGENT NEEDS</h3>
@@ -148,7 +153,6 @@ const categories = [
         </div>
       )}
 
-      {/* How it works */}
       <div>
         <h3 class="font-semibold text-sm text-gray-900 mb-2">HOW IT WORKS</h3>
         <ol class="text-sm text-gray-600 space-y-2">
@@ -172,4 +176,58 @@ const categories = [
       </div>
     </aside>
   </div>
+
+  {/* Mobile bottom nav — toggle between listings and map */}
+  {mapNeeds.length > 0 && (
+    <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
+      <button
+        id="tab-listings"
+        class="flex-1 py-3 text-center text-sm font-medium text-[#2D4A2D] border-t-2 border-[#2D4A2D]"
+      >
+        <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        Listings
+      </button>
+      <button
+        id="tab-map"
+        class="flex-1 py-3 text-center text-sm font-medium text-gray-400 border-t-2 border-transparent"
+      >
+        <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        Map
+      </button>
+    </nav>
+  )}
+
+  <script>
+    const tabListings = document.getElementById('tab-listings');
+    const tabMap = document.getElementById('tab-map');
+    const listingsView = document.getElementById('listings-view');
+    const mapView = document.getElementById('map-view');
+
+    function showListings() {
+      listingsView?.classList.remove('hidden');
+      mapView?.classList.add('hidden');
+      mapView?.classList.remove('block');
+      tabListings?.classList.replace('text-gray-400', 'text-[#2D4A2D]');
+      tabListings?.classList.replace('border-transparent', 'border-[#2D4A2D]');
+      tabMap?.classList.replace('text-[#2D4A2D]', 'text-gray-400');
+      tabMap?.classList.replace('border-[#2D4A2D]', 'border-transparent');
+    }
+
+    function showMap() {
+      listingsView?.classList.add('hidden');
+      mapView?.classList.remove('hidden');
+      mapView?.classList.add('block');
+      tabMap?.classList.replace('text-gray-400', 'text-[#2D4A2D]');
+      tabMap?.classList.replace('border-transparent', 'border-[#2D4A2D]');
+      tabListings?.classList.replace('text-[#2D4A2D]', 'text-gray-400');
+      tabListings?.classList.replace('border-[#2D4A2D]', 'border-transparent');
+    }
+
+    tabListings?.addEventListener('click', showListings);
+    tabMap?.addEventListener('click', showMap);
+  </script>
 </Layout>

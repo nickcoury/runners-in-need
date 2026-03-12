@@ -9,9 +9,10 @@ interface MapNeed {
 
 interface MapViewProps {
   needs: MapNeed[];
+  fullscreen?: boolean;
 }
 
-export default function MapView({ needs }: MapViewProps) {
+export default function MapView({ needs, fullscreen }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -107,7 +108,7 @@ export default function MapView({ needs }: MapViewProps) {
   return (
     <div
       ref={containerRef}
-      className="rounded-lg h-56 w-full"
+      className={fullscreen ? "w-full h-full" : "rounded-lg h-56 w-full"}
       style={{ background: "#e5e7eb" }}
     />
   );

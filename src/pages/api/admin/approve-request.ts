@@ -1,0 +1,43 @@
+import type { APIRoute } from "astro";
+import { getDb, schema } from "../../../db";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+
+export const POST: APIRoute = async ({ request, redirect }) => {
+  const form = await request.formData();
+  const requestId = form.get("requestId") as string;
+  if (!requestId) return new Response("Missing requestId", { status: 400 });
+
+  const db = getDb();
+  const orgRequest = await db.query.organizerRequests.findFirst({
+    where: eq(schema.organizerRequests.id, requestId),
+  });
+
+  if (!orgRequest || orgRequest.status !== "pending") {
+    return redirect("/admin/requests");
+  }
+
+  // Create the organization
+  const orgId = nanoid();
+  await db.insert(schema.organizations).values({
+    id: orgId,
+    name: orgRequest.orgName,
+    description: orgRequest.orgDescription,
+    location: "TBD",
+    verified: true,
+  });
+
+  // Update user to organizer role with org
+  await db
+    .update(schema.users)
+    .set({ role: "organizer", orgId })
+    .where(eq(schema.users.id, orgRequest.userId));
+
+  // Mark request as approved
+  await db
+    .update(schema.organizerRequests)
+    .set({ status: "approved", reviewedAt: new Date() })
+    .where(eq(schema.organizerRequests.id, requestId));
+
+  return redirect("/admin/requests");
+};

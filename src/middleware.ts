@@ -14,7 +14,8 @@ function isProtected(pathname: string): boolean {
 }
 
 function isAdminRoute(pathname: string): boolean {
-  return adminRoutes.some((r) => pathname === r || pathname.startsWith(r + "/"));
+  return adminRoutes.some((r) => pathname === r || pathname.startsWith(r + "/")) ||
+    pathname.startsWith("/api/admin/");
 }
 
 async function getSession(req: Request): Promise<Session | null> {
