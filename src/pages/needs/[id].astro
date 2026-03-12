@@ -187,6 +187,13 @@ const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCoun
     <div class="mb-6">
       <h2 class="text-lg font-bold text-gray-900 mb-4">Pledges ({need.pledgeCount})</h2>
 
+      {pledgesWithComputed.length === 0 && (
+        <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400">
+          <p class="mb-1">No pledges yet.</p>
+          <p class="text-sm">Be the first to pledge gear for this need!</p>
+        </div>
+      )}
+
       <div class="space-y-4">
         {pledgesWithComputed.map((pledge) => (
           <div class="bg-white border border-gray-200 rounded-lg p-4">
