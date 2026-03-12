@@ -3,7 +3,13 @@ import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-export const POST: APIRoute = async ({ request, redirect }) => {
+export const POST: APIRoute = async ({ request, redirect, locals }) => {
+  // Defense-in-depth: verify admin role at handler level
+  const session = (locals as any).session;
+  if (!session?.user || (session.user as any).role !== "admin") {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const form = await request.formData();
   const requestId = form.get("requestId") as string;
   if (!requestId) return new Response("Missing requestId", { status: 400 });

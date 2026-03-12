@@ -24,7 +24,13 @@ export const POST: APIRoute = async ({ request }) => {
   // Verify Turnstile if configured
   const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
   const turnstileToken = form.get("cf-turnstile-response") as string | null;
-  if (turnstileSecret && turnstileToken) {
+  if (turnstileSecret) {
+    if (!turnstileToken) {
+      return new Response(JSON.stringify({ error: "Verification required" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

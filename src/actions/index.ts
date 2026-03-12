@@ -82,7 +82,8 @@ export const server = {
       // Verify Turnstile token if secret key is configured
       const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
       const turnstileToken = input["cf-turnstile-response"];
-      if (turnstileSecret && turnstileToken) {
+      if (turnstileSecret) {
+        if (!turnstileToken) throw new Error("Turnstile verification required");
         const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -118,6 +119,7 @@ export const server = {
     accept: "form",
     input: z.object({
       pledgeId: z.string(),
+      userId: z.string(),
       status: z.enum([
         "collecting",
         "ready_to_deliver",
@@ -127,6 +129,26 @@ export const server = {
     }),
     handler: async (input) => {
       const db = getDb();
+
+      // Verify pledge exists and load parent need for ownership check
+      const pledge = await db.query.pledges.findFirst({
+        where: eq(schema.pledges.id, input.pledgeId),
+        with: { need: true },
+      });
+      if (!pledge) throw new Error("Pledge not found");
+
+      // Verify caller is either the pledge donor or the org that owns the need
+      const user = await db.query.users.findFirst({
+        where: eq(schema.users.id, input.userId),
+      });
+      if (!user) throw new Error("User not found");
+
+      const isDonor = pledge.donorId === user.id;
+      const isOrgMember = user.orgId === pledge.need.orgId;
+      if (!isDonor && !isOrgMember) {
+        throw new Error("You do not have permission to update this pledge");
+      }
+
       await db
         .update(schema.pledges)
         .set({ status: input.status, updatedAt: new Date() })

@@ -39,10 +39,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const method = context.request.method;
 
-  // CSRF: Reject state-changing requests with mismatched Origin
+  // CSRF: Reject state-changing requests without a valid Origin header
   if (method !== "GET" && method !== "HEAD") {
     const origin = context.request.headers.get("Origin");
-    if (origin) {
+    if (!origin) {
+      // Missing Origin on non-GET — block unless it's a same-origin navigation
+      // (browsers always send Origin on cross-origin requests and fetch())
+      const secFetchSite = context.request.headers.get("Sec-Fetch-Site");
+      if (secFetchSite && secFetchSite !== "same-origin" && secFetchSite !== "none") {
+        return new Response("CSRF check failed", { status: 403 });
+      }
+    } else {
       const requestHost = context.url.host;
       const originHost = new URL(origin).host;
       if (originHost !== requestHost) {
