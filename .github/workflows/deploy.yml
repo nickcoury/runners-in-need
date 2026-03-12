@@ -30,7 +30,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config dist/server/wrangler.json
+          command: deploy --config dist/server/wrangler.json --keep-vars
 
       - name: Deploy to Cloudflare Workers (dev)
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
@@ -38,4 +38,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config dist/server/wrangler.json --env dev
+          command: deploy --config dist/server/wrangler.json --keep-vars --env dev
