@@ -37,8 +37,8 @@ async function getSession(req: Request): Promise<Session | null> {
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
-  // Skip auth routes themselves to avoid circular redirects
-  if (pathname.startsWith("/api/auth") || pathname.startsWith("/auth/")) {
+  // Skip auth routes and public API endpoints
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/auth/") || pathname === "/api/health") {
     return next();
   }
 

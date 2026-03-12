@@ -6,7 +6,7 @@ interface Need {
   id: string;
   title: string;
   categoryTag: string;
-  status: "active" | "fulfilled" | "expired";
+  status: string;
   pledgeCount: number;
   daysLeft: number;
   location: string;
@@ -19,7 +19,7 @@ interface Pledge {
   donorName: string;
   donorEmail: string;
   description: string;
-  status: "pending" | "accepted" | "declined" | "shipped" | "received";
+  status: string;
   createdAt: string;
 }
 
@@ -52,30 +52,30 @@ const categoryLabels: Record<string, string> = {
 
 const statusStyles: Record<string, string> = {
   active: "bg-green-50 text-green-700 border-green-200",
+  partially_fulfilled: "bg-amber-50 text-amber-700 border-amber-200",
   fulfilled: "bg-blue-50 text-blue-700 border-blue-200",
   expired: "bg-gray-100 text-gray-500 border-gray-200",
 };
 
 const statusLabels: Record<string, string> = {
   active: "Active",
+  partially_fulfilled: "Partially Fulfilled",
   fulfilled: "Fulfilled",
   expired: "Expired",
 };
 
 const pledgeStatusStyles: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-  accepted: "bg-green-50 text-green-700 border-green-200",
-  declined: "bg-red-50 text-red-600 border-red-200",
-  shipped: "bg-blue-50 text-blue-700 border-blue-200",
-  received: "bg-[#2D4A2D]/10 text-[#2D4A2D] border-[#2D4A2D]/20",
+  collecting: "bg-amber-50 text-amber-700 border-amber-200",
+  ready_to_deliver: "bg-green-50 text-green-700 border-green-200",
+  delivered: "bg-blue-50 text-blue-700 border-blue-200",
+  withdrawn: "bg-red-50 text-red-600 border-red-200",
 };
 
 const pledgeStatusLabels: Record<string, string> = {
-  pending: "Pending",
-  accepted: "Accepted",
-  declined: "Declined",
-  shipped: "Shipped",
-  received: "Received",
+  collecting: "Collecting",
+  ready_to_deliver: "Ready to Deliver",
+  delivered: "Delivered",
+  withdrawn: "Withdrawn",
 };
 
 export default function DashboardTabs({
@@ -275,38 +275,21 @@ export default function DashboardTabs({
                           {pledge.description}
                         </p>
 
-                        {pledge.status === "pending" && (
+                        {pledge.status === "collecting" && (
                           <div className="flex gap-2">
                             <button className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] transition-colors">
-                              Accept
+                              Mark Ready to Deliver
                             </button>
                             <button className="text-xs font-medium border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
-                              Decline
-                            </button>
-                            <button className="text-xs text-[#2D4A2D] hover:underline ml-auto">
-                              Message Donor
+                              Withdraw
                             </button>
                           </div>
                         )}
 
-                        {pledge.status === "accepted" && (
+                        {pledge.status === "ready_to_deliver" && (
                           <div className="flex gap-2">
                             <button className="text-xs font-medium bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
-                              Mark Shipped
-                            </button>
-                            <button className="text-xs text-[#2D4A2D] hover:underline ml-auto">
-                              Message Donor
-                            </button>
-                          </div>
-                        )}
-
-                        {pledge.status === "shipped" && (
-                          <div className="flex gap-2">
-                            <button className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] transition-colors">
-                              Mark Received
-                            </button>
-                            <button className="text-xs text-[#2D4A2D] hover:underline ml-auto">
-                              Message Donor
+                              Mark Delivered
                             </button>
                           </div>
                         )}
