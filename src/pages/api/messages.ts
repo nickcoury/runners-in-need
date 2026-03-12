@@ -3,7 +3,7 @@ import { getDb, schema } from "../../db";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = (locals as any).session;
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
@@ -54,6 +54,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     senderId: user.id,
     body: sanitized,
   });
+
+  // If form submission (has Referer), redirect back to need page
+  const referer = request.headers.get("Referer");
+  if (referer) {
+    return redirect(new URL(referer).pathname);
+  }
 
   return new Response(JSON.stringify({ success: true }), {
     status: 201,

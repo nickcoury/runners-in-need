@@ -120,10 +120,25 @@ const pledgesWithComputed = pledges.map((p) => {
     });
     return { ...m, timeStr };
   });
-  return { ...p, badge, label, dateStr, messagesWithDates };
+  // Check if current user can message on this pledge
+  const canMessage = isOrgMember || (currentUserId && needRow.pledges.find((np) => np.id === p.id)?.donorId === currentUserId);
+  return { ...p, badge, label, dateStr, messagesWithDates, canMessage: !!canMessage };
 });
 
 const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
+
+// Check if current user can message on any pledge
+const session = (Astro.locals as any).session;
+const currentUserId = session?.user?.id;
+let currentUserOrgId: string | null = null;
+if (currentUserId) {
+  const currentUser = await db.query.users.findFirst({
+    where: eq(schema.users.id, currentUserId),
+    columns: { orgId: true },
+  });
+  currentUserOrgId = currentUser?.orgId ?? null;
+}
+const isOrgMember = currentUserOrgId === needRow.orgId;
 ---
 
 <Layout title={need.title}>
@@ -212,33 +227,56 @@ const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCoun
             <p class="text-sm text-gray-600 whitespace-pre-line mb-3">{pledge.description}</p>
 
             {/* Messages thread */}
-            {pledge.messagesWithDates.length > 0 && (
+            {(pledge.messagesWithDates.length > 0 || pledge.canMessage) && (
               <div class="border-t border-gray-100 pt-3 mt-3">
-                <p class="text-xs font-medium text-gray-500 mb-2">Messages</p>
-                <div class="space-y-2">
-                  {pledge.messagesWithDates.map((msg) => (
-                    <div class:list={[
-                      "rounded-lg px-3 py-2 text-sm",
-                      msg.isOrg ? "bg-green-50 border border-green-100 ml-4" : "bg-gray-50 border border-gray-100 mr-4",
-                    ]}>
-                      <div class="flex items-center gap-2 mb-1">
-                        <span class:list={[
-                          "text-xs font-medium",
-                          msg.isOrg ? "text-green-700" : "text-gray-700",
+                {pledge.messagesWithDates.length > 0 && (
+                  <Fragment>
+                    <p class="text-xs font-medium text-gray-500 mb-2">Messages</p>
+                    <div class="space-y-2 mb-3">
+                      {pledge.messagesWithDates.map((msg) => (
+                        <div class:list={[
+                          "rounded-lg px-3 py-2 text-sm",
+                          msg.isOrg ? "bg-green-50 border border-green-100 ml-4" : "bg-gray-50 border border-gray-100 mr-4",
                         ]}>
-                          {msg.author}
-                        </span>
-                        {msg.isOrg && (
-                          <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
-                            ORG
-                          </span>
-                        )}
-                        <span class="text-xs text-gray-400 ml-auto">{msg.timeStr}</span>
-                      </div>
-                      <p class="text-gray-700">{msg.body}</p>
+                          <div class="flex items-center gap-2 mb-1">
+                            <span class:list={[
+                              "text-xs font-medium",
+                              msg.isOrg ? "text-green-700" : "text-gray-700",
+                            ]}>
+                              {msg.author}
+                            </span>
+                            {msg.isOrg && (
+                              <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
+                                ORG
+                              </span>
+                            )}
+                            <span class="text-xs text-gray-400 ml-auto">{msg.timeStr}</span>
+                          </div>
+                          <p class="text-gray-700">{msg.body}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </Fragment>
+                )}
+                {pledge.canMessage && (
+                  <form method="POST" action="/api/messages" class="flex gap-2">
+                    <input type="hidden" name="pledgeId" value={pledge.id} />
+                    <input
+                      type="text"
+                      name="body"
+                      required
+                      maxlength="2000"
+                      placeholder="Send a message..."
+                      class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                    />
+                    <button
+                      type="submit"
+                      class="bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg text-sm hover:bg-[#1F361F] transition-colors"
+                    >
+                      Send
+                    </button>
+                  </form>
+                )}
               </div>
             )}
           </div>

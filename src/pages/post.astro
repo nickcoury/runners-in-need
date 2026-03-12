@@ -31,7 +31,7 @@ const isOrganizer = user?.role === 'organizer' && !!orgId;
 
     {!isOrganizer ? (
       <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
-        Only verified organizers can post needs. <a href="/contact" class="underline font-medium">Request organizer access</a> to get started.
+        Only verified organizers can post needs. <a href="/become-organizer" class="underline font-medium">Request organizer access</a> to get started.
       </div>
     ) : (
       <NeedForm client:load orgId={orgId} />
