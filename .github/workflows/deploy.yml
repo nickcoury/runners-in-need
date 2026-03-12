@@ -31,13 +31,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler pages project create runners-in-need --production-branch=main 2>/dev/null || true
 
-      # Deploy static assets to Cloudflare Pages.
-      # SSR routes (/needs/[id], /post, /auth/*) require Workers deploy
-      # with Workers Scripts:Edit token permission — upgrade when ready.
       - name: Deploy to Cloudflare Pages
         if: github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist/client --project-name=runners-in-need
+          command: pages deploy dist/ --project-name=runners-in-need
