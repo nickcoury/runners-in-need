@@ -6,13 +6,26 @@ Research conducted 2026-03-11. This document covers liability, regulatory compli
 
 ---
 
+## Operating Model
+
+This is a **personal charity project** with these constraints:
+- **No money changes hands** — not on the platform, not between parties, not ever
+- **No revenue** — hosting and technical costs are paid personally by the operator
+- **No donations accepted** — not to the platform, not to the operator
+- **No formal entity** — operates as a personal project, not a business or nonprofit
+- The platform is a **free bulletin board** connecting gear donors with organizations
+
+This model is the simplest possible structure and eliminates entire categories of legal complexity (tax compliance, charity registration, financial regulation, payment processing liability).
+
+---
+
 ## Executive Summary
 
-**Can we connect donors and organizations without significant platform liability?** Yes. The risk profile is comparable to Freecycle, Craigslist, or Buy Nothing — all of which started as personal projects and operate successfully with similar models. No money changes hands on the platform, which significantly reduces liability.
+**Can we connect donors and organizations without significant platform liability?** Yes. The risk profile is comparable to Freecycle, Craigslist, or Buy Nothing — all of which started as personal projects and operate successfully with similar models. No money changes hands, which eliminates the most significant liability categories.
 
-**Do we need a lawyer?** Not to start. A good Terms of Service (modeled on Freecycle/Craigslist templates) and a privacy policy are sufficient for launch. Attorney review is recommended if the project grows significantly (1,000+ users) or starts handling money.
+**Do we need a lawyer?** Not to start. A good Terms of Service (modeled on Freecycle/Craigslist templates) and a privacy policy are sufficient for launch. Attorney review is recommended only if the project grows significantly (1,000+ users).
 
-**Do we need a formal entity?** No. This can operate as a personal side project. DonorsChoose started as one teacher's side project. Craigslist ran unincorporated from Craig Newmark's apartment for 4 years. Formal structure becomes important at scale, not at launch.
+**Do we need a formal entity?** No. This can operate as a personal side project indefinitely. Craigslist ran unincorporated from Craig Newmark's apartment for 4 years. Buy Nothing groups operate as informal Facebook groups with no entity. Formal structure becomes important only if money enters the picture.
 
 **Biggest risks:** Product liability for defective gear (low probability, high impact) and COPPA if collecting data from minors (avoidable by only collecting adult organizer/donor data).
 

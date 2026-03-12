@@ -2,7 +2,7 @@
 
 Connecting runners who have extra gear with organizations serving runners in need.
 
-**Live site:** https://runners-in-need.nickcoury.workers.dev
+**Live site:** https://runners-in-need.pages.dev
 
 ## Quick Start
 
