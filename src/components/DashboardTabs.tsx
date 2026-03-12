@@ -28,6 +28,7 @@ interface DashboardTabsProps {
   pledges: Pledge[];
   orgName: string;
   orgEmail: string;
+  userId: string;
 }
 
 const tabs: { key: Tab; label: string }[] = [
@@ -83,8 +84,29 @@ export default function DashboardTabs({
   pledges,
   orgName,
   orgEmail,
+  userId,
 }: DashboardTabsProps) {
   const [active, setActive] = useState<Tab>("needs");
+  const [pledgeStatuses, setPledgeStatuses] = useState<Record<string, string>>(
+    () => Object.fromEntries(pledges.map((p) => [p.id, p.status]))
+  );
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  async function updatePledgeStatus(pledgeId: string, newStatus: string) {
+    setUpdating(pledgeId);
+    try {
+      const form = new FormData();
+      form.set("pledgeId", pledgeId);
+      form.set("userId", userId);
+      form.set("status", newStatus);
+      const res = await fetch("/_actions/updatePledgeStatus", { method: "POST", body: form });
+      if (res.ok) {
+        setPledgeStatuses((prev) => ({ ...prev, [pledgeId]: newStatus }));
+      }
+    } finally {
+      setUpdating(null);
+    }
+  }
 
   // Group pledges by needId
   const pledgesByNeed: Record<string, Pledge[]> = {};
@@ -263,11 +285,11 @@ export default function DashboardTabs({
                           </div>
                           <span
                             className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                              pledgeStatusStyles[pledge.status] ||
-                              pledgeStatusStyles.pending
+                              pledgeStatusStyles[pledgeStatuses[pledge.id] || pledge.status] ||
+                              pledgeStatusStyles.collecting
                             }`}
                           >
-                            {pledgeStatusLabels[pledge.status] || pledge.status}
+                            {pledgeStatusLabels[pledgeStatuses[pledge.id] || pledge.status] || pledge.status}
                           </span>
                         </div>
 
@@ -275,21 +297,33 @@ export default function DashboardTabs({
                           {pledge.description}
                         </p>
 
-                        {pledge.status === "collecting" && (
+                        {(pledgeStatuses[pledge.id] || pledge.status) === "collecting" && (
                           <div className="flex gap-2">
-                            <button className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] transition-colors">
-                              Mark Ready to Deliver
+                            <button
+                              disabled={updating === pledge.id}
+                              onClick={() => updatePledgeStatus(pledge.id, "ready_to_deliver")}
+                              className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] transition-colors disabled:opacity-50"
+                            >
+                              {updating === pledge.id ? "Updating..." : "Mark Ready to Deliver"}
                             </button>
-                            <button className="text-xs font-medium border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button
+                              disabled={updating === pledge.id}
+                              onClick={() => updatePledgeStatus(pledge.id, "withdrawn")}
+                              className="text-xs font-medium border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            >
                               Withdraw
                             </button>
                           </div>
                         )}
 
-                        {pledge.status === "ready_to_deliver" && (
+                        {(pledgeStatuses[pledge.id] || pledge.status) === "ready_to_deliver" && (
                           <div className="flex gap-2">
-                            <button className="text-xs font-medium bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
-                              Mark Delivered
+                            <button
+                              disabled={updating === pledge.id}
+                              onClick={() => updatePledgeStatus(pledge.id, "delivered")}
+                              className="text-xs font-medium bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            >
+                              {updating === pledge.id ? "Updating..." : "Mark Delivered"}
                             </button>
                           </div>
                         )}
