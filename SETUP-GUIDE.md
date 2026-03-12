@@ -222,16 +222,21 @@ Check off as you go. Items marked ⚠️ are blocking deployment.
 ### ⚠️ Blocking — Site won't work without these
 
 - [ ] **Add Cloudflare secrets to GitHub Actions** — `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` (enables CI/CD auto-deploy)
-- [ ] **Add Turso to Cloudflare Pages env vars** — Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for both Production and Preview. (You added these to GitHub secrets, but the app reads them at runtime from Cloudflare Pages, not GitHub Actions.)
-- [ ] **Add Resend API key to Cloudflare Pages env vars** — You added it to GitHub secrets, but like Turso, the app reads it at runtime from Cloudflare Pages. Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add `RESEND_API_KEY` (Production + Preview)
+- [ ] **Add ALL runtime secrets to Cloudflare Pages env vars** — GitHub secrets are only for deployment (Account ID + API Token). The app reads everything else at runtime from Cloudflare Pages. Go to Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add these for **both Production and Preview**:
+  - `TURSO_DATABASE_URL`
+  - `TURSO_AUTH_TOKEN`
+  - `RESEND_API_KEY`
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `AUTH_SECRET` (generate with `openssl rand -base64 32`)
 
 ### 🔜 Domain Setup (after Cloudflare Pages is deploying)
 
 - [ ] **Add custom domain** — Cloudflare dashboard → Workers & Pages → runners-in-need → Custom domains → Add `runnersinneed.com` and `www.runnersinneed.com`
 - [ ] **Verify sending domain in Resend** — Resend dashboard → Domains → Add `runnersinneed.com` → add the DNS records Resend provides in Cloudflare DNS (detailed instructions in Section 3 above)
+- [ ] **Update Google OAuth redirect URI** — Google Cloud Console → Credentials → edit your OAuth client → add `https://runnersinneed.com/api/auth/callback/google` to Authorized redirect URIs
 
 ### 📋 Optional (can do anytime)
 
-- [ ] **Google OAuth** — Google Cloud Console → OAuth credentials (see Section 4)
 - [ ] **Cloudflare Turnstile** — Bot prevention for forms (see Section 5)
 - [ ] **Claude API key** — For LLM-assisted partial fulfillment feature (see Section 6)
