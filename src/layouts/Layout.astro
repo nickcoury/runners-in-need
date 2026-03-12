@@ -48,7 +48,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
           <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
           <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
           <a href="/about" class="hover:text-green-200 transition-colors">About</a>
-          <a href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Sign In</a>
+          <a id="auth-link" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Sign In</a>
         </div>
 
         <button id="mobile-menu-btn" class="md:hidden ml-auto p-1" aria-label="Toggle menu" aria-expanded="false">
@@ -63,7 +63,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
           <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
           <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
           <a href="/about" class="hover:text-green-200 transition-colors">About</a>
-          <a href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Sign In</a>
+          <a id="auth-link-mobile" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Sign In</a>
         </div>
       </div>
     </header>
@@ -75,6 +75,18 @@ const { title, description = 'Connecting runners who have extra gear with organi
         const open = menu?.classList.toggle('hidden') === false;
         btn.setAttribute('aria-expanded', String(open));
       });
+
+      // Toggle Sign In / Dashboard based on session cookie
+      const hasSession = document.cookie.includes('authjs.session-token') || document.cookie.includes('__Secure-authjs.session-token');
+      if (hasSession) {
+        for (const id of ['auth-link', 'auth-link-mobile']) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.href = '/dashboard';
+            el.textContent = 'Dashboard';
+          }
+        }
+      }
     </script>
 
     <main class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>

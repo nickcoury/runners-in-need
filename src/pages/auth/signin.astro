@@ -2,6 +2,8 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+
+const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
 ---
 
 <Layout title="Sign In">
@@ -11,6 +13,7 @@ import Layout from "../../layouts/Layout.astro";
     <div class="space-y-4">
       {/* Magic link */}
       <form method="POST" action="/api/auth/signin/resend" class="space-y-3">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <label for="email" class="block text-sm font-medium text-gray-700">
           Email address
         </label>
@@ -41,6 +44,7 @@ import Layout from "../../layouts/Layout.astro";
 
       {/* Google OAuth */}
       <form method="POST" action="/api/auth/signin/google">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <button
           type="submit"
           class="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 text-sm flex items-center justify-center gap-2"
@@ -57,7 +61,7 @@ import Layout from "../../layouts/Layout.astro";
     </div>
 
     <p class="text-xs text-gray-400 text-center mt-6">
-      By signing in, you agree to our terms of service and privacy policy.
+      By signing in, you agree to our <a href="/terms" class="underline hover:text-gray-600">terms of service</a> and <a href="/privacy" class="underline hover:text-gray-600">privacy policy</a>.
     </p>
   </div>
 </Layout>
