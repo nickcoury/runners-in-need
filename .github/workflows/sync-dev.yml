@@ -1,0 +1,21 @@
+name: Sync dev branch
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fast-forward dev to main
+        run: |
+          git checkout dev 2>/dev/null || git checkout -b dev
+          git merge --ff-only origin/main
+          git push origin dev

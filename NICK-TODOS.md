@@ -16,7 +16,8 @@ For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Clo
 | Environment | URL | Database | Purpose |
 |-------------|-----|----------|---------|
 | **Production** | https://runnersinneed.com | `runners-in-need` | Live site |
-| **Preview** | `*.runners-in-need.pages.dev` | `runners-in-need-dev` | Test changes (auto-deploys on PRs) |
+| **Dev** | https://dev.runners-in-need.pages.dev | `runners-in-need-dev` | Persistent test environment (auto-syncs from main) |
+| **PR Preview** | `*.runners-in-need.pages.dev` | `runners-in-need-dev` | Per-PR preview (auto-deploys on PRs) |
 | **Local** | http://localhost:4321 | Per your `.env` | Local development |
 
-Preview deploys happen automatically on pull requests. Each PR gets a unique URL.
+**Dev environment** auto-syncs from main on every push. Use it to test all flows with the dev database. PR previews are ephemeral per-commit.
