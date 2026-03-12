@@ -2,6 +2,8 @@
 
 Connecting runners who have extra gear with organizations serving runners in need.
 
+**Live site:** https://runners-in-need.nickcoury.workers.dev
+
 ## Quick Start
 
 ```bash
@@ -35,6 +37,10 @@ src/
 
 - [Product Requirements](docs/PRODUCT.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Design System](docs/DESIGN-SYSTEM.md)
+- [Market Research](docs/MARKET-RESEARCH.md)
+- [Legal Analysis](docs/LEGAL.md)
+- [Setup Guide](SETUP-GUIDE.md)
 - [TODO](TODO.md)
 
 ## Scripts

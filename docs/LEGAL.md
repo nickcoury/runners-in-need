@@ -2,17 +2,19 @@
 
 Research conducted 2026-03-11. This document covers liability, regulatory compliance, organizational structure, and risk mitigation for a platform matching running gear donors with organizations in need.
 
-**Disclaimer:** This is research, not legal advice. Consult an attorney before launch for Terms of Service review and organizational structure decisions.
+**Disclaimer:** This is research, not legal advice.
 
 ---
 
 ## Executive Summary
 
-**Can we connect donors and organizations without significant platform liability?** Yes, with proper Terms of Service and a passive matching design. The risk profile is comparable to Freecycle, Craigslist, or Buy Nothing — all of which operate successfully with similar models.
+**Can we connect donors and organizations without significant platform liability?** Yes. The risk profile is comparable to Freecycle, Craigslist, or Buy Nothing — all of which started as personal projects and operate successfully with similar models. No money changes hands on the platform, which significantly reduces liability.
 
-**Do we need a lawyer?** Yes, but scope is limited: review Terms of Service, advise on organizational structure (501(c)(3) vs for-profit), and confirm COPPA compliance if youth data is involved. Estimated cost: $1,500-5,000 for initial setup.
+**Do we need a lawyer?** Not to start. A good Terms of Service (modeled on Freecycle/Craigslist templates) and a privacy policy are sufficient for launch. Attorney review is recommended if the project grows significantly (1,000+ users) or starts handling money.
 
-**Biggest risks:** COPPA compliance (if collecting data from minors), product liability for defective gear (low probability, high impact), and platform liability if we actively curate matches rather than passively list them.
+**Do we need a formal entity?** No. This can operate as a personal side project. DonorsChoose started as one teacher's side project. Craigslist ran unincorporated from Craig Newmark's apartment for 4 years. Formal structure becomes important at scale, not at launch.
+
+**Biggest risks:** Product liability for defective gear (low probability, high impact) and COPPA if collecting data from minors (avoidable by only collecting adult organizer/donor data).
 
 ---
 
@@ -86,27 +88,41 @@ Research conducted 2026-03-11. This document covers liability, regulatory compli
 
 ### 5. Organizational Structure
 
-**Recommended: 501(c)(3) nonprofit.** This is the model used by DonorsChoose, Freecycle, Good Sports, and virtually every successful donation matching platform.
+**For a personal side project, no formal entity is required.** Here's the spectrum from lightest to heaviest:
 
-| Factor | 501(c)(3) | For-Profit | B-Corp |
+#### Option A: Personal Project (Recommended for Launch)
+
+Operate as yourself. No entity, no filing, no ongoing compliance.
+- **Cost:** $0
+- **Liability protection:** None beyond Section 230 and Terms of Service disclaimers
+- **Tax deductions for donors:** No (but gear donations to 501(c)(3) orgs are deductible regardless — the org issues the receipt, not the platform)
+- **Precedent:** Craigslist (1995-1999), DonorsChoose (initial launch), every community forum ever
+- **When to upgrade:** 1,000+ users, handling money, or wanting grant funding
+
+#### Option B: Fiscal Sponsorship (If You Want 501(c)(3) Credibility Later)
+
+Operate under an existing nonprofit's umbrella. No incorporation needed.
+- **Cost:** 5-7% of any donations raised (to the platform itself, not gear donations)
+- **Options:** Open Collective Foundation, Hack Club (7% flat, includes bank account + tax handling)
+- **Benefits:** Donors to the platform get tax deductions, institutional backing, reduced personal liability
+- **When it makes sense:** If people want to donate money to support the platform's operations
+
+#### Option C: Full 501(c)(3) (Only at Scale)
+
+Form your own nonprofit corporation.
+- **Cost:** $1,500-5,000 setup + ~$1,000-3,000/year compliance
+- **Benefits:** Full tax exemption, grant eligibility, maximum credibility
+- **When it makes sense:** 50,000+ in annual donations, employees, multi-state operations
+
+| Factor | Personal Project | Fiscal Sponsorship | Full 501(c)(3) |
 |---|---|---|---|
-| Donor tax deductions | Yes | No | No |
-| Grant eligibility | Yes | No | No |
-| Tax-exempt | Yes | No | No |
-| Can pay employees | Yes | Yes | Yes |
-| Investor funding | No (grants/donations only) | Yes | Yes |
-| Brand trust | Higher | Lower | Medium |
-| Setup cost | $500-2,000 + attorney | ~$200 | ~$200 + certification |
-| Governance | Board required | Flexible | Board required |
-
-**Why 501(c)(3) wins for RIN:**
-- Donors are more motivated when donations are tax-deductible
-- Grants and corporate giving programs open up (foundation funding)
-- Brand trust — "nonprofit" signals mission-driven intent
-- DonorsChoose proves this model works at massive scale ($1.64B raised)
-- Can still pay employees and operate professionally
-
-**If seeking venture capital:** Consider a for-profit B-Corp with a separate 501(c)(3) partner that handles donation receipts. This is more complex but allows investor returns.
+| Cost to start | $0 | $0 | $1,500-5,000 |
+| Annual cost | $0-500 (insurance) | 5-7% of donations | $1,000-3,000 |
+| Setup time | Now | 2-3 weeks | 2-4 months |
+| Liability protection | Section 230 + ToS | Medium | High |
+| Donor tax deductions (platform) | No | Yes | Yes |
+| Grant eligibility | No | Sometimes | Yes |
+| Governance overhead | None | Minimal | Board required |
 
 ### 6. Insurance
 
@@ -135,62 +151,43 @@ Research conducted 2026-03-11. This document covers liability, regulatory compli
 
 ## Recommendations
 
-### Before Launch (Required)
+### Before Launch (Do Now — No Lawyer Needed)
 
-1. **Hire an attorney ($1,500-5,000) to:**
-   - Draft or review Terms of Service (model after Freecycle/DonorsChoose)
-   - Advise on organizational structure (501(c)(3) filing if chosen)
-   - Confirm COPPA compliance approach
-
-2. **Draft Terms of Service including:**
-   - Liability disclaimers (platform not responsible for goods quality or user conduct)
-   - User indemnification (users indemnify platform for claims)
+1. **Draft Terms of Service** using Freecycle/Craigslist as templates:
+   - Platform provides service "as is" — not responsible for goods quality or user conduct
+   - Users indemnify the platform
    - Liability cap ($100, following DonorsChoose precedent)
-   - No warranties (goods are "as is")
-   - Waiver of class action rights
-   - Donor certification (items safe, not recalled, cleaned)
-   - Organization release (will inspect items before distributing)
+   - No warranties on donated goods
+   - Donor certification: items are safe, not recalled, cleaned
 
-3. **Create Privacy Policy covering:**
-   - What data is collected and why
-   - How long data is retained
-   - Who has access
-   - User rights (access, deletion, opt-out)
-   - Explicit statement: we do not collect data from minors
-   - Contact information for privacy inquiries
+2. **Create Privacy Policy** (template-based):
+   - What data is collected (email, name, organization) and why
+   - We do NOT collect data from minors
+   - How long data is retained, who has access
+   - User rights (access, deletion)
+   - CAN-SPAM compliance (unsubscribe links)
 
-4. **Choose organizational structure:**
-   - Strong recommendation: 501(c)(3) nonprofit
-   - File with IRS (Form 1023 or 1023-EZ), ~2-4 weeks processing
-   - Register with state charity regulators as required
-
-5. **Procure insurance:**
-   - General liability + cyber liability at minimum (~$150/month)
-   - D&O if forming a board (~$70/month additional)
-
-### Before Launch (Recommended)
-
-6. **Create donor certification checklist (built into pledge flow):**
+3. **Build donor certification into pledge flow:**
    - "I certify these items are in safe, wearable condition"
    - "These items are not subject to product recalls"
    - "I have cleaned/laundered these items"
 
-7. **Create organization onboarding agreement:**
-   - Organization agrees to inspect donated items before distributing
-   - Organization assumes responsibility for items once received
-   - Organization confirms its legal status (501(c)(3) or other)
+4. **Design platform as passive matching** (not active curation):
+   - Organizations post needs, donors browse and choose
+   - Don't algorithmically recommend specific matches to specific users
+   - This preserves Section 230 protection
 
-8. **Provide donor resources:**
-   - Link to IRS Publication 561 (valuation of donated property)
-   - Valuation table for common running gear
-   - Link to CPSC recall database
+### When the Project Grows (200+ Users)
 
-### After Launch (When Needed)
+5. **Consider basic general liability insurance** (~$300-500/year)
+6. **Consider fiscal sponsorship** if wanting to accept donations to the platform
+7. **Get attorney review of ToS** (~$500-1,500 for review only)
 
-9. **Monitor for:**
-   - Any injury claims or complaints
-   - COPPA compliance if youth-facing features are added
-   - State-specific charity registration requirements as we expand geographically
+### At Scale (1,000+ Users)
+
+8. **Evaluate formal entity** (fiscal sponsorship or 501(c)(3))
+9. **Procure full insurance package** (GL + cyber + D&O, ~$200-300/month)
+10. **State charity registrations** as needed for geographic expansion
 
 ---
 
@@ -219,17 +216,16 @@ The running gear donation matching model falls squarely within established legal
 
 ## Next Steps (Priority Order)
 
-| # | Action | Owner | Cost | Timeline |
-|---|---|---|---|---|
-| 1 | Decide: 501(c)(3) or for-profit | Nick | $0 | This week |
-| 2 | Find attorney for ToS + structure | Nick | $1,500-5,000 | 1-2 weeks |
-| 3 | Draft Terms of Service | Attorney + dev | Included above | 2-3 weeks |
-| 4 | Draft Privacy Policy | Dev (template) + attorney review | Included above | 2-3 weeks |
-| 5 | File for 501(c)(3) if chosen | Attorney | ~$600 filing fee | 2-4 weeks processing |
-| 6 | Procure insurance | Nick | ~$200-300/mo | 1 week |
-| 7 | Build donor certification into pledge flow | Dev | $0 | With platform launch |
-| 8 | Build org onboarding agreement | Dev + attorney | Included above | With platform launch |
-| 9 | State charity registrations | Attorney/Nick | Varies by state | As we expand |
+| # | Action | Cost | When |
+|---|---|---|---|
+| 1 | Draft Terms of Service (template-based) | $0 | Before launch |
+| 2 | Draft Privacy Policy (template-based) | $0 | Before launch |
+| 3 | Build donor certification into pledge flow | $0 | With launch |
+| 4 | Keep platform design passive (no algorithmic matching) | $0 | Ongoing |
+| 5 | Consider general liability insurance | ~$300-500/year | When 200+ users |
+| 6 | Attorney review of ToS | ~$500-1,500 | When 200+ users |
+| 7 | Evaluate fiscal sponsorship (Hack Club / Open Collective) | 5-7% of donations | If accepting platform donations |
+| 8 | Evaluate formal entity (501(c)(3)) | $1,500-5,000 | If 1,000+ users or handling money |
 
 ---
 
