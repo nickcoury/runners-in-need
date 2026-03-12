@@ -36,6 +36,19 @@ async function getSession(req: Request): Promise<Session | null> {
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+  const method = context.request.method;
+
+  // CSRF: Reject state-changing requests with mismatched Origin
+  if (method !== "GET" && method !== "HEAD") {
+    const origin = context.request.headers.get("Origin");
+    if (origin) {
+      const requestHost = context.url.host;
+      const originHost = new URL(origin).host;
+      if (originHost !== requestHost) {
+        return new Response("CSRF check failed", { status: 403 });
+      }
+    }
+  }
 
   // Skip auth routes and public API endpoints
   if (pathname.startsWith("/api/auth") || pathname.startsWith("/auth/") || pathname === "/api/health") {
