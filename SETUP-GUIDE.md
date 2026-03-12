@@ -222,13 +222,7 @@ Check off as you go. Items marked ⚠️ are blocking deployment.
 ### ⚠️ Blocking — Site won't work without these
 
 - [ ] **Add Cloudflare secrets to GitHub Actions** — `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` (enables CI/CD auto-deploy)
-- [ ] **Add ALL runtime secrets to Cloudflare Pages env vars** — GitHub secrets are only for deployment (Account ID + API Token). The app reads everything else at runtime from Cloudflare Pages. Go to Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add these for **both Production and Preview**:
-  - `TURSO_DATABASE_URL`
-  - `TURSO_AUTH_TOKEN`
-  - `RESEND_API_KEY`
-  - `GOOGLE_CLIENT_ID`
-  - `GOOGLE_CLIENT_SECRET`
-  - `AUTH_SECRET` (generate with `openssl rand -base64 32`)
+- [x] **Add ALL runtime secrets to Cloudflare Pages env vars** ✅ Done
 
 ### 🔜 Domain Setup (after Cloudflare Pages is deploying)
 
