@@ -4,15 +4,6 @@ Action items that require your manual intervention (dashboard clicks, account se
 
 ---
 
-## Blocking — Do These First
-
-### Update Google OAuth Redirect URI
-Google Cloud Console → APIs & Services → Credentials → edit your OAuth client → add:
-- `https://runnersinneed.com/api/auth/callback/google`
-- `https://runners-in-need.pages.dev/api/auth/callback/google` (for preview)
-
----
-
 ## When Ready
 
 ### Add Anthropic API Key
