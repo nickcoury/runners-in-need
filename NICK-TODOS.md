@@ -16,7 +16,7 @@ For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Clo
 | Environment | URL | Database | Purpose |
 |-------------|-----|----------|---------|
 | **Production** | https://runnersinneed.com | `runners-in-need` | Live site |
-| **Workers Preview** | https://runners-in-need.nickcoury.workers.dev | `runners-in-need` | Direct Workers URL (same deployment) |
+| **Dev** | https://runners-in-need-dev.nickcoury.workers.dev | `runners-in-need-dev` | Test environment (auto-syncs from main) |
 | **Local** | http://localhost:4321 | Per your `.env` | Local development |
 
-Deployment is via Cloudflare Workers (not Pages). The `main` and `dev` branches both trigger `wrangler deploy`. Env vars are managed in the Workers project settings in the Cloudflare dashboard.
+Deployment is via Cloudflare Workers (not Pages). `main` deploys to production, `dev` branch deploys to the dev environment. Env vars are managed per-environment in the Workers project settings (or via `wrangler secret put VAR --env dev`).

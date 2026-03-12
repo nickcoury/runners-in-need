@@ -5,7 +5,7 @@ Connecting runners who have extra gear with organizations serving runners in nee
 | Environment | URL |
 |-------------|-----|
 | **Production** | https://runnersinneed.com |
-| **Workers Preview** | https://runners-in-need.nickcoury.workers.dev |
+| **Dev** | https://runners-in-need-dev.nickcoury.workers.dev |
 | **Local** | http://localhost:4321 |
 
 ## Quick Start

@@ -13,5 +13,10 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+	"env": {
+		"dev": {
+			"name": "runners-in-need-dev"
+		}
 	}
 }
