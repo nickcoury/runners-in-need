@@ -2,7 +2,11 @@
 
 Connecting runners who have extra gear with organizations serving runners in need.
 
-**Live site:** https://runners-in-need.pages.dev
+| Environment | URL |
+|-------------|-----|
+| **Production** | https://runnersinneed.com |
+| **Preview** | `*.runners-in-need.pages.dev` (auto-deploys on PRs) |
+| **Local** | http://localhost:4321 |
 
 ## Quick Start
 
@@ -41,8 +45,7 @@ src/
 - [Market Research](docs/MARKET-RESEARCH.md)
 - [Legal Analysis](docs/LEGAL.md)
 - [Incident Playbook](docs/INCIDENT-PLAYBOOK.md)
-- [Setup Guide](SETUP-GUIDE.md)
-- [TODO](TODO.md)
+- [Nick's TODOs](NICK-TODOS.md)
 
 ## Scripts
 
