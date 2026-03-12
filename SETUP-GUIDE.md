@@ -80,7 +80,27 @@ I'll use these to run the DB migration (`npm run db:migrate`) and add them to Cl
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-**Later (for custom domain):** You'll need to add DNS records to verify your sending domain. I'll walk you through this once you have a domain.
+**Where it goes:** Like Turso, the Resend API key needs to be in **Cloudflare Pages env vars** (not just GitHub secrets). Add `RESEND_API_KEY` in Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables (Production + Preview).
+
+**Verify sending domain (runnersinneed.com):**
+
+Without this, magic link emails come from `onboarding@resend.dev` and may land in spam. To send from `noreply@runnersinneed.com`:
+
+1. Go to https://resend.com/domains → **Add Domain**
+2. Enter `runnersinneed.com`
+3. Resend shows DNS records you need to add. Go to **Cloudflare dashboard** → **DNS** → **runnersinneed.com** → **Records**
+4. Add each record Resend provides (typically):
+
+   | Type | Name | Value | Notes |
+   |------|------|-------|-------|
+   | **MX** | `send` | (Resend provides) | For bounce handling |
+   | **TXT** | `send` | (Resend provides) | SPF record |
+   | **TXT** | `resend._domainkey` | (Resend provides) | DKIM signing |
+
+   **Important:** Use the exact names and values Resend shows — they may differ slightly from this table.
+
+5. Back in Resend, click **Verify** — DNS propagation is usually instant since Cloudflare manages the domain
+6. Once verified, update `src/lib/auth.ts` to use `noreply@runnersinneed.com` as the sender (I'll handle this)
 
 ---
 
@@ -148,13 +168,20 @@ No action needed from you.
 
 ---
 
-### 8. Domain Name (WHEN READY)
+### 8. Domain Name — runnersinneed.com ✅ PURCHASED
 
-Not needed for initial development — Cloudflare Pages gives you a `*.pages.dev` URL. When you want a custom domain:
+Domain purchased through Cloudflare — DNS is already managed, so setup is simple.
 
-1. Register a domain (e.g., `runnersinneed.org` via Cloudflare Registrar, Namecheap, etc.)
-2. Point nameservers to Cloudflare
-3. Add the domain in Cloudflare Pages project settings
+**What to do:**
+1. In Cloudflare dashboard → **Workers & Pages** → **runners-in-need** → **Custom domains** → **Add**
+2. Add `runnersinneed.com` — Cloudflare auto-creates the DNS CNAME record
+3. Add `www.runnersinneed.com` — redirects to apex domain
+4. SSL is automatic (no action needed)
+
+**After adding the domain, update these services:**
+- **Google OAuth** (if configured): Update redirect URI to `https://runnersinneed.com/api/auth/callback/google`
+- **Turnstile** (if configured): Add `runnersinneed.com` to allowed domains
+- **Resend**: Verify `runnersinneed.com` as sending domain (see Section 3)
 
 ---
 
@@ -168,7 +195,7 @@ Not needed for initial development — Cloudflare Pages gives you a `*.pages.dev
 | 4 | Google OAuth | Later | "Continue with Google" option |
 | 5 | Turnstile | Later | Bot prevention on forms |
 | 6 | Claude API | Later | LLM partial fulfillment feature |
-| 7 | Domain | When ready | Custom URL |
+| 7 | Domain — `runnersinneed.com` | ✅ Purchased | Custom URL (add to Pages project) |
 
 ## Where Secrets Go
 
@@ -185,3 +212,26 @@ Not needed for initial development — Cloudflare Pages gives you a `*.pages.dev
 | TURNSTILE_SITE_KEY | — | Yes | Yes |
 | TURNSTILE_SECRET_KEY | — | Yes | Yes |
 | ANTHROPIC_API_KEY | — | Yes | Yes |
+
+---
+
+## Your Remaining Setup TODOs
+
+Check off as you go. Items marked ⚠️ are blocking deployment.
+
+### ⚠️ Blocking — Site won't work without these
+
+- [ ] **Add Cloudflare secrets to GitHub Actions** — `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` (enables CI/CD auto-deploy)
+- [ ] **Add Turso to Cloudflare Pages env vars** — Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for both Production and Preview. (You added these to GitHub secrets, but the app reads them at runtime from Cloudflare Pages, not GitHub Actions.)
+- [ ] **Add Resend API key to Cloudflare Pages env vars** — You added it to GitHub secrets, but like Turso, the app reads it at runtime from Cloudflare Pages. Dashboard → Workers & Pages → runners-in-need → Settings → Environment variables → add `RESEND_API_KEY` (Production + Preview)
+
+### 🔜 Domain Setup (after Cloudflare Pages is deploying)
+
+- [ ] **Add custom domain** — Cloudflare dashboard → Workers & Pages → runners-in-need → Custom domains → Add `runnersinneed.com` and `www.runnersinneed.com`
+- [ ] **Verify sending domain in Resend** — Resend dashboard → Domains → Add `runnersinneed.com` → add the DNS records Resend provides in Cloudflare DNS (detailed instructions in Section 3 above)
+
+### 📋 Optional (can do anytime)
+
+- [ ] **Google OAuth** — Google Cloud Console → OAuth credentials (see Section 4)
+- [ ] **Cloudflare Turnstile** — Bot prevention for forms (see Section 5)
+- [ ] **Claude API key** — For LLM-assisted partial fulfillment feature (see Section 6)
