@@ -76,8 +76,21 @@ export const server = {
       donorEmail: z.string().email(),
       donorName: z.string().optional(),
       description: z.string().min(5).max(2000),
+      "cf-turnstile-response": z.string().optional(),
     }),
     handler: async (input) => {
+      // Verify Turnstile token if secret key is configured
+      const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
+      const turnstileToken = input["cf-turnstile-response"];
+      if (turnstileSecret && turnstileToken) {
+        const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ secret: turnstileSecret, response: turnstileToken }),
+        });
+        const result = await res.json() as { success: boolean };
+        if (!result.success) throw new Error("Turnstile verification failed");
+      }
       const db = getDb();
       const need = await db.query.needs.findFirst({
         where: eq(schema.needs.id, input.needId),

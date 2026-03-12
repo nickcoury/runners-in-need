@@ -1,13 +1,24 @@
 ---
 export const prerender = false;
 
-// TODO: This page requires authentication. Redirect unauthenticated users to /auth/signin.
-// TODO: Get orgId from the authenticated user's session
 import Layout from '../layouts/Layout.astro';
 import NeedForm from '../components/NeedForm';
+import { getDb, schema } from '../db';
+import { eq } from 'drizzle-orm';
 
-// Placeholder until auth is wired up
-const orgId = "demo-org";
+// Session is set by middleware (which redirects if not authenticated)
+const session = (Astro.locals as any).session;
+if (!session?.user) {
+  return Astro.redirect('/auth/signin?callbackUrl=/post');
+}
+
+const db = getDb();
+const user = await db.query.users.findFirst({
+  where: eq(schema.users.id, session.user.id),
+});
+
+const orgId = user?.orgId || '';
+const isOrganizer = user?.role === 'organizer' && !!orgId;
 ---
 
 <Layout title="Post a Need">
@@ -18,10 +29,12 @@ const orgId = "demo-org";
       condition &mdash; it helps donors match the right gear to your group.
     </p>
 
-    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
-      Sign-in is required to post needs. This is a preview of the form.
-    </div>
-
-    <NeedForm client:load orgId={orgId} />
+    {!isOrganizer ? (
+      <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
+        Only verified organizers can post needs. <a href="/contact" class="underline font-medium">Request organizer access</a> to get started.
+      </div>
+    ) : (
+      <NeedForm client:load orgId={orgId} />
+    )}
   </div>
 </Layout>

@@ -1,19 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface PledgeFormProps {
   needId: string;
   userEmail?: string;
   userName?: string;
+  turnstileSiteKey?: string;
 }
 
 export default function PledgeForm({
   needId,
   userEmail,
   userName,
+  turnstileSiteKey,
 }: PledgeFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  useEffect(() => {
+    if (!turnstileSiteKey || !turnstileRef.current) return;
+    // Load Turnstile script if not already present
+    const scriptId = "cf-turnstile-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    // Render widget
+    const render = () => {
+      if ((window as any).turnstile && turnstileRef.current) {
+        (window as any).turnstile.render(turnstileRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => setTurnstileToken(token),
+        });
+      }
+    };
+    (window as any).onTurnstileLoad = render;
+    // If script already loaded
+    if ((window as any).turnstile) render();
+  }, [turnstileSiteKey]);
 
   if (submitted) {
     return (
@@ -33,6 +62,9 @@ export default function PledgeForm({
     setError("");
     const form = e.currentTarget;
     const data = new FormData(form);
+    if (turnstileSiteKey && turnstileToken) {
+      data.set("cf-turnstile-response", turnstileToken);
+    }
     try {
       const res = await fetch("/api/pledges", {
         method: "POST",
@@ -113,6 +145,10 @@ export default function PledgeForm({
           placeholder="e.g., I have 3 pairs of men's running shoes (sizes 9, 9.5, 10), lightly used Nike and Brooks. Happy to ship or drop off."
         />
       </div>
+
+      {turnstileSiteKey && (
+        <div ref={turnstileRef} />
+      )}
 
       {error && (
         <p className="text-sm text-red-600">{error}</p>
