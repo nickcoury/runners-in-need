@@ -7,7 +7,7 @@ Action items that require your manual intervention (dashboard clicks, account se
 ## When Ready
 
 ### Add Anthropic API Key
-For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Cloudflare Pages env vars (Production + Preview) and `.env` when you want this feature enabled.
+For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Cloudflare Workers env vars and `.env` when you want this feature enabled.
 
 ---
 
@@ -16,8 +16,7 @@ For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Clo
 | Environment | URL | Database | Purpose |
 |-------------|-----|----------|---------|
 | **Production** | https://runnersinneed.com | `runners-in-need` | Live site |
-| **Dev** | https://dev.runners-in-need.pages.dev | `runners-in-need-dev` | Persistent test environment (auto-syncs from main) |
-| **PR Preview** | `*.runners-in-need.pages.dev` | `runners-in-need-dev` | Per-PR preview (auto-deploys on PRs) |
+| **Workers Preview** | https://runners-in-need.nickcoury.workers.dev | `runners-in-need` | Direct Workers URL (same deployment) |
 | **Local** | http://localhost:4321 | Per your `.env` | Local development |
 
-**Dev environment** auto-syncs from main on every push. Use it to test all flows with the dev database. PR previews are ephemeral per-commit.
+Deployment is via Cloudflare Workers (not Pages). The `main` and `dev` branches both trigger `wrangler deploy`. Env vars are managed in the Workers project settings in the Cloudflare dashboard.

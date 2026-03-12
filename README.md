@@ -5,8 +5,7 @@ Connecting runners who have extra gear with organizations serving runners in nee
 | Environment | URL |
 |-------------|-----|
 | **Production** | https://runnersinneed.com |
-| **Dev** | https://dev.runners-in-need.pages.dev (auto-syncs from main, uses dev DB) |
-| **PR Preview** | `*.runners-in-need.pages.dev` (auto-deploys on PRs, uses dev DB) |
+| **Workers Preview** | https://runners-in-need.nickcoury.workers.dev |
 | **Local** | http://localhost:4321 |
 
 ## Quick Start
@@ -23,7 +22,7 @@ npm run dev            # http://localhost:4321
 - **Tailwind CSS** — Utility-first styling
 - **Turso** — SQLite database (via Drizzle ORM)
 - **Auth.js** — Magic links + OAuth authentication
-- **Cloudflare Pages** — Hosting (free tier)
+- **Cloudflare Workers** — Hosting with SSR (free tier)
 
 ## Project Structure
 

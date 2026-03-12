@@ -3,6 +3,10 @@
 	"compatibility_flags": ["global_fetch_strictly_public", "nodejs_compat"],
 	"name": "runners-in-need",
 	"main": "@astrojs/cloudflare/entrypoints/server",
+	"routes": [
+		{ "pattern": "runnersinneed.com", "custom_domain": true },
+		{ "pattern": "www.runnersinneed.com", "custom_domain": true }
+	],
 	"assets": {
 		"directory": "./dist",
 		"binding": "ASSETS"

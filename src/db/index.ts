@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { construct } from "drizzle-orm/libsql/driver-core";
+import { createClient } from "@libsql/client/web";
 import * as schema from "./schema";
 
 function getClient() {
@@ -10,16 +10,36 @@ function getClient() {
     throw new Error("TURSO_DATABASE_URL is not set");
   }
 
+  // Wrap native fetch to handle cross-fetch Request objects from @libsql/hrana-client.
+  // The hrana client creates Request objects via cross-fetch which aren't native Requests,
+  // so the native fetch() can't process them directly.
+  const compatFetch: typeof globalThis.fetch = (input, init) => {
+    if (input instanceof globalThis.Request) {
+      return globalThis.fetch(input, init);
+    }
+    if (typeof input === "string" || input instanceof URL) {
+      return globalThis.fetch(input, init);
+    }
+    // cross-fetch Request object — extract URL and options
+    const req = input as any;
+    return globalThis.fetch(req.url ?? String(req), init ?? {
+      method: req.method,
+      headers: req.headers,
+      body: req.body ?? req._bodyInit,
+    });
+  };
+
   return createClient({
     url,
     authToken,
+    fetch: compatFetch,
   });
 }
 
 let _db: ReturnType<typeof createDb> | null = null;
 
 function createDb() {
-  return drizzle(getClient(), { schema });
+  return construct(getClient(), { schema });
 }
 
 export function getDb() {
