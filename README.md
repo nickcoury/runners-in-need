@@ -40,6 +40,7 @@ src/
 - [Design System](docs/DESIGN-SYSTEM.md)
 - [Market Research](docs/MARKET-RESEARCH.md)
 - [Legal Analysis](docs/LEGAL.md)
+- [Incident Playbook](docs/INCIDENT-PLAYBOOK.md)
 - [Setup Guide](SETUP-GUIDE.md)
 - [TODO](TODO.md)
 

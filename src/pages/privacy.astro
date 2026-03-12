@@ -5,48 +5,189 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Privacy Policy">
   <div class="max-w-3xl">
     <h1 class="text-3xl font-bold mb-6">Privacy Policy</h1>
-    <p class="text-sm text-gray-500 mb-8">Draft &mdash; Last updated March 2026</p>
+    <p class="text-sm text-gray-500 mb-8">Last updated: March 2026</p>
 
-    <div class="space-y-6 text-gray-600">
+    <div class="space-y-8 text-gray-600">
+      <p>
+        Runners in Need is a personal project operated by Nick Coury. There is no
+        formal business entity behind it. No money changes hands on this platform
+        &mdash; it exists solely to connect running gear donors with community
+        organizers. This policy explains what data we collect, how we use it, and
+        what rights you have.
+      </p>
+
+      <!-- 1. What We Collect and Why -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">What We Collect</h2>
-        <p>
-          When you create an account we collect your name, email address, and
-          optional organization details. When you post a need or pledge gear we
-          store the listing content you provide, including location information.
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">1. What We Collect and Why</h2>
+        <p class="mb-3">
+          We collect only the information needed to operate the platform:
+        </p>
+        <ul class="list-disc pl-6 space-y-2">
+          <li>
+            <strong>Email address</strong> &mdash; Used for authentication (magic links
+            and optional Google OAuth sign-in) and to send you transactional
+            notifications such as pledge updates.
+          </li>
+          <li>
+            <strong>Name</strong> &mdash; Displayed to other users so donors and
+            organizers can identify each other.
+          </li>
+          <li>
+            <strong>Organization name</strong> (optional) &mdash; Shown on your profile
+            and listings if you represent a group or running club.
+          </li>
+          <li>
+            <strong>Location</strong> &mdash; Used to match gear donations with nearby
+            organizers. You choose how specific to make this.
+          </li>
+          <li>
+            <strong>Gear descriptions</strong> &mdash; The details you provide when
+            posting a need or pledging gear, stored so listings can be displayed and
+            matched.
+          </li>
+        </ul>
+      </section>
+
+      <!-- 2. What We Don't Collect -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">2. What We Don't Collect</h2>
+        <ul class="list-disc pl-6 space-y-2">
+          <li>
+            <strong>Data from minors.</strong> This platform is used by adult organizers
+            and donors. We do not knowingly collect information from anyone under 18.
+            If you believe a minor's data has been submitted, please contact us and we
+            will delete it promptly.
+          </li>
+          <li>
+            <strong>Financial data.</strong> No payments, credit card numbers, or
+            banking information are collected. No money changes hands on this platform.
+          </li>
+          <li>
+            <strong>Tracking cookies or advertising identifiers.</strong> We do not use
+            third-party analytics trackers, ad networks, or retargeting pixels.
+          </li>
+        </ul>
+      </section>
+
+      <!-- 3. How We Use Your Data -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">3. How We Use Your Data</h2>
+        <p class="mb-3">Your information is used to:</p>
+        <ul class="list-disc pl-6 space-y-2">
+          <li>Authenticate your account and keep you signed in.</li>
+          <li>Display your listings and profile to other users on the platform.</li>
+          <li>Send transactional emails &mdash; pledge notifications, magic link
+            sign-in codes, and direct messages between users.</li>
+          <li>Match gear donations with organizer needs based on location.</li>
+          <li>Respond to your support requests.</li>
+        </ul>
+        <p class="mt-3">
+          We do not sell, rent, or share your personal data with third parties for
+          marketing or any other purpose. Ever.
         </p>
       </section>
 
+      <!-- 4. Third-Party Services -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">How We Use It</h2>
-        <p>
-          Your information is used to operate the platform &mdash; connecting donors
-          with organizers, sending notifications about pledges and messages, and
-          improving the service. We do not sell your data to third parties.
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">4. Third-Party Services</h2>
+        <p class="mb-3">
+          We rely on two third-party services to operate the platform:
+        </p>
+        <ul class="list-disc pl-6 space-y-2">
+          <li>
+            <strong>Cloudflare</strong> &mdash; Hosts the site and serves pages.
+            Cloudflare processes incoming web requests, which means their servers see
+            IP addresses and standard HTTP headers. Cloudflare provides built-in,
+            privacy-friendly analytics (aggregated, no personal identifiers). We do
+            not use any additional analytics tools. See
+            <a href="https://www.cloudflare.com/privacypolicy/" class="text-[#2D4A2D] underline" target="_blank" rel="noopener noreferrer">Cloudflare's privacy policy</a>.
+          </li>
+          <li>
+            <strong>Resend</strong> &mdash; Sends transactional emails on our behalf
+            (magic link codes, pledge notifications). Resend processes your email
+            address solely to deliver these messages. We do not send marketing or
+            promotional emails through Resend or any other service. See
+            <a href="https://resend.com/legal/privacy-policy" class="text-[#2D4A2D] underline" target="_blank" rel="noopener noreferrer">Resend's privacy policy</a>.
+          </li>
+        </ul>
+        <p class="mt-3">
+          If you sign in with Google OAuth, Google processes your authentication
+          according to
+          <a href="https://policies.google.com/privacy" class="text-[#2D4A2D] underline" target="_blank" rel="noopener noreferrer">Google's privacy policy</a>.
+          We receive only your name and email address from Google; we do not access
+          your contacts, calendar, or any other Google data.
         </p>
       </section>
 
+      <!-- 5. Data Retention -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">Cookies</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">5. Data Retention</h2>
         <p>
-          We use essential cookies to keep you signed in and remember your
-          preferences. We may use analytics cookies to understand how the site is
-          used. You can disable non-essential cookies in your browser settings.
+          Your data is kept for as long as your account is active. If you delete your
+          account or request deletion, we will remove your personal data from our
+          systems. Residual copies in backups may persist for a short time but are not
+          used or accessed. To request account deletion, email us at the address below.
         </p>
       </section>
 
+      <!-- 6. Your Rights -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">Data Retention</h2>
-        <p>
-          Account data is kept as long as your account is active. You can request
-          deletion of your account and associated data at any time by contacting us.
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">6. Your Rights</h2>
+        <p class="mb-3">You have the right to:</p>
+        <ul class="list-disc pl-6 space-y-2">
+          <li><strong>Access</strong> the personal data we hold about you.</li>
+          <li><strong>Correct</strong> inaccurate or incomplete data.</li>
+          <li><strong>Delete</strong> your account and all associated data.</li>
+        </ul>
+        <p class="mt-3">
+          To exercise any of these rights, send an email to
+          <a href="mailto:privacy@runnersinneed.org" class="text-[#2D4A2D] underline">privacy@runnersinneed.org</a>.
+          We will respond within a reasonable timeframe.
         </p>
       </section>
 
+      <!-- 7. Cookies -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">Contact</h2>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">7. Cookies</h2>
         <p>
-          Questions about this policy? Reach out at
+          We use minimal cookies. The only cookies set are session cookies required to
+          keep you signed in after authentication. These are essential for the site to
+          function and cannot be disabled while using the platform. We do not use
+          advertising cookies, tracking cookies, or any non-essential cookies. There is
+          no cookie banner because there is nothing optional to consent to.
+        </p>
+      </section>
+
+      <!-- 8. CAN-SPAM Compliance -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">8. Email and CAN-SPAM Compliance</h2>
+        <p>
+          All emails we send are transactional &mdash; they relate directly to your
+          account activity (sign-in links, pledge notifications, messages from other
+          users). We do not send marketing or promotional emails. If you wish to stop
+          receiving pledge notifications, you can adjust your notification preferences
+          in your account settings or email us to opt out. You can also delete your
+          account entirely to stop all emails.
+        </p>
+      </section>
+
+      <!-- 9. Changes to This Policy -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">9. Changes to This Policy</h2>
+        <p>
+          We may update this policy from time to time. When we do, we will revise the
+          "Last updated" date at the top. If we make significant changes to how we
+          handle your data, we will notify you by email. Continued use of the platform
+          after changes constitutes acceptance of the revised policy.
+        </p>
+      </section>
+
+      <!-- 10. Contact -->
+      <section>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">10. Contact</h2>
+        <p>
+          If you have questions about this privacy policy or how your data is handled,
+          contact Nick Coury at
           <a href="mailto:privacy@runnersinneed.org" class="text-[#2D4A2D] underline">privacy@runnersinneed.org</a>.
         </p>
       </section>
