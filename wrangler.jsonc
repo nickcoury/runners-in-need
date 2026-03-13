@@ -16,7 +16,8 @@
 	},
 	"env": {
 		"dev": {
-			"name": "runners-in-need-dev"
+			"name": "runners-in-need-dev",
+			"routes": []
 		}
 	}
 }
