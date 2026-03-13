@@ -1,17 +1,13 @@
 /**
  * Get an environment variable at runtime.
  *
- * On Cloudflare Workers (Astro v6), secrets and vars are accessed via
- * `import { env } from "cloudflare:workers"`. Falls back to import.meta.env
- * for local dev and build time.
+ * Uses Astro's internal env runtime which the Cloudflare adapter configures
+ * with Worker bindings via `setGetEnv(createGetEnv(env))`.
+ * Falls back to process.env for local dev / build time.
  */
+// @ts-ignore — internal Astro module
+import { getEnv as astroGetEnv } from "astro/env/runtime";
+
 export function getEnv(key: string): string | undefined {
-  try {
-    // @ts-ignore — cloudflare:workers is only available at runtime on Workers
-    const { env } = require("cloudflare:workers");
-    if (env?.[key]) return env[key] as string;
-  } catch {
-    // Not in Cloudflare runtime
-  }
-  return (import.meta.env as any)?.[key] || undefined;
+  return astroGetEnv(key) || undefined;
 }
