@@ -5,13 +5,12 @@ import { getDb } from "../../db";
 
 export const GET: APIRoute = async () => {
   let dbOk = false;
-  let dbError = "";
   try {
     const db = getDb();
     await db.query.users.findFirst();
     dbOk = true;
-  } catch (e: any) {
-    dbError = e?.cause?.message || e?.message || String(e);
+  } catch {
+    // DB unreachable
   }
 
   const status = dbOk ? 200 : 503;
@@ -19,7 +18,6 @@ export const GET: APIRoute = async () => {
     JSON.stringify({
       status: dbOk ? "ok" : "degraded",
       db: dbOk ? "connected" : "unreachable",
-      ...(dbError ? { dbError } : {}),
       timestamp: new Date().toISOString(),
     }),
     {

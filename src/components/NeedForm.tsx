@@ -17,6 +17,7 @@ export default function NeedForm({
   const [body, setBody] = useState(initialBody || "");
   const [extrasWelcome, setExtrasWelcome] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(90);
+  const [submitting, setSubmitting] = useState(false);
 
   function insertTemplate(tag: CategoryTag) {
     setCategoryTag(tag);
@@ -26,7 +27,7 @@ export default function NeedForm({
   }
 
   return (
-    <form method="POST" action="/api/needs" className="space-y-6">
+    <form method="POST" action="/api/needs" className="space-y-6" onSubmit={() => setSubmitting(true)}>
       <input type="hidden" name="orgId" value={orgId} />
       {continuedFromId && (
         <input type="hidden" name="continuedFromId" value={continuedFromId} />
@@ -141,9 +142,10 @@ export default function NeedForm({
 
       <button
         type="submit"
-        className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm"
+        disabled={submitting}
+        className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
       >
-        {continuedFromId ? "Post Remaining Need" : "Post Need"}
+        {submitting ? "Posting..." : continuedFromId ? "Post Remaining Need" : "Post Need"}
       </button>
     </form>
   );

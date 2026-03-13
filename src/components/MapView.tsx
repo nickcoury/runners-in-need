@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MapNeed {
   id: string;
@@ -15,6 +15,7 @@ interface MapViewProps {
 export default function MapView({ needs, fullscreen }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -92,6 +93,8 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
         map.fitBounds(bounds, { padding: [20, 20], maxZoom: 6 });
       }
 
+      setLoading(false);
+
       // Fix tile rendering after container becomes visible
       setTimeout(() => map.invalidateSize(), 100);
     })();
@@ -106,10 +109,17 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
   }, [needs]);
 
   return (
-    <div
-      ref={containerRef}
-      className={fullscreen ? "w-full h-full" : "rounded-lg h-56 w-full"}
-      style={{ background: "#e5e7eb" }}
-    />
+    <div className="relative">
+      <div
+        ref={containerRef}
+        className={fullscreen ? "w-full h-full" : "rounded-lg h-56 w-full"}
+        style={{ background: "#e5e7eb" }}
+      />
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-sm text-gray-400">Loading map...</div>
+        </div>
+      )}
+    </div>
   );
 }
