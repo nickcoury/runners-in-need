@@ -35,9 +35,9 @@ export default defineConfig({
   },
   callbacks: {
     session({ session, user }) {
-      // Include role in session so pages can check it
       if (session.user) {
         session.user.id = user.id;
+        session.user.image = (user as any).image || null;
         (session.user as any).role = (user as any).role || "donor";
       }
       return session;

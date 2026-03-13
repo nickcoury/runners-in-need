@@ -48,7 +48,33 @@ const { title, description = 'Connecting runners who have extra gear with organi
           <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
           <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
           <a href="/about" class="hover:text-green-200 transition-colors">About</a>
+
+          {/* Signed-out state */}
           <a id="auth-link" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Sign In</a>
+
+          {/* Signed-in state — hidden by default, shown by JS */}
+          <div id="user-menu" class="relative hidden">
+            <button id="user-menu-btn" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 pl-1.5 pr-3 py-1 rounded-lg transition-colors">
+              <span id="user-avatar" class="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold overflow-hidden">
+                <span id="user-initials"></span>
+              </span>
+              <span id="user-name-display" class="max-w-[120px] truncate"></span>
+              <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 text-gray-700">
+              <div id="dropdown-user-info" class="px-4 py-2.5 border-b border-gray-100">
+                <p id="dropdown-name" class="text-sm font-medium text-gray-900 truncate"></p>
+                <p id="dropdown-email" class="text-xs text-gray-500 truncate"></p>
+              </div>
+              <a href="/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Dashboard</a>
+              <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Profile</a>
+              <div class="border-t border-gray-100 mt-1 pt-1">
+                <button id="sign-out-btn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <button id="mobile-menu-btn" class="md:hidden ml-auto p-1" aria-label="Toggle menu" aria-expanded="false">
@@ -63,7 +89,22 @@ const { title, description = 'Connecting runners who have extra gear with organi
           <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
           <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
           <a href="/about" class="hover:text-green-200 transition-colors">About</a>
+
+          {/* Mobile: signed-out */}
           <a id="auth-link-mobile" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Sign In</a>
+
+          {/* Mobile: signed-in — hidden by default */}
+          <div id="mobile-user-section" class="hidden space-y-2 pt-1 border-t border-white/10">
+            <div class="flex items-center gap-2 py-1">
+              <span id="mobile-user-avatar" class="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold overflow-hidden">
+                <span id="mobile-user-initials"></span>
+              </span>
+              <span id="mobile-user-name" class="text-sm font-medium truncate"></span>
+            </div>
+            <a href="/dashboard" class="block hover:text-green-200 transition-colors">Dashboard</a>
+            <a href="/profile" class="block hover:text-green-200 transition-colors">Profile</a>
+            <button id="mobile-sign-out-btn" class="text-red-300 hover:text-red-200 transition-colors text-left">Sign Out</button>
+          </div>
         </div>
       </div>
     </header>
@@ -76,17 +117,96 @@ const { title, description = 'Connecting runners who have extra gear with organi
         btn.setAttribute('aria-expanded', String(open));
       });
 
-      // Toggle Sign In / Dashboard based on session cookie
+      // Check for session cookie and fetch user info
       const hasSession = document.cookie.includes('authjs.session-token') || document.cookie.includes('__Secure-authjs.session-token');
       if (hasSession) {
-        for (const id of ['auth-link', 'auth-link-mobile']) {
-          const el = document.getElementById(id);
-          if (el) {
-            el.href = '/dashboard';
-            el.textContent = 'Dashboard';
-          }
+        fetch('/api/auth/session')
+          .then(r => r.json())
+          .then(session => {
+            if (!session?.user) return;
+            const user = session.user;
+            const name = user.name || 'User';
+            const email = user.email || '';
+            const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+
+            // Hide sign-in links
+            document.getElementById('auth-link')?.classList.add('hidden');
+            document.getElementById('auth-link-mobile')?.classList.add('hidden');
+
+            // Desktop user menu
+            const userMenu = document.getElementById('user-menu');
+            if (userMenu) {
+              userMenu.classList.remove('hidden');
+              userMenu.classList.add('flex');
+            }
+            const nameEl = document.getElementById('user-name-display');
+            if (nameEl) nameEl.textContent = name;
+            const initialsEl = document.getElementById('user-initials');
+            if (initialsEl) {
+              if (user.image) {
+                const img = document.createElement('img');
+                img.src = user.image;
+                img.alt = name;
+                img.className = 'w-full h-full object-cover';
+                img.referrerPolicy = 'no-referrer';
+                initialsEl.parentElement?.replaceChildren(img);
+              } else {
+                initialsEl.textContent = initials;
+              }
+            }
+            const dropdownName = document.getElementById('dropdown-name');
+            if (dropdownName) dropdownName.textContent = name;
+            const dropdownEmail = document.getElementById('dropdown-email');
+            if (dropdownEmail) dropdownEmail.textContent = email;
+
+            // Mobile user section
+            const mobileSection = document.getElementById('mobile-user-section');
+            if (mobileSection) mobileSection.classList.remove('hidden');
+            const mobileName = document.getElementById('mobile-user-name');
+            if (mobileName) mobileName.textContent = name;
+            const mobileInitials = document.getElementById('mobile-user-initials');
+            if (mobileInitials) {
+              if (user.image) {
+                const img = document.createElement('img');
+                img.src = user.image;
+                img.alt = name;
+                img.className = 'w-full h-full object-cover';
+                img.referrerPolicy = 'no-referrer';
+                mobileInitials.parentElement?.replaceChildren(img);
+              } else {
+                mobileInitials.textContent = initials;
+              }
+            }
+          })
+          .catch(() => { /* session fetch failed, keep showing Sign In */ });
+      }
+
+      // Desktop dropdown toggle
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      userMenuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown?.classList.toggle('hidden');
+      });
+      document.addEventListener('click', () => {
+        userDropdown?.classList.add('hidden');
+      });
+
+      // Sign out handler (POST with CSRF)
+      async function handleSignOut() {
+        try {
+          const csrfRes = await fetch('/api/auth/csrf');
+          const { csrfToken } = await csrfRes.json();
+          const form = new FormData();
+          form.set('csrfToken', csrfToken);
+          await fetch('/api/auth/signout', { method: 'POST', body: form });
+          window.location.href = '/';
+        } catch {
+          window.location.href = '/api/auth/signout';
         }
       }
+      document.getElementById('sign-out-btn')?.addEventListener('click', handleSignOut);
+      document.getElementById('mobile-sign-out-btn')?.addEventListener('click', handleSignOut);
     </script>
 
     <main class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>

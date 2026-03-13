@@ -3,7 +3,7 @@ import { Auth } from "@auth/core";
 import type { Session } from "@auth/core/types";
 import { getEnv } from "./lib/env";
 
-const protectedRoutes = ["/post", "/dashboard"];
+const protectedRoutes = ["/post", "/dashboard", "/profile"];
 const adminRoutes = ["/admin"];
 
 function isProtected(pathname: string): boolean {

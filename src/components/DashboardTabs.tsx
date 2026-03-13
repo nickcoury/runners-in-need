@@ -468,12 +468,23 @@ export default function DashboardTabs({
           )}
 
           <div className="max-w-lg">
-            <a
-              href="/api/auth/signout"
-              className="inline-block border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+            <button
+              onClick={async () => {
+                try {
+                  const csrfRes = await fetch('/api/auth/csrf');
+                  const { csrfToken } = await csrfRes.json();
+                  const form = new FormData();
+                  form.set('csrfToken', csrfToken);
+                  await fetch('/api/auth/signout', { method: 'POST', body: form });
+                  window.location.href = '/';
+                } catch {
+                  window.location.href = '/api/auth/signout';
+                }
+              }}
+              className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
             >
               Sign Out
-            </a>
+            </button>
           </div>
         </div>
       )}
