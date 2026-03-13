@@ -4,11 +4,22 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { defineConfig } from "auth-astro";
 import { getDb } from "../db";
 import { getEnv } from "./env";
+import {
+  users,
+  accounts,
+  sessions,
+  verificationTokens,
+} from "../db/schema";
 
 export default defineConfig({
   secret: getEnv("AUTH_SECRET"),
   trustHost: true,
-  adapter: DrizzleAdapter(getDb()),
+  adapter: DrizzleAdapter(getDb(), {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   providers: [
     Resend({
       apiKey: getEnv("RESEND_API_KEY"),
