@@ -103,8 +103,32 @@ const categories = [
     </div>
   </div>
 
+  {/* Desktop view toggle — list/map */}
+  {mapNeeds.length > 0 && (
+    <div class="hidden lg:flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
+      <button
+        id="desktop-tab-list"
+        class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        List
+      </button>
+      <button
+        id="desktop-tab-map"
+        class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        Map
+      </button>
+    </div>
+  )}
+
   {/* Main content: cards + sidebar */}
-  <div class="flex gap-6 pb-16 lg:pb-0">
+  <div id="desktop-list-view" class="flex gap-6 pb-16 lg:pb-0">
     {/* Card grid — hidden on mobile when map tab active */}
     <div id="listings-view" class="flex-1 min-w-0">
       {allNeeds.length === 0 ? (
@@ -133,13 +157,6 @@ const categories = [
 
     {/* Sidebar — desktop only */}
     <aside class="hidden lg:block w-72 shrink-0 space-y-6">
-      {mapNeeds.length > 0 && (
-        <div>
-          <h3 class="font-semibold text-sm text-gray-900 mb-2">NEEDS MAP</h3>
-          <MapView client:visible needs={mapNeeds} />
-        </div>
-      )}
-
       {urgentNeeds.length > 0 && (
         <div>
           <h3 class="font-semibold text-sm text-gray-900 mb-2">URGENT NEEDS</h3>
@@ -181,6 +198,13 @@ const categories = [
     </aside>
   </div>
 
+  {/* Desktop expanded map view — hidden by default, shown when Map tab clicked */}
+  {mapNeeds.length > 0 && (
+    <div id="desktop-map-view" class="hidden rounded-lg overflow-hidden" style="height: calc(100vh - 240px); min-height: 400px;">
+      <MapView client:visible needs={mapNeeds} fullscreen />
+    </div>
+  )}
+
   {/* Mobile bottom nav — toggle between listings and map */}
   {mapNeeds.length > 0 && (
     <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
@@ -206,6 +230,7 @@ const categories = [
   )}
 
   <script>
+    // Mobile bottom nav toggle
     const tabListings = document.getElementById('tab-listings');
     const tabMap = document.getElementById('tab-map');
     const listingsView = document.getElementById('listings-view');
@@ -233,6 +258,43 @@ const categories = [
 
     tabListings?.addEventListener('click', showListings);
     tabMap?.addEventListener('click', showMap);
+
+    // Desktop list/map toggle
+    const desktopTabList = document.getElementById('desktop-tab-list');
+    const desktopTabMap = document.getElementById('desktop-tab-map');
+    const desktopListView = document.getElementById('desktop-list-view');
+    const desktopMapView = document.getElementById('desktop-map-view');
+
+    function showDesktopList() {
+      desktopListView?.classList.remove('hidden');
+      desktopListView?.classList.add('flex');
+      desktopMapView?.classList.add('hidden');
+      desktopMapView?.classList.remove('block');
+      if (desktopTabList) {
+        desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all';
+      }
+      if (desktopTabMap) {
+        desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all';
+      }
+    }
+
+    function showDesktopMap() {
+      desktopListView?.classList.add('hidden');
+      desktopListView?.classList.remove('flex');
+      desktopMapView?.classList.remove('hidden');
+      desktopMapView?.classList.add('block');
+      if (desktopTabMap) {
+        desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all';
+      }
+      if (desktopTabList) {
+        desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all';
+      }
+      // Trigger Leaflet resize so it renders correctly
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    desktopTabList?.addEventListener('click', showDesktopList);
+    desktopTabMap?.addEventListener('click', showDesktopMap);
 
     // Search + category filtering
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
