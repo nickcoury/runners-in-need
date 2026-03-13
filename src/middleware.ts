@@ -60,7 +60,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Skip auth routes and public API endpoints
-  if (pathname.startsWith("/api/auth") || pathname.startsWith("/auth/") || pathname === "/api/health") {
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/auth/") ||
+    pathname === "/api/health" ||
+    pathname === "/api/pledges"
+  ) {
     return next();
   }
 
