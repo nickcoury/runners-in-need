@@ -4,6 +4,18 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 
 const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+
+// Fetch CSRF token from Auth.js
+let csrfToken = '';
+try {
+  const res = await fetch(new URL('/api/auth/csrf', Astro.url), {
+    headers: Astro.request.headers,
+  });
+  const data = await res.json() as { csrfToken: string };
+  csrfToken = data.csrfToken;
+} catch {
+  // Will fail gracefully — form submission will get a new token
+}
 ---
 
 <Layout title="Sign In">
@@ -13,6 +25,7 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
     <div class="space-y-4">
       {/* Magic link */}
       <form method="POST" action="/api/auth/signin/resend" class="space-y-3">
+        <input type="hidden" name="csrfToken" value={csrfToken} />
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <label for="email" class="block text-sm font-medium text-gray-700">
           Email address
@@ -44,6 +57,7 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
 
       {/* Google OAuth */}
       <form method="POST" action="/api/auth/signin/google">
+        <input type="hidden" name="csrfToken" value={csrfToken} />
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <button
           type="submit"
