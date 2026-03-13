@@ -6,6 +6,7 @@ import { getDb } from "../db";
 import { getEnv } from "./env";
 
 export default defineConfig({
+  trustHost: true,
   adapter: DrizzleAdapter(getDb()),
   providers: [
     Resend({
