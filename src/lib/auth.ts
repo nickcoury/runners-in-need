@@ -3,17 +3,18 @@ import Resend from "@auth/core/providers/resend";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { defineConfig } from "auth-astro";
 import { getDb } from "../db";
+import { getEnv } from "./env";
 
 export default defineConfig({
   adapter: DrizzleAdapter(getDb()),
   providers: [
     Resend({
-      apiKey: import.meta.env.RESEND_API_KEY,
-      from: import.meta.env.EMAIL_FROM || "noreply@runnersinneed.org",
+      apiKey: getEnv("RESEND_API_KEY"),
+      from: getEnv("EMAIL_FROM") || "noreply@runnersinneed.org",
     }),
     Google({
-      clientId: import.meta.env.GOOGLE_CLIENT_ID,
-      clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET,
+      clientId: getEnv("GOOGLE_CLIENT_ID"),
+      clientSecret: getEnv("GOOGLE_CLIENT_SECRET"),
     }),
   ],
   session: {

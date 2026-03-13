@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { Auth } from "@auth/core";
 import type { Session } from "@auth/core/types";
+import { getEnv } from "./lib/env";
 
 const protectedRoutes = ["/post", "/dashboard"];
 const adminRoutes = ["/admin"];
@@ -22,7 +23,7 @@ async function getSession(req: Request): Promise<Session | null> {
   const { default: authConfig } = await import("./lib/auth");
   const config = { ...authConfig };
   // @ts-ignore
-  config.secret ??= import.meta.env.AUTH_SECRET;
+  config.secret ??= getEnv("AUTH_SECRET");
   config.trustHost ??= true;
 
   const prefix = "/api/auth";

@@ -1,9 +1,10 @@
 import { Resend } from "resend";
+import { getEnv } from "./env";
 
 const FROM_ADDRESS = "Runners In Need <notifications@runnersinneed.com>";
 
 function getResend(): Resend | null {
-  const apiKey = import.meta.env.RESEND_API_KEY;
+  const apiKey = getEnv("RESEND_API_KEY");
   if (!apiKey) {
     return null;
   }
@@ -11,7 +12,7 @@ function getResend(): Resend | null {
 }
 
 function getSiteUrl(): string {
-  return import.meta.env.PUBLIC_SITE_URL || "http://localhost:4321";
+  return getEnv("PUBLIC_SITE_URL") || "http://localhost:4321";
 }
 
 // ============================================================

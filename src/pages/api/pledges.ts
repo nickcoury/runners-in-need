@@ -3,6 +3,7 @@ import { getDb, schema } from "../../db";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendPledgeReceivedEmail } from "../../lib/email";
+import { getEnv } from "../../lib/env";
 
 function sanitize(s: string): string {
   return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -23,7 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // Verify Turnstile if configured
-  const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
+  const turnstileSecret = getEnv("TURNSTILE_SECRET_KEY");
   const turnstileToken = form.get("cf-turnstile-response") as string | null;
   if (turnstileSecret) {
     if (!turnstileToken) {
