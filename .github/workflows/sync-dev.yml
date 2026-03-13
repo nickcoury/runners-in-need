@@ -1,14 +1,15 @@
-name: Sync dev branch
+name: Sync and deploy dev
 
 on:
   push:
     branches: [main]
 
 jobs:
-  sync-dev:
+  sync-and-deploy-dev:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      deployments: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,3 +20,19 @@ jobs:
           git checkout dev 2>/dev/null || git checkout -b dev
           git merge --ff-only origin/main
           git push origin dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Deploy to Cloudflare Workers (dev)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config dist/server/wrangler.json --keep-vars --env dev

@@ -2,9 +2,10 @@ name: Deploy to Cloudflare
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -25,17 +26,9 @@ jobs:
       - run: npm run build
 
       - name: Deploy to Cloudflare Workers (production)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config dist/server/wrangler.json --keep-vars
-
-      - name: Deploy to Cloudflare Workers (dev)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config dist/server/wrangler.json --keep-vars --env dev
