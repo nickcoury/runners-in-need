@@ -6,6 +6,7 @@ import { getDb } from "../db";
 import { getEnv } from "./env";
 
 export default defineConfig({
+  secret: getEnv("AUTH_SECRET"),
   trustHost: true,
   adapter: DrizzleAdapter(getDb()),
   providers: [
