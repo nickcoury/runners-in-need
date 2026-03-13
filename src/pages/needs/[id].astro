@@ -108,6 +108,21 @@ const statusLabelMap: Record<string, string> = {
   withdrawn: "Withdrawn",
 };
 
+const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
+
+// Check if current user can message on pledges
+const session = (Astro.locals as any).session;
+const currentUserId = session?.user?.id;
+let currentUserOrgId: string | null = null;
+if (currentUserId) {
+  const currentUser = await db.query.users.findFirst({
+    where: eq(schema.users.id, currentUserId),
+    columns: { orgId: true },
+  });
+  currentUserOrgId = currentUser?.orgId ?? null;
+}
+const isOrgMember = currentUserOrgId === needRow.orgId;
+
 const pledgesWithComputed = pledges.map((p) => {
   const badge = statusBadgeMap[p.status] || statusBadgeMap.pending;
   const label = statusLabelMap[p.status] || "Pending";
@@ -121,25 +136,9 @@ const pledgesWithComputed = pledges.map((p) => {
     });
     return { ...m, timeStr };
   });
-  // Check if current user can message on this pledge
   const canMessage = isOrgMember || (currentUserId && needRow.pledges.find((np) => np.id === p.id)?.donorId === currentUserId);
   return { ...p, badge, label, dateStr, messagesWithDates, canMessage: !!canMessage };
 });
-
-const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
-
-// Check if current user can message on any pledge
-const session = (Astro.locals as any).session;
-const currentUserId = session?.user?.id;
-let currentUserOrgId: string | null = null;
-if (currentUserId) {
-  const currentUser = await db.query.users.findFirst({
-    where: eq(schema.users.id, currentUserId),
-    columns: { orgId: true },
-  });
-  currentUserOrgId = currentUser?.orgId ?? null;
-}
-const isOrgMember = currentUserOrgId === needRow.orgId;
 ---
 
 <Layout title={need.title}>
