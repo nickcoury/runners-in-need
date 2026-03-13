@@ -39,13 +39,15 @@ src/
 
 ## Documentation
 
+- [TODO — Task List](TODO.md) — Prioritized work items
+- [CLAUDE.md](CLAUDE.md) — AI agent context (project state, preferences, setup)
 - [Product Requirements](docs/PRODUCT.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Design System](docs/DESIGN-SYSTEM.md)
 - [Market Research](docs/MARKET-RESEARCH.md)
 - [Legal Analysis](docs/LEGAL.md)
 - [Incident Playbook](docs/INCIDENT-PLAYBOOK.md)
-- [Nick's TODOs](NICK-TODOS.md)
+- [Nick's TODOs](NICK-TODOS.md) — Items needing human decisions
 
 ## Scripts
 
