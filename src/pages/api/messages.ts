@@ -1,3 +1,4 @@
+export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
 import { eq, and } from "drizzle-orm";
