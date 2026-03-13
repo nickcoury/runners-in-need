@@ -17,7 +17,8 @@
 	"env": {
 		"dev": {
 			"name": "runners-in-need-dev",
-			"routes": []
+			"routes": [],
+			"workers_dev": true
 		}
 	}
 }
