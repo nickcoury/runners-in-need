@@ -30,9 +30,21 @@ jobs:
 
       - run: npm run build
 
+      - name: Patch wrangler config for dev (remove production routes)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const cfg = JSON.parse(fs.readFileSync('dist/server/wrangler.json', 'utf8'));
+            cfg.name = 'runners-in-need-dev';
+            cfg.routes = [];
+            cfg.workers_dev = true;
+            delete cfg.env;
+            fs.writeFileSync('dist/server/wrangler.json', JSON.stringify(cfg));
+          "
+
       - name: Deploy to Cloudflare Workers (dev)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config dist/server/wrangler.json --keep-vars --env dev
+          command: deploy --config dist/server/wrangler.json --keep-vars
