@@ -22,6 +22,10 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 
+# playwright
+playwright-report/
+test-results/
+
 # Gas Town (added by gt)
 .runtime/
 .claude/

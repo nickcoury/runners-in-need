@@ -15,6 +15,11 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ['auth:config', 'auth-astro'],
     },
+    resolve: {
+      alias: {
+        'node-domexception': new URL('./src/lib/node-domexception-shim.js', import.meta.url).pathname,
+      },
+    },
   },
 
   adapter: cloudflare()
