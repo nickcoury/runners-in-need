@@ -2,13 +2,14 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
-import { and, lte, inArray } from "drizzle-orm";
+import { and, eq, lte, inArray, isNotNull } from "drizzle-orm";
 import { getEnv } from "../../../lib/env";
 import { createActionToken } from "../../../lib/tokens";
 import { expireOverdueNeeds } from "../../../lib/expire-needs";
 import {
   sendNeedExpiryReminderEmail,
   sendPledgeExpiredEmail,
+  sendFulfillmentReminderEmail,
 } from "../../../lib/email";
 
 export const GET: APIRoute = async ({ request }) => {
@@ -29,6 +30,8 @@ export const GET: APIRoute = async ({ request }) => {
     expiryReminders: 0,
     needsExpired: 0,
     pledgesExpired: 0,
+    fulfillmentReminders: 0,
+    needsAutoFulfilled: 0,
   };
 
   try {
@@ -36,6 +39,7 @@ export const GET: APIRoute = async ({ request }) => {
     await expireOverdueNeeds();
     results.needsExpired = -1; // handled by shared function, count not available
     await expireStalePledges(results);
+    await processFulfillmentReminders(results);
   } catch (err) {
     console.error("[cron/daily] Error:", err);
     return json(500, { error: "Internal error", partial: results });
@@ -143,6 +147,75 @@ async function expireStalePledges(results: { pledgesExpired: number }) {
         pledge.need.title,
         pledge.need.id
       );
+    }
+  }
+}
+
+// ============================================================
+// 3. Fulfillment reminders & auto-close for all-delivered needs
+// ============================================================
+
+async function processFulfillmentReminders(results: {
+  fulfillmentReminders: number;
+  needsAutoFulfilled: number;
+}) {
+  const db = getDb();
+  const now = new Date();
+
+  // Find needs where allDeliveredAt is set and status is still active
+  const candidates = await db.query.needs.findMany({
+    where: and(
+      isNotNull(schema.needs.allDeliveredAt),
+      inArray(schema.needs.status, ["active"])
+    ),
+    with: {
+      organization: {
+        with: {
+          members: true,
+        },
+      },
+    },
+  });
+
+  for (const need of candidates) {
+    if (!need.allDeliveredAt) continue;
+
+    const daysSinceDelivered = Math.floor(
+      (now.getTime() - need.allDeliveredAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceDelivered >= 60) {
+      // Auto-close as fulfilled
+      await db
+        .update(schema.needs)
+        .set({ status: "fulfilled", updatedAt: new Date() })
+        .where(eq(schema.needs.id, need.id));
+      results.needsAutoFulfilled++;
+      continue;
+    }
+
+    // Send reminder on the exact day of each milestone (30, 45, 55 days)
+    if (
+      daysSinceDelivered === 30 ||
+      daysSinceDelivered === 45 ||
+      daysSinceDelivered === 55
+    ) {
+      const daysRemaining = 60 - daysSinceDelivered;
+      const token = await createActionToken(need.id);
+      const orgMembers = need.organization.members;
+
+      for (const member of orgMembers) {
+        if (member.email) {
+          await sendFulfillmentReminderEmail(
+            member.email,
+            need.title,
+            need.id,
+            token,
+            daysRemaining
+          );
+          results.fulfillmentReminders++;
+        }
+      }
     }
   }
 }

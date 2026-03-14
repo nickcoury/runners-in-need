@@ -232,6 +232,47 @@ export async function sendNeedExpiryReminderEmail(
 }
 
 // ============================================================
+// Template: Fulfillment reminder (sent to org members)
+// ============================================================
+
+export async function sendFulfillmentReminderEmail(
+  orgEmail: string,
+  needTitle: string,
+  needId: string,
+  token: string,
+  daysRemaining: number
+): Promise<void> {
+  const siteUrl = getSiteUrl();
+  const fulfilledUrl = `${siteUrl}/api/needs/${needId}/status?action=fulfilled&token=${token}`;
+  const partialUrl = `${siteUrl}/api/needs/${needId}/status?action=partially_fulfilled&token=${token}`;
+  const notFulfilledUrl = `${siteUrl}/api/needs/${needId}/status?action=not_fulfilled&token=${token}`;
+
+  const subject =
+    daysRemaining <= 5
+      ? `Action needed: "${needTitle}" will auto-close in ${daysRemaining} days`
+      : `"${needTitle}" will auto-close as fulfilled in ${daysRemaining} days`;
+
+  const html = emailLayout(
+    "Fulfillment Check",
+    `<p>All pledges for ${needLink(needId, `"${needTitle}"`)} have been marked as delivered.</p>
+     <p>This need will automatically close as <strong>fulfilled</strong> in <strong>${daysRemaining} days</strong>.</p>
+     <p>Please confirm the outcome:</p>
+     <div style="margin-top:24px;">
+       <a href="${fulfilledUrl}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;margin-right:8px;margin-bottom:8px;">Fulfilled</a>
+       <a href="${partialUrl}" style="display:inline-block;background:#B8860B;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;margin-right:8px;margin-bottom:8px;">Partially Fulfilled</a>
+       <a href="${notFulfilledUrl}" style="display:inline-block;background:#8B0000;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;margin-bottom:8px;">Not Fulfilled</a>
+     </div>
+     <p style="margin-top:16px;color:#666;font-size:13px;">
+       <strong>Fulfilled</strong> — Close the need. Everything was received.<br>
+       <strong>Partially Fulfilled</strong> — Close and create a new need for what's still missing.<br>
+       <strong>Not Fulfilled</strong> — Keep the need open and reset delivered pledges.
+     </p>`
+  );
+
+  await sendEmail(orgEmail, subject, html);
+}
+
+// ============================================================
 // Template: Pledge auto-expired notification (sent to donor)
 // ============================================================
 

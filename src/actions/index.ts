@@ -82,10 +82,10 @@ export const server = {
         const allResolved = activePledges.length === 0;
 
         if (allResolved && deliveredPledges.length === allPledges.length) {
-          // Fully fulfilled — all pledges delivered
+          // All pledges delivered — record timestamp, start 60-day fulfillment window
           await db
             .update(schema.needs)
-            .set({ status: "fulfilled", updatedAt: new Date() })
+            .set({ allDeliveredAt: new Date(), updatedAt: new Date() })
             .where(eq(schema.needs.id, pledge.needId));
         } else {
           // Partially fulfilled — generate suggested remaining text
@@ -107,6 +107,18 @@ export const server = {
             })
             .where(eq(schema.needs.id, pledge.needId));
         }
+      }
+
+      // If a pledge was delivered and is now changing away from delivered, clear allDeliveredAt
+      if (
+        pledge.status === "delivered" &&
+        input.status !== "delivered" &&
+        pledge.need.allDeliveredAt
+      ) {
+        await db
+          .update(schema.needs)
+          .set({ allDeliveredAt: null, updatedAt: new Date() })
+          .where(eq(schema.needs.id, pledge.needId));
       }
 
       return { success: true };

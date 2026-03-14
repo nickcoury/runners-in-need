@@ -2,21 +2,23 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../../db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { verifyActionToken } from "../../../../lib/tokens";
+import { createId } from "../../../../lib/id";
 
-const VALID_ACTIONS: Record<string, string> = {
-  keep_open: "active",
-  partially_fulfilled: "partially_fulfilled",
-  fulfilled: "fulfilled",
-};
+const VALID_ACTIONS = new Set([
+  "keep_open",
+  "partially_fulfilled",
+  "fulfilled",
+  "not_fulfilled",
+]);
 
 export const GET: APIRoute = async ({ params, url }) => {
   const needId = params.id!;
   const action = url.searchParams.get("action");
   const token = url.searchParams.get("token");
 
-  if (!action || !token || !VALID_ACTIONS[action]) {
+  if (!action || !token || !VALID_ACTIONS.has(action)) {
     return new Response(page("Invalid Request", "The link you followed is invalid or incomplete."), {
       status: 400,
       headers: { "Content-Type": "text/html" },
@@ -43,22 +45,96 @@ export const GET: APIRoute = async ({ params, url }) => {
     });
   }
 
-  const newStatus = VALID_ACTIONS[action];
-  await db
-    .update(schema.needs)
-    .set({ status: newStatus, updatedAt: new Date() })
-    .where(eq(schema.needs.id, needId));
+  // Handle each action
+  if (action === "fulfilled" || action === "keep_open") {
+    const newStatus = action === "fulfilled" ? "fulfilled" : "active";
+    await db
+      .update(schema.needs)
+      .set({ status: newStatus, updatedAt: new Date() })
+      .where(eq(schema.needs.id, needId));
 
-  const labels: Record<string, string> = {
-    active: "reopened and accepting pledges",
-    partially_fulfilled: "marked as partially fulfilled",
-    fulfilled: "confirmed as fulfilled",
-  };
+    const label =
+      newStatus === "fulfilled"
+        ? "confirmed as fulfilled"
+        : "reopened and accepting pledges";
 
-  return new Response(
-    page("Status Updated", `<strong>"${need.title}"</strong> has been ${labels[newStatus]}.`),
-    { status: 200, headers: { "Content-Type": "text/html" } }
-  );
+    return new Response(
+      page("Status Updated", `<strong>"${need.title}"</strong> has been ${label}.`),
+      { status: 200, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  if (action === "partially_fulfilled") {
+    // Close the original need as fulfilled
+    await db
+      .update(schema.needs)
+      .set({ status: "fulfilled", updatedAt: new Date() })
+      .where(eq(schema.needs.id, needId));
+
+    // Create a new need copying the original, linked via continuedFromId
+    const newNeedId = createId();
+    const newExpiry = new Date();
+    newExpiry.setDate(newExpiry.getDate() + 90);
+
+    await db.insert(schema.needs).values({
+      id: newNeedId,
+      orgId: need.orgId,
+      categoryTag: need.categoryTag,
+      title: need.title,
+      body: need.body,
+      extrasWelcome: need.extrasWelcome,
+      location: need.location,
+      latitude: need.latitude,
+      longitude: need.longitude,
+      status: "active",
+      continuedFromId: needId,
+      expiresAt: newExpiry,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Redirect to the new need's edit page
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `/needs/${newNeedId}/edit` },
+    });
+  }
+
+  if (action === "not_fulfilled") {
+    // Set all delivered pledges back to withdrawn
+    const deliveredPledges = await db.query.pledges.findMany({
+      where: eq(schema.pledges.needId, needId),
+    });
+    const deliveredIds = deliveredPledges
+      .filter((p) => p.status === "delivered")
+      .map((p) => p.id);
+
+    if (deliveredIds.length > 0) {
+      await db
+        .update(schema.pledges)
+        .set({ status: "withdrawn", updatedAt: new Date() })
+        .where(inArray(schema.pledges.id, deliveredIds));
+    }
+
+    // Keep need active, clear allDeliveredAt
+    await db
+      .update(schema.needs)
+      .set({ status: "active", allDeliveredAt: null, updatedAt: new Date() })
+      .where(eq(schema.needs.id, needId));
+
+    return new Response(
+      page(
+        "Need Kept Open",
+        `<strong>"${need.title}"</strong> remains active. ${deliveredIds.length} delivered pledge(s) have been withdrawn.`
+      ),
+      { status: 200, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  return new Response(page("Invalid Request", "Unknown action."), {
+    status: 400,
+    headers: { "Content-Type": "text/html" },
+  });
 };
 
 function page(title: string, message: string): string {

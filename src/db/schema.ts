@@ -111,6 +111,7 @@ export const needs = sqliteTable("needs", {
     .default("active"),
   suggestedText: text("suggested_text"), // LLM-generated remaining need text for organizer review
   continuedFromId: text("continued_from_id").references((): any => needs.id),
+  allDeliveredAt: integer("all_delivered_at", { mode: "timestamp" }),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
