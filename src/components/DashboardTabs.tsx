@@ -34,6 +34,7 @@ interface DashboardTabsProps {
   orgShippingAddress: string;
   orgShippingAttn: string;
   orgShowShippingAddress: boolean;
+  orgPledgeDriveInterest: boolean;
   userId: string;
   userRole: string;
 }
@@ -102,6 +103,7 @@ export default function DashboardTabs({
   orgShippingAddress,
   orgShippingAttn,
   orgShowShippingAddress,
+  orgPledgeDriveInterest,
   userId,
   userRole,
 }: DashboardTabsProps) {
@@ -559,6 +561,48 @@ export default function DashboardTabs({
                 Save Shipping Address
               </button>
             </form>
+          )}
+
+          {userRole === "organizer" && orgId && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Pledge Drive Gear
+              </h3>
+              <p className="text-xs text-gray-500">
+                Opt in to receive gear collected at pledge drives in your area.
+                When a drive is organized nearby, your organization will be eligible
+                to receive donated gear.
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="pledgeDriveInterest"
+                  defaultChecked={orgPledgeDriveInterest}
+                  className="rounded border-gray-300 text-[#2D4A2D] focus:ring-[#2D4A2D]/30"
+                  onChange={async (e) => {
+                    const checked = e.target.checked;
+                    const data = new FormData();
+                    data.set("orgId", orgId);
+                    data.set("pledgeDriveInterest", checked ? "on" : "off");
+                    const res = await fetch("/api/org/pledge-drive-interest", {
+                      method: "POST",
+                      body: data,
+                    });
+                    if (res.ok) {
+                      const label = document.getElementById("pledge-drive-saved");
+                      if (label) {
+                        label.textContent = "Saved!";
+                        setTimeout(() => { label.textContent = ""; }, 2000);
+                      }
+                    }
+                  }}
+                />
+                <label htmlFor="pledgeDriveInterest" className="text-sm text-gray-700">
+                  I'm interested in receiving pledge drive gear
+                </label>
+                <span id="pledge-drive-saved" className="text-xs text-green-600 ml-2"></span>
+              </div>
+            </div>
           )}
 
           <div className="max-w-lg flex gap-3">

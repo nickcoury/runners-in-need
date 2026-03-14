@@ -24,7 +24,7 @@ const allNeeds = needsWithOrg.map((n) => ({
   title: n.title,
   categoryTag: n.categoryTag,
   body: n.body,
-  orgName: n.organization.name,
+  orgName: n.organization?.name ?? "Unknown Organization",
   location: n.location,
   lat: n.latitude,
   lng: n.longitude,

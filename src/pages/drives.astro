@@ -1,0 +1,312 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import { getDb, schema } from '../db';
+import { desc, eq, gte, lt } from 'drizzle-orm';
+
+const session = (Astro.locals as any).session;
+const isSignedIn = !!session?.user?.id;
+const success = Astro.url.searchParams.get('success') === 'true';
+
+const db = getDb();
+const now = new Date();
+
+const allDrives = await db.query.pledgeDrives.findMany({
+  orderBy: [desc(schema.pledgeDrives.eventDate)],
+});
+
+const upcoming = allDrives.filter(
+  (d) => d.eventDate >= now && d.status !== 'cancelled'
+);
+const past = allDrives.filter(
+  (d) => d.eventDate < now || d.status === 'completed' || d.status === 'cancelled'
+);
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+const driveStatusStyles: Record<string, string> = {
+  planned: 'bg-blue-50 text-blue-700 border-blue-200',
+  active: 'bg-green-50 text-green-700 border-green-200',
+  completed: 'bg-gray-100 text-gray-500 border-gray-200',
+  cancelled: 'bg-red-50 text-red-600 border-red-200',
+};
+
+const driveStatusLabels: Record<string, string> = {
+  planned: 'Planned',
+  active: 'Active',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+---
+
+<Layout title="Pledge Drives" description="Organize a pledge drive to collect running gear for those in need. Learn how running groups and clubs can host gear collection events.">
+  <!-- Hero -->
+  <div class="bg-[#2D4A2D] text-white -mx-4 -mt-6 px-4 py-12 mb-8">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-3xl md:text-4xl font-bold mb-4">Pledge Drives</h1>
+      <p class="text-green-100 text-lg mb-6 max-w-2xl mx-auto">
+        A pledge drive is a gear collection event organized by a running group, club, or organization.
+        Collect shoes, apparel, and accessories at your next club run, race, or event &mdash; then distribute
+        the gear to local organizations serving runners in need.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        {isSignedIn ? (
+          <a href="#organize-form" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 transition-colors">
+            Organize a Pledge Drive
+          </a>
+        ) : (
+          <a href="/auth/signin?callbackUrl=/drives" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 transition-colors">
+            Sign In to Organize a Drive
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <!-- Why Pledge Drives -->
+  <div class="max-w-3xl mx-auto mb-12">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Why Organize a Pledge Drive?</h2>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-5">
+        <div class="text-2xl mb-2">&#x1f3c3;</div>
+        <h3 class="font-semibold text-gray-900 mb-1">Higher Volume</h3>
+        <p class="text-sm text-gray-600">
+          Collect more gear at once by leveraging your running community's turnout at events.
+        </p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-5">
+        <div class="text-2xl mb-2">&#x1f91d;</div>
+        <h3 class="font-semibold text-gray-900 mb-1">Community Impact</h3>
+        <p class="text-sm text-gray-600">
+          Rally your club or group around a cause and make a meaningful difference together.
+        </p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-5">
+        <div class="text-2xl mb-2">&#x1f4e6;</div>
+        <h3 class="font-semibold text-gray-900 mb-1">Easy Distribution</h3>
+        <p class="text-sm text-gray-600">
+          Collected gear goes to local organizations that have opted in to receive pledge drive donations.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success message -->
+  {success && (
+    <div class="max-w-3xl mx-auto mb-6">
+      <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-800">
+        Your pledge drive has been submitted! We'll review it and follow up with next steps.
+      </div>
+    </div>
+  )}
+
+  <!-- Upcoming Drives -->
+  <div class="max-w-3xl mx-auto mb-10">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">Upcoming Drives</h2>
+    {upcoming.length === 0 ? (
+      <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400">
+        <p>No upcoming drives yet. Be the first to organize one!</p>
+      </div>
+    ) : (
+      <div class="space-y-4">
+        {upcoming.map((drive) => (
+          <div class="bg-white border border-gray-200 rounded-lg p-5">
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <h3 class="font-semibold text-gray-900">{drive.eventName}</h3>
+                <p class="text-xs text-gray-500">
+                  {drive.groupName} &middot; Organized by {drive.organizerName}
+                </p>
+              </div>
+              <span class:list={[
+                "text-xs font-medium px-2 py-0.5 rounded-full border shrink-0",
+                driveStatusStyles[drive.status] || driveStatusStyles.planned,
+              ]}>
+                {driveStatusLabels[drive.status] || drive.status}
+              </span>
+            </div>
+            <div class="text-sm text-gray-600 mb-2">
+              <span class="font-medium">{formatDate(drive.eventDate)}</span> &middot; {drive.eventLocation}
+              {drive.estimatedAttendees && (
+                <span> &middot; ~{drive.estimatedAttendees} expected attendees</span>
+              )}
+            </div>
+            <p class="text-sm text-gray-600">{drive.description}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <!-- Past Drives -->
+  {past.length > 0 && (
+    <div class="max-w-3xl mx-auto mb-10">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Past Drives</h2>
+      <div class="space-y-4">
+        {past.map((drive) => (
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-5">
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <h3 class="font-medium text-gray-700">{drive.eventName}</h3>
+                <p class="text-xs text-gray-400">
+                  {drive.groupName} &middot; {formatDate(drive.eventDate)} &middot; {drive.eventLocation}
+                </p>
+              </div>
+              <span class:list={[
+                "text-xs font-medium px-2 py-0.5 rounded-full border shrink-0",
+                driveStatusStyles[drive.status] || driveStatusStyles.completed,
+              ]}>
+                {driveStatusLabels[drive.status] || drive.status}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Organize Form (requires auth) -->
+  {isSignedIn && (
+    <div id="organize-form" class="max-w-2xl mx-auto mb-10 scroll-mt-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Organize a Pledge Drive</h2>
+      <form method="POST" action="/api/drives" class="space-y-6 bg-white border border-gray-200 rounded-lg p-6">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label for="organizerName" class="block text-sm font-medium text-gray-700 mb-1">
+              Your Name
+            </label>
+            <input
+              id="organizerName"
+              name="organizerName"
+              type="text"
+              required
+              minlength="2"
+              maxlength="200"
+              value={session.user.name || ''}
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+          <div>
+            <label for="organizerEmail" class="block text-sm font-medium text-gray-700 mb-1">
+              Your Email
+            </label>
+            <input
+              id="organizerEmail"
+              name="organizerEmail"
+              type="email"
+              required
+              value={session.user.email || ''}
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="groupName" class="block text-sm font-medium text-gray-700 mb-1">
+            Organization / Group Name
+          </label>
+          <input
+            id="groupName"
+            name="groupName"
+            type="text"
+            required
+            minlength="2"
+            maxlength="200"
+            placeholder="e.g., Portland Running Club"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+          />
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label for="eventName" class="block text-sm font-medium text-gray-700 mb-1">
+              Event Name
+            </label>
+            <input
+              id="eventName"
+              name="eventName"
+              type="text"
+              required
+              minlength="2"
+              maxlength="200"
+              placeholder="e.g., Spring 5K Gear Drive"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+          <div>
+            <label for="eventDate" class="block text-sm font-medium text-gray-700 mb-1">
+              Event Date
+            </label>
+            <input
+              id="eventDate"
+              name="eventDate"
+              type="date"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label for="eventLocation" class="block text-sm font-medium text-gray-700 mb-1">
+              Event Location
+            </label>
+            <input
+              id="eventLocation"
+              name="eventLocation"
+              type="text"
+              required
+              placeholder="e.g., Riverside Park, Portland, OR"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+          <div>
+            <label for="estimatedAttendees" class="block text-sm font-medium text-gray-700 mb-1">
+              Estimated Attendees <span class="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <input
+              id="estimatedAttendees"
+              name="estimatedAttendees"
+              type="number"
+              min="1"
+              placeholder="e.g., 50"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            required
+            rows="4"
+            minlength="10"
+            maxlength="2000"
+            placeholder="Tell us about the drive — what gear are you collecting? What's the event like? Any details donors should know?"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] text-sm font-medium transition-colors"
+        >
+          Submit Pledge Drive
+        </button>
+      </form>
+    </div>
+  )}
+</Layout>

@@ -52,6 +52,9 @@ export const organizations = sqliteTable("organizations", {
     .notNull()
     .default(false),
   verified: integer("verified", { mode: "boolean" }).notNull().default(false),
+  pledgeDriveInterest: integer("pledge_drive_interest", { mode: "boolean" })
+    .notNull()
+    .default(false),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -197,6 +200,43 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
   sender: one(users, {
     fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================
+// Pledge Drives (gear collection events)
+// ============================================================
+
+export const pledgeDrives = sqliteTable("pledge_drives", {
+  id: text("id").primaryKey(),
+  organizerUserId: text("organizer_user_id")
+    .notNull()
+    .references(() => users.id),
+  organizerName: text("organizer_name").notNull(),
+  organizerEmail: text("organizer_email").notNull(),
+  groupName: text("group_name").notNull(),
+  eventName: text("event_name").notNull(),
+  eventDate: integer("event_date", { mode: "timestamp" }).notNull(),
+  eventLocation: text("event_location").notNull(),
+  estimatedAttendees: integer("estimated_attendees"),
+  description: text("description").notNull(),
+  status: text("status", {
+    enum: ["planned", "active", "completed", "cancelled"],
+  })
+    .notNull()
+    .default("planned"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const pledgeDrivesRelations = relations(pledgeDrives, ({ one }) => ({
+  organizer: one(users, {
+    fields: [pledgeDrives.organizerUserId],
     references: [users.id],
   }),
 }));

@@ -36,7 +36,7 @@ const need = {
   title: needRow.title,
   categoryTag: needRow.categoryTag,
   body: needRow.body,
-  orgName: needRow.organization.name,
+  orgName: needRow.organization?.name ?? "Unknown Organization",
   location: needRow.location,
   extrasWelcome: needRow.extrasWelcome,
   status: needRow.status,
@@ -123,9 +123,9 @@ if (currentUserId) {
 }
 const isOrgMember = currentUserOrgId === needRow.orgId;
 
-const showShipping = needRow.organization.showShippingAddress && !!needRow.organization.shippingAddress;
-const shippingAddress = needRow.organization.shippingAddress || "";
-const shippingAttn = needRow.organization.shippingAttn || "";
+const showShipping = needRow.organization?.showShippingAddress && !!needRow.organization?.shippingAddress;
+const shippingAddress = needRow.organization?.shippingAddress || "";
+const shippingAttn = needRow.organization?.shippingAttn || "";
 
 const pledgesWithComputed = pledges.map((p) => {
   const badge = statusBadgeMap[p.status] || statusBadgeMap.pending;

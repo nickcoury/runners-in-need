@@ -132,8 +132,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Public endpoints that benefit from session but don't require it
-  if (pathname === "/api/pledges") {
+  // Public endpoints/pages that benefit from session but don't require it
+  if (pathname === "/api/pledges" || pathname === "/drives") {
     const session = await getSession(context.request);
     if (session?.user) {
       (context.locals as any).session = session;

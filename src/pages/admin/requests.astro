@@ -37,6 +37,10 @@ const reviewed = requestsWithUsers.filter((r) => r.status !== 'pending');
   <h1 class="text-3xl font-bold mb-2">Organizer Requests</h1>
   <p class="text-gray-500 text-sm mb-6">Review and approve organizations requesting to post needs.</p>
 
+  <div class="mb-6 text-sm">
+    <a href="/admin/drives" class="text-[#2D4A2D] hover:underline">View Pledge Drives &rarr;</a>
+  </div>
+
   {pending.length === 0 ? (
     <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400 mb-8">
       <p>No pending requests.</p>

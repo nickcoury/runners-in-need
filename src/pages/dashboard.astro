@@ -30,6 +30,7 @@ const orgId = user?.orgId || '';
 const orgShippingAddress = user?.organization?.shippingAddress || '';
 const orgShippingAttn = user?.organization?.shippingAttn || '';
 const orgShowShippingAddress = user?.organization?.showShippingAddress || false;
+const orgPledgeDriveInterest = user?.organization?.pledgeDriveInterest || false;
 
 let needs: Array<{
   id: string;
@@ -126,6 +127,7 @@ if (userRole === 'organizer' && user?.orgId) {
     orgShippingAddress={orgShippingAddress}
     orgShippingAttn={orgShippingAttn}
     orgShowShippingAddress={orgShowShippingAddress}
+    orgPledgeDriveInterest={orgPledgeDriveInterest}
     userId={userId}
     userRole={userRole}
   />
