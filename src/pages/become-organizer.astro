@@ -10,6 +10,7 @@ const isSignedIn = !!session?.user?.id;
 
 let existingRequest = null;
 let isAlreadyOrganizer = false;
+let reapplyDate: string | null = null;
 
 if (isSignedIn) {
   const db = getDb();
@@ -23,7 +24,22 @@ if (isSignedIn) {
     const request = await db.query.organizerRequests.findFirst({
       where: eq(schema.organizerRequests.userId, session.user.id),
     });
-    existingRequest = request ?? null;
+
+    if (request?.status === 'denied' && request.reviewedAt) {
+      const twelveMonthsLater = new Date(request.reviewedAt);
+      twelveMonthsLater.setMonth(twelveMonthsLater.getMonth() + 12);
+
+      if (new Date() >= twelveMonthsLater) {
+        // Cooldown expired — delete old request so they can reapply
+        await db.delete(schema.organizerRequests).where(eq(schema.organizerRequests.id, request.id));
+        // existingRequest stays null → form will show
+      } else {
+        existingRequest = request;
+        reapplyDate = twelveMonthsLater.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+    } else {
+      existingRequest = request ?? null;
+    }
   }
 }
 ---
@@ -58,7 +74,7 @@ if (isSignedIn) {
           <p>Your request has been approved! Visit your <a href="/dashboard" class="underline font-medium">dashboard</a> to get started.</p>
         )}
         {existingRequest.status === 'denied' && (
-          <p>Your request was not approved. Please <a href="/contact" class="underline font-medium">contact us</a> if you have questions.</p>
+          <p>Your request was not approved. {reapplyDate ? `You may reapply after ${reapplyDate}.` : ''} Please <a href="/contact" class="underline font-medium">contact us</a> if you have questions.</p>
         )}
       </div>
     ) : (
