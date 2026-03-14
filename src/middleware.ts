@@ -82,7 +82,7 @@ function addSecurityHeaders(response: Response): Response {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
-  // CSP only in production — Vite dev server uses inline scripts
+  // CSP and HSTS only in production — Vite dev server uses inline scripts
   if (import.meta.env.PROD) {
     response.headers.set(
       "Content-Security-Policy",
@@ -95,6 +95,10 @@ function addSecurityHeaders(response: Response): Response {
         "connect-src 'self' https://challenges.cloudflare.com https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org",
         "frame-src https://challenges.cloudflare.com",
       ].join("; ")
+    );
+    response.headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains"
     );
   }
   return response;

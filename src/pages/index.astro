@@ -17,7 +17,7 @@ const db = getDb();
 const needsWithOrg = await db.query.needs.findMany({
   where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),
   with: {
-    organization: true,
+    organization: { columns: { name: true } },
     pledges: { columns: { id: true } },
   },
   orderBy: [desc(schema.needs.createdAt)],
