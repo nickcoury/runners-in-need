@@ -6,7 +6,6 @@ import NeedCard from '../components/NeedCard.astro';
 import MapView from '../components/MapView';
 import { getDb, schema } from '../db';
 import { inArray, desc } from 'drizzle-orm';
-import { expireOverdueNeeds } from '../lib/expire-needs';
 
 // Extract approximate user location from Cloudflare geolocation headers
 const cfLat = Astro.request.headers.get('cf-iplatitude');
@@ -14,7 +13,6 @@ const cfLng = Astro.request.headers.get('cf-iplongitude');
 const userLat = cfLat ? parseFloat(cfLat) : null;
 const userLng = cfLng ? parseFloat(cfLng) : null;
 
-await expireOverdueNeeds();
 const db = getDb();
 const needsWithOrg = await db.query.needs.findMany({
   where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),

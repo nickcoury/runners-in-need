@@ -4,5 +4,6 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /dashboard
 Disallow: /auth/
+Disallow: /profile
 
 Sitemap: https://runnersinneed.com/sitemap.xml

@@ -3,7 +3,7 @@ import { and, inArray, lte } from "drizzle-orm";
 
 /**
  * Expire needs that have passed their expiresAt date.
- * Called lazily on page loads — lightweight query, no harm if called often.
+ * Called by the daily cron job (/api/cron/daily).
  */
 export async function expireOverdueNeeds() {
   try {
