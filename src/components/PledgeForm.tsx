@@ -32,16 +32,16 @@ export default function PledgeForm({
     }
     // Render widget
     const render = () => {
-      if ((window as any).turnstile && turnstileRef.current) {
-        (window as any).turnstile.render(turnstileRef.current, {
+      if (window.turnstile && turnstileRef.current) {
+        window.turnstile.render(turnstileRef.current, {
           sitekey: turnstileSiteKey,
           callback: (token: string) => setTurnstileToken(token),
         });
       }
     };
-    (window as any).onTurnstileLoad = render;
+    window.onTurnstileLoad = render;
     // If script already loaded
-    if ((window as any).turnstile) render();
+    if (window.turnstile) render();
   }, [turnstileSiteKey]);
 
   if (submitted) {

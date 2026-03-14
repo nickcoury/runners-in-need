@@ -22,11 +22,11 @@ function getClient() {
       return globalThis.fetch(input, init);
     }
     // cross-fetch Request object — extract URL and options
-    const req = input as any;
-    return globalThis.fetch(req.url ?? String(req), init ?? {
-      method: req.method,
-      headers: req.headers,
-      body: req.body ?? req._bodyInit,
+    const req = input as Record<string, unknown>;
+    return globalThis.fetch(String(req.url ?? req), init ?? {
+      method: req.method as string,
+      headers: req.headers as HeadersInit,
+      body: (req.body ?? req._bodyInit) as BodyInit,
     });
   };
 

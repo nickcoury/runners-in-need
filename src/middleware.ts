@@ -172,6 +172,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const session = await getSession(context.request);
 
   if (!session?.user) {
+    // API routes get a 401 JSON response instead of a redirect
+    if (pathname.startsWith("/api/")) {
+      return addSecurityHeaders(new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }));
+    }
     const callbackUrl = encodeURIComponent(context.url.pathname);
     return addSecurityHeaders(context.redirect(`/auth/signin?callbackUrl=${callbackUrl}`));
   }
