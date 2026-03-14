@@ -78,6 +78,17 @@ These are broken features that affect core user journeys.
   - Let user refine with search/filter from there
   - Consider: IP geolocation on server side (Cloudflare `cf-ipcountry` / `cf-connecting-ip` + GeoIP), browser geolocation on client side with permission prompt
 
+- [ ] **Full codebase audit and quality pass (3+ hours)**
+  - Research best practices for AI-assisted code audits first
+  - Architecture review: identify duplication, unnecessary complexity, dead code
+  - Performance: N+1 queries, unnecessary re-renders, bundle size, lazy loading
+  - Code quality: consistent patterns, error handling, type safety
+  - UI/UX: minor polish, accessibility, responsive issues
+  - Tests: fix brittle tests, add coverage for gaps, improve test infrastructure
+  - Record start time programmatically, spend minimum 3 hours
+  - Commit and push in small logical blocks throughout
+  - Do this LAST — after all other TODOs are complete
+
 ---
 
 ## Testing
