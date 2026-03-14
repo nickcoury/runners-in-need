@@ -1,28 +1,17 @@
 export const prerender = false;
 import type { APIRoute } from "astro";
-import { getDb, schema } from "../../db";
+import { schema } from "../../db";
 import { eq } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sanitize } from "../../lib/html";
-import { jsonError } from "../../lib/api";
+import { jsonError, requireOrganizer } from "../../lib/api";
 
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
-  const session = locals.session;
-  if (!session?.user?.id) {
-    return jsonError("Unauthorized", 401);
-  }
-
-  const db = getDb();
-
-  // Verify user is an organizer with an org
-  const user = await db.query.users.findFirst({
-    where: eq(schema.users.id, session.user.id),
-  });
-  if (!user || user.role !== "organizer" || !user.orgId) {
-    return jsonError("Only organizers can post needs", 403);
-  }
+  const auth = await requireOrganizer(locals);
+  if ("error" in auth) return auth.error;
+  const { user, db } = auth;
 
   const form = await request.formData();
   const orgId = form.get("orgId") as string;

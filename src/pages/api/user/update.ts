@@ -3,13 +3,11 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { sanitize } from "../../../lib/html";
-import { jsonError } from "../../../lib/api";
+import { jsonError, requireAuth } from "../../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const session = locals.session;
-  if (!session?.user?.id) {
-    return jsonError("Unauthorized", 401);
-  }
+  const session = requireAuth(locals);
+  if (!session) return jsonError("Unauthorized", 401);
 
   const form = await request.formData();
   const name = (form.get("name") as string)?.trim();

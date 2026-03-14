@@ -5,13 +5,11 @@ import { eq, and } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sendMessageNotificationEmail } from "../../lib/email";
 import { sanitize } from "../../lib/html";
-import { jsonError } from "../../lib/api";
+import { jsonError, requireAuth } from "../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
-  const session = locals.session;
-  if (!session?.user?.id) {
-    return jsonError("Unauthorized", 401);
-  }
+  const session = requireAuth(locals);
+  if (!session) return jsonError("Unauthorized", 401);
 
   const form = await request.formData();
   const pledgeId = form.get("pledgeId") as string;
