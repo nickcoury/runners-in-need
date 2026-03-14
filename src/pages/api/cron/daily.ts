@@ -34,14 +34,38 @@ export const GET: APIRoute = async ({ request }) => {
     needsAutoFulfilled: 0,
   };
 
+  const errors: string[] = [];
+
   try {
     await sendExpiryReminders(results);
+  } catch (err) {
+    console.error("[cron/daily] sendExpiryReminders failed:", err);
+    errors.push("expiryReminders");
+  }
+
+  try {
     results.needsExpired = await expireOverdueNeeds();
+  } catch (err) {
+    console.error("[cron/daily] expireOverdueNeeds failed:", err);
+    errors.push("needsExpired");
+  }
+
+  try {
     await expireStalePledges(results);
+  } catch (err) {
+    console.error("[cron/daily] expireStalePledges failed:", err);
+    errors.push("stalePledges");
+  }
+
+  try {
     await processFulfillmentReminders(results);
   } catch (err) {
-    console.error("[cron/daily] Error:", err);
-    return json(500, { error: "Internal error", partial: results });
+    console.error("[cron/daily] processFulfillmentReminders failed:", err);
+    errors.push("fulfillmentReminders");
+  }
+
+  if (errors.length > 0) {
+    return json(207, { ok: false, errors, ...results });
   }
 
   return json(200, { ok: true, ...results });
