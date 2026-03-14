@@ -68,6 +68,10 @@ test.describe("API Endpoint Behavior", () => {
     expect(body).toHaveProperty("error");
   });
 
+  // Note: POST /api/pledges with valid fields but nonexistent needId cannot be
+  // tested without a Turnstile token — the request is rejected before reaching
+  // the need-exists check. Server-side validation is verified by code review.
+
   test("POST /api/messages without auth returns 401", async ({ request }) => {
     const response = await request.post("/api/messages", {
       headers: { Origin: BASE_URL },

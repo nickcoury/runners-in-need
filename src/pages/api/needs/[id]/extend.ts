@@ -13,14 +13,15 @@ export const GET: APIRoute = async ({ params, url }) => {
   const token = url.searchParams.get("token");
 
   if (!token) {
-    return htmlPage("Invalid Request", "The link you followed is missing a token.");
+    return htmlPage("Invalid Request", "The link you followed is missing a token.", 400);
   }
 
   const valid = await verifyActionToken(needId, token);
   if (!valid) {
     return htmlPage(
       "Invalid Token",
-      "This link has expired or is invalid. Please log in to your dashboard to manage the need."
+      "This link has expired or is invalid. Please log in to your dashboard to manage the need.",
+      403
     );
   }
 
@@ -30,7 +31,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   });
 
   if (!need) {
-    return htmlPage("Not Found", "This need no longer exists.");
+    return htmlPage("Not Found", "This need no longer exists.", 404);
   }
 
   // Extend from the later of: current expiresAt or now
@@ -59,11 +60,12 @@ export const GET: APIRoute = async ({ params, url }) => {
 
   return htmlPage(
     "Need Extended",
-    `<strong>"${escapeHtml(need.title)}"</strong> has been extended and now expires on <strong>${formattedDate}</strong>.`
+    `<strong>"${escapeHtml(need.title)}"</strong> has been extended and now expires on <strong>${formattedDate}</strong>.`,
+    200
   );
 };
 
-function htmlPage(title: string, message: string): Response {
+function htmlPage(title: string, message: string, status: number): Response {
   const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><title>${title} — Runners In Need</title>
@@ -78,7 +80,7 @@ a.btn{display:inline-block;background:#2D4A2D;color:#fff;padding:10px 20px;borde
 </html>`;
 
   return new Response(html, {
-    status: title === "Need Extended" ? 200 : 400,
+    status,
     headers: { "Content-Type": "text/html" },
   });
 }

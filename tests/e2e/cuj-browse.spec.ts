@@ -211,7 +211,13 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     }
   });
 
-  test('"Near me" location button exists', async ({ page }) => {
+  test('"Near me" location button exists and is functional without geolocation', async ({
+    page,
+    context,
+  }) => {
+    // Deny geolocation so the test doesn't depend on it being available
+    await context.clearPermissions();
+
     await page.goto("/");
     const locationBtn = page.locator("#location-btn");
     await expect(locationBtn).toBeVisible();
@@ -224,6 +230,9 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     const btnText = page.locator("#location-btn-text");
     expect(await btnText.count()).toBe(1);
     await expect(btnText).toHaveText("Near me");
+
+    // Button should be enabled and clickable even without geolocation permission
+    await expect(locationBtn).toBeEnabled();
   });
 
   test("/browse redirects to /", async ({ page }) => {

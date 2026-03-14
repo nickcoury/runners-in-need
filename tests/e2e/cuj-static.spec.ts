@@ -144,6 +144,17 @@ test.describe("Static Pages", () => {
     expect(title).toContain("Runners In Need");
   });
 
+  test("/become-organizer page renders with proper title", async ({ page }) => {
+    const response = await page.goto("/become-organizer");
+    expect(response?.status()).toBe(200);
+
+    const title = await page.title();
+    expect(title).toContain("Become an Organizer");
+    expect(title).toContain("Runners In Need");
+
+    await expect(page.locator("h1").first()).toBeVisible();
+  });
+
   test("all static pages have proper page titles", async ({ page }) => {
     const pages = [
       { path: "/about", expected: "About" },
