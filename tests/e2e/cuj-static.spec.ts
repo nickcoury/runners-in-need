@@ -135,6 +135,15 @@ test.describe("Static Pages", () => {
     expect(new Date(body.timestamp).toISOString()).toBe(body.timestamp);
   });
 
+  test("/drives page loads with correct title", async ({ page }) => {
+    const response = await page.goto("/drives");
+    expect(response?.status()).toBe(200);
+
+    const title = await page.title();
+    expect(title).toContain("Pledge Drives");
+    expect(title).toContain("Runners In Need");
+  });
+
   test("all static pages have proper page titles", async ({ page }) => {
     const pages = [
       { path: "/about", expected: "About" },

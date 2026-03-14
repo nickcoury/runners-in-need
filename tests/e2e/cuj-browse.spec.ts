@@ -211,6 +211,21 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     }
   });
 
+  test('"Near me" location button exists', async ({ page }) => {
+    await page.goto("/");
+    const locationBtn = page.locator("#location-btn");
+    await expect(locationBtn).toBeVisible();
+    await expect(locationBtn).toHaveAttribute(
+      "aria-label",
+      "Sort by distance to your location"
+    );
+
+    // The text label is hidden on small screens but present in DOM
+    const btnText = page.locator("#location-btn-text");
+    expect(await btnText.count()).toBe(1);
+    await expect(btnText).toHaveText("Near me");
+  });
+
   test("/browse redirects to /", async ({ page }) => {
     const response = await page.goto("/browse");
     // After redirect, should be on the home page
