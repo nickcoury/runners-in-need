@@ -34,7 +34,7 @@ const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 6
   </div>
 
   {/* Title */}
-  <a href={`/needs/${id}`} class="font-semibold text-gray-900 hover:text-[#2D4A2D] mb-1 line-clamp-2">
+  <a href={`/needs/${id}`} class="font-semibold text-gray-900 hover:text-[#2D4A2D] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:rounded mb-1 line-clamp-2">
     {title}
   </a>
 
@@ -55,7 +55,7 @@ const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 6
   {/* Action button */}
   <a
     href={`/needs/${id}`}
-    class="block text-center bg-[#2D4A2D] text-white text-sm font-medium py-2 rounded-lg hover:bg-[#1F361F] transition-colors"
+    class="block text-center bg-[#2D4A2D] text-white text-sm font-medium py-2 rounded-lg hover:bg-[#1F361F] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 transition-colors"
   >
     MATCH NEED
   </a>
