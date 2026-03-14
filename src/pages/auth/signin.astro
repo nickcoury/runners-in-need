@@ -28,7 +28,8 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
         />
         <button
           type="submit"
-          class="w-full bg-green-700 text-white py-2 rounded-lg hover:bg-green-800 text-sm"
+          disabled
+          class="signin-submit w-full bg-green-700 text-white py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send magic link
         </button>
@@ -49,7 +50,8 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <button
           type="submit"
-          class="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 text-sm flex items-center justify-center gap-2"
+          disabled
+          class="signin-submit w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -74,6 +76,8 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
       .then(data => {
         document.querySelectorAll<HTMLInputElement>('.signin-form input[name="csrfToken"]')
           .forEach(input => { input.value = data.csrfToken; });
+        document.querySelectorAll<HTMLButtonElement>('.signin-submit')
+          .forEach(btn => { btn.disabled = false; });
       });
   </script>
 </Layout>

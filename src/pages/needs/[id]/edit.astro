@@ -4,6 +4,7 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import { getDb, schema } from '../../../db';
 import { eq } from 'drizzle-orm';
+import { categoryLabels } from '../../../lib/constants';
 
 // Auth check
 const session = Astro.locals.session;
@@ -73,10 +74,9 @@ const expiresInDays = closestExpiry(daysLeft);
           name="categoryTag"
           class="border rounded-lg px-3 py-2 text-sm"
         >
-          <option value="shoes" selected={need.categoryTag === 'shoes'}>Shoes</option>
-          <option value="apparel" selected={need.categoryTag === 'apparel'}>Apparel</option>
-          <option value="accessories" selected={need.categoryTag === 'accessories'}>Accessories</option>
-          <option value="other" selected={need.categoryTag === 'other'}>Other</option>
+          {Object.entries(categoryLabels).map(([value, label]) => (
+            <option value={value} selected={need.categoryTag === value}>{label}</option>
+          ))}
         </select>
       </div>
 

@@ -274,14 +274,22 @@ const pledgesWithComputed = pledges.map((p) => {
 
     {/* Pledge form */}
     <div class="mb-8">
-      <h2 class="text-lg font-bold text-gray-900 mb-4">Make a Pledge</h2>
-      <PledgeForm
-        client:load
-        needId={need.id}
-        turnstileSiteKey={getEnv("TURNSTILE_SITE_KEY")}
-        userEmail={session?.user?.email || undefined}
-        userName={session?.user?.name || undefined}
-      />
+      {(need.status === "active" || need.status === "partially_fulfilled") ? (
+        <>
+          <h2 class="text-lg font-bold text-gray-900 mb-4">Make a Pledge</h2>
+          <PledgeForm
+            client:load
+            needId={need.id}
+            turnstileSiteKey={getEnv("TURNSTILE_SITE_KEY")}
+            userEmail={session?.user?.email || undefined}
+            userName={session?.user?.name || undefined}
+          />
+        </>
+      ) : (
+        <div class="border border-gray-200 rounded-lg p-6 text-center text-gray-500 text-sm">
+          This need is no longer accepting pledges.
+        </div>
+      )}
     </div>
   </div>
 </Layout>
