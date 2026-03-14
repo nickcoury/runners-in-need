@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const pledgeId = form.get("pledgeId") as string;
   const body = (form.get("body") as string)?.trim();
 
-  if (!pledgeId || !body || body.length < 1 || body.length > 2000) {
+  if (!pledgeId || !body || body.length < 1 || body.length > 5000) {
     return jsonError("Invalid input", 400);
   }
 

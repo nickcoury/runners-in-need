@@ -40,9 +40,16 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     return jsonError("Description must be 10-2000 characters", 400);
   }
 
+  if (eventLocation.length < 2 || eventLocation.length > 500) {
+    return jsonError("Event location must be 2-500 characters", 400);
+  }
+
   const eventDate = new Date(eventDateStr);
   if (isNaN(eventDate.getTime())) {
     return jsonError("Invalid event date", 400);
+  }
+  if (eventDate.getTime() <= Date.now()) {
+    return jsonError("Event date must be in the future", 400);
   }
 
   const estimatedAttendees = estimatedAttendeesStr ? parseInt(estimatedAttendeesStr, 10) : null;

@@ -8,7 +8,7 @@
 
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import { nanoid } from "nanoid";
+import { createId } from "../lib/id.ts";
 import * as schema from "./schema.ts";
 
 const client = createClient({
@@ -30,6 +30,7 @@ async function seed() {
   console.log("Clearing existing data...");
   await db.delete(schema.messages);
   await db.delete(schema.pledges);
+  await db.delete(schema.pledgeDrives);
   await db.delete(schema.organizerRequests);
   await db.delete(schema.needs);
   await db.delete(schema.users);
@@ -38,7 +39,7 @@ async function seed() {
   console.log("Seeding organizations...");
   const orgs = [
     {
-      id: nanoid(),
+      id: createId(),
       name: "Portland Running Project",
       description: "Providing running gear and coaching to houseless individuals in Portland. We believe running is for everyone.",
       location: "Portland, OR",
@@ -50,7 +51,7 @@ async function seed() {
       verified: true,
     },
     {
-      id: nanoid(),
+      id: createId(),
       name: "Back on My Feet Chicago",
       description: "Combat homelessness through the power of running. Our members train together 3x/week and work toward employment goals.",
       location: "Chicago, IL",
@@ -62,7 +63,7 @@ async function seed() {
       verified: true,
     },
     {
-      id: nanoid(),
+      id: createId(),
       name: "Soles4Souls Running",
       description: "Getting shoes on feet that need them. We distribute donated running shoes to youth programs across Appalachia.",
       location: "Nashville, TN",
@@ -72,7 +73,7 @@ async function seed() {
       showShippingAddress: false,
     },
     {
-      id: nanoid(),
+      id: createId(),
       name: "Girls on the Run Austin",
       description: "Inspiring girls to be joyful, healthy and confident through running. Many participants can't afford proper running shoes.",
       location: "Austin, TX",
@@ -84,7 +85,7 @@ async function seed() {
       verified: true,
     },
     {
-      id: nanoid(),
+      id: createId(),
       name: "Refugee Runners Boston",
       description: "Helping refugee families find community through running. Many arrive with only the clothes on their backs.",
       location: "Boston, MA",
@@ -98,15 +99,15 @@ async function seed() {
 
   console.log("Seeding users...");
   const users = [
-    { id: nanoid(), email: "admin@runnersinneed.com", name: "Site Admin", role: "admin" as const },
-    { id: nanoid(), email: "coach.martinez@portland.org", name: "Coach Martinez", role: "organizer" as const, orgId: orgs[0].id },
-    { id: nanoid(), email: "sarah@backonmyfeet.org", name: "Sarah Chen", role: "organizer" as const, orgId: orgs[1].id },
-    { id: nanoid(), email: "mike@soles4souls.org", name: "Mike Johnson", role: "organizer" as const, orgId: orgs[2].id },
-    { id: nanoid(), email: "lisa@gotraustin.org", name: "Lisa Park", role: "organizer" as const, orgId: orgs[3].id },
-    { id: nanoid(), email: "ahmed@refugeerunners.org", name: "Ahmed Hassan", role: "organizer" as const, orgId: orgs[4].id },
-    { id: nanoid(), email: "runner42@gmail.com", name: "Jamie Thompson", role: "donor" as const },
-    { id: nanoid(), email: "marathonmom@yahoo.com", name: "Rachel Green", role: "donor" as const },
-    { id: nanoid(), email: "ultrarunner@outlook.com", name: "David Kim", role: "donor" as const },
+    { id: createId(), email: "admin@runnersinneed.com", name: "Site Admin", role: "admin" as const },
+    { id: createId(), email: "coach.martinez@portland.org", name: "Coach Martinez", role: "organizer" as const, orgId: orgs[0].id },
+    { id: createId(), email: "sarah@backonmyfeet.org", name: "Sarah Chen", role: "organizer" as const, orgId: orgs[1].id },
+    { id: createId(), email: "mike@soles4souls.org", name: "Mike Johnson", role: "organizer" as const, orgId: orgs[2].id },
+    { id: createId(), email: "lisa@gotraustin.org", name: "Lisa Park", role: "organizer" as const, orgId: orgs[3].id },
+    { id: createId(), email: "ahmed@refugeerunners.org", name: "Ahmed Hassan", role: "organizer" as const, orgId: orgs[4].id },
+    { id: createId(), email: "runner42@gmail.com", name: "Jamie Thompson", role: "donor" as const },
+    { id: createId(), email: "marathonmom@yahoo.com", name: "Rachel Green", role: "donor" as const },
+    { id: createId(), email: "ultrarunner@outlook.com", name: "David Kim", role: "donor" as const },
   ];
   await db.insert(schema.users).values(users);
 
@@ -114,7 +115,7 @@ async function seed() {
   const needsList = [
     // Portland Running Project
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[0].id,
       categoryTag: "shoes" as const,
       title: "Men's running shoes, sizes 9-12",
@@ -129,7 +130,7 @@ async function seed() {
       updatedAt: daysAgo(15),
     },
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[0].id,
       categoryTag: "apparel" as const,
       title: "Rain jackets and waterproof layers",
@@ -145,7 +146,7 @@ async function seed() {
     },
     // Back on My Feet Chicago
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[1].id,
       categoryTag: "shoes" as const,
       title: "Women's running shoes, any size",
@@ -160,7 +161,7 @@ async function seed() {
       updatedAt: daysAgo(3),
     },
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[1].id,
       categoryTag: "apparel" as const,
       title: "Cold weather running gear for Chicago winter",
@@ -176,7 +177,7 @@ async function seed() {
     },
     // Soles4Souls
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[2].id,
       categoryTag: "shoes" as const,
       title: "Youth running shoes (kids sizes 3-7)",
@@ -192,7 +193,7 @@ async function seed() {
     },
     // Girls on the Run Austin
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[3].id,
       categoryTag: "accessories" as const,
       title: "Water bottles and running belts",
@@ -207,7 +208,7 @@ async function seed() {
       updatedAt: daysAgo(10),
     },
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[3].id,
       categoryTag: "apparel" as const,
       title: "Girls' athletic shorts and tops (youth M/L)",
@@ -223,7 +224,7 @@ async function seed() {
     },
     // Refugee Runners Boston
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[4].id,
       categoryTag: "shoes" as const,
       title: "Family running shoes — all sizes needed",
@@ -239,7 +240,7 @@ async function seed() {
     },
     // Fulfilled need (for testing different states)
     {
-      id: nanoid(),
+      id: createId(),
       orgId: orgs[0].id,
       categoryTag: "other" as const,
       title: "Foam rollers and recovery tools",
@@ -259,7 +260,7 @@ async function seed() {
   console.log("Seeding pledges...");
   const pledgesList = [
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[0].id,
       donorId: users[6].id,
       donorEmail: users[6].email,
@@ -270,7 +271,7 @@ async function seed() {
       updatedAt: daysAgo(10),
     },
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[0].id,
       donorId: users[8].id,
       donorEmail: users[8].email,
@@ -281,7 +282,7 @@ async function seed() {
       updatedAt: daysAgo(5),
     },
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[2].id,
       donorId: users[7].id,
       donorEmail: users[7].email,
@@ -292,7 +293,7 @@ async function seed() {
       updatedAt: daysAgo(2),
     },
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[3].id,
       donorEmail: "anonymous@example.com",
       donorName: "Anonymous Runner",
@@ -302,7 +303,7 @@ async function seed() {
       updatedAt: daysAgo(15),
     },
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[4].id,
       donorId: users[6].id,
       donorEmail: users[6].email,
@@ -313,7 +314,7 @@ async function seed() {
       updatedAt: daysAgo(14),
     },
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[7].id,
       donorId: users[8].id,
       donorEmail: users[8].email,
@@ -325,7 +326,7 @@ async function seed() {
     },
     // Fulfilled need pledge
     {
-      id: nanoid(),
+      id: createId(),
       needId: needsList[8].id,
       donorId: users[7].id,
       donorEmail: users[7].email,
@@ -341,35 +342,35 @@ async function seed() {
   console.log("Seeding messages...");
   await db.insert(schema.messages).values([
     {
-      id: nanoid(),
+      id: createId(),
       pledgeId: pledgesList[0].id,
       senderId: users[6].id,
       body: "Hi! I have the shoes packed up and ready to go. What's the best shipping address?",
       createdAt: daysAgo(11),
     },
     {
-      id: nanoid(),
+      id: createId(),
       pledgeId: pledgesList[0].id,
       senderId: users[1].id,
       body: "That's amazing, thank you! You can ship to 123 SE Hawthorne Blvd, Portland, OR 97214 — Attn: Coach Martinez. Our runners will be so grateful!",
       createdAt: daysAgo(10),
     },
     {
-      id: nanoid(),
+      id: createId(),
       pledgeId: pledgesList[0].id,
       senderId: users[6].id,
       body: "Shipped! Tracking number is 1Z999AA10123456784. Should arrive Thursday.",
       createdAt: daysAgo(10),
     },
     {
-      id: nanoid(),
+      id: createId(),
       pledgeId: pledgesList[2].id,
       senderId: users[7].id,
       body: "Are these sizes helpful or do you need different ones?",
       createdAt: daysAgo(1),
     },
     {
-      id: nanoid(),
+      id: createId(),
       pledgeId: pledgesList[2].id,
       senderId: users[2].id,
       body: "8.5 and 9 are perfect! We have two new members who are exactly those sizes. Thank you so much!",
@@ -380,7 +381,7 @@ async function seed() {
   console.log("Seeding organizer requests...");
   await db.insert(schema.organizerRequests).values([
     {
-      id: nanoid(),
+      id: createId(),
       userId: users[5].id,
       orgName: "Refugee Runners Boston",
       orgDescription: "Helping refugee families find community through running. We meet 3x/week for group runs and provide coaching.",
