@@ -13,7 +13,7 @@ export const POST: APIRoute = async (context) => {
 };
 
 export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
-  const session = (locals as any).session;
+  const session = locals.session;
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -82,7 +82,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
 };
 
 export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
-  const session = (locals as any).session;
+  const session = locals.session;
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }

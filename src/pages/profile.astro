@@ -5,14 +5,14 @@ import Layout from '../layouts/Layout.astro';
 import { getDb, schema } from '../db';
 import { eq } from 'drizzle-orm';
 
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 if (!session?.user) {
   return Astro.redirect('/auth/signin?callbackUrl=/profile');
 }
 
 const db = getDb();
 const userId = session.user.id!;
-const userRole = (session.user as any).role || 'donor';
+const userRole = session.user.role || 'donor';
 
 const user = await db.query.users.findFirst({
   where: eq(schema.users.id, userId),

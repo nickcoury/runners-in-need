@@ -136,7 +136,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (pathname === "/api/pledges" || pathname === "/drives") {
     const session = await getSession(context.request);
     if (session?.user) {
-      (context.locals as any).session = session;
+      context.locals.session = session;
     }
     return next();
   }
@@ -153,14 +153,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (isAdminRoute(pathname)) {
-    const role = (session.user as any).role;
+    const role = session.user.role;
     if (role !== "admin") {
       return new Response("Forbidden", { status: 403 });
     }
   }
 
   // Store session on locals for downstream use
-  (context.locals as any).session = session;
+  context.locals.session = session;
 
   return next();
 });

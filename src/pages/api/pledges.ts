@@ -87,7 +87,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const session = (locals as any).session;
+  const session = locals.session;
   const donorId = session?.user?.id ?? null;
 
   const pledge = {

@@ -1,4 +1,6 @@
 ---
+import { categoryStyles, categoryLabels } from "../lib/constants";
+
 interface Props {
   id: string;
   title: string;
@@ -15,20 +17,6 @@ interface Props {
 }
 
 const { id, title, categoryTag, body, orgName, location, lat, lng, extrasWelcome, status, expiresAt, pledgeCount = 0 } = Astro.props;
-
-const categoryStyles: Record<string, string> = {
-  shoes: "bg-[#2D4A2D] text-white",
-  apparel: "bg-blue-600 text-white",
-  accessories: "bg-amber-600 text-white",
-  other: "bg-gray-500 text-white",
-};
-
-const categoryLabels: Record<string, string> = {
-  shoes: "Shoes",
-  apparel: "Apparel",
-  accessories: "Accessories",
-  other: "Other",
-};
 
 const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 ---

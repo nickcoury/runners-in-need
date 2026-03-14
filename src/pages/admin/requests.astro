@@ -6,7 +6,7 @@ import { getDb, schema } from '../../db';
 import { eq, desc, inArray } from 'drizzle-orm';
 
 // Auth is checked by middleware (admin-only route)
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 
 const db = getDb();
 const requests = await db.query.organizerRequests.findMany({

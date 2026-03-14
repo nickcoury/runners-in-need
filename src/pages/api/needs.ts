@@ -8,7 +8,7 @@ import { sanitize } from "../../lib/html";
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
-  const session = (locals as any).session;
+  const session = locals.session;
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }

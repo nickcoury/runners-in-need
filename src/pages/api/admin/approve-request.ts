@@ -7,8 +7,8 @@ import { sendOrganizerApprovedEmail } from "../../../lib/email";
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   // Defense-in-depth: verify admin role at handler level
-  const session = (locals as any).session;
-  if (!session?.user || (session.user as any).role !== "admin") {
+  const session = locals.session;
+  if (!session?.user || session.user.role !== "admin") {
     return new Response("Forbidden", { status: 403 });
   }
 

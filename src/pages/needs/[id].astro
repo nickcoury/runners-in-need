@@ -6,6 +6,7 @@ import PledgeForm from "../../components/PledgeForm";
 import { getDb, schema } from "../../db";
 import { getEnv } from "../../lib/env";
 import { eq } from "drizzle-orm";
+import { categoryStyles, categoryLabels, pledgeStatusStyles, pledgeStatusLabels } from "../../lib/constants";
 
 const { id } = Astro.params;
 const db = getDb();
@@ -64,22 +65,8 @@ const pledges = needRow.pledges.map((p) => ({
 }));
 
 // Precompute all derived values
-const categoryStyleMap: Record<string, string> = {
-  shoes: "bg-[#2D4A2D] text-white",
-  apparel: "bg-blue-600 text-white",
-  accessories: "bg-amber-600 text-white",
-  other: "bg-gray-500 text-white",
-};
-
-const categoryLabelMap: Record<string, string> = {
-  shoes: "Shoes",
-  apparel: "Apparel",
-  accessories: "Accessories",
-  other: "Other",
-};
-
-const categoryStyle = categoryStyleMap[need.categoryTag] || categoryStyleMap.other;
-const categoryLabel = categoryLabelMap[need.categoryTag] || "Other";
+const categoryStyle = categoryStyles[need.categoryTag] || categoryStyles.other;
+const categoryLabel = categoryLabels[need.categoryTag] || "Other";
 
 const msPerDay = 1000 * 60 * 60 * 24;
 const daysUntilExpiry = Math.ceil((need.expiresAt.getTime() - Date.now()) / msPerDay);
@@ -94,24 +81,10 @@ const continuationUrl = hasContinuation ? `/needs/${need.continuedFromId}` : "";
 const createdDateStr = need.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 const expiresDateStr = need.expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-const statusBadgeMap: Record<string, string> = {
-  collecting: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  ready_to_deliver: "bg-green-50 text-green-700 border-green-200",
-  delivered: "bg-blue-50 text-blue-700 border-blue-200",
-  withdrawn: "bg-red-50 text-red-700 border-red-200",
-};
-
-const statusLabelMap: Record<string, string> = {
-  collecting: "Collecting",
-  ready_to_deliver: "Ready to Deliver",
-  delivered: "Delivered",
-  withdrawn: "Withdrawn",
-};
-
 const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
 
 // Check if current user can message on pledges
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 const currentUserId = session?.user?.id;
 let currentUserOrgId: string | null = null;
 if (currentUserId) {
@@ -128,8 +101,8 @@ const shippingAddress = needRow.organization?.shippingAddress || "";
 const shippingAttn = needRow.organization?.shippingAttn || "";
 
 const pledgesWithComputed = pledges.map((p) => {
-  const badge = statusBadgeMap[p.status] || statusBadgeMap.pending;
-  const label = statusLabelMap[p.status] || "Pending";
+  const badge = pledgeStatusStyles[p.status] || pledgeStatusStyles.pending;
+  const label = pledgeStatusLabels[p.status] || "Pending";
   const dateStr = p.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const messagesWithDates = p.messages.map((m) => {
     const timeStr = m.createdAt.toLocaleString("en-US", {

@@ -7,7 +7,7 @@ import { getDb, schema } from '../db';
 import { eq } from 'drizzle-orm';
 
 // Session is set by middleware (which redirects if not authenticated)
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 if (!session?.user) {
   return Astro.redirect('/auth/signin?callbackUrl=/post');
 }

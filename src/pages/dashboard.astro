@@ -7,14 +7,14 @@ import { getDb, schema } from '../db';
 import { eq, inArray } from 'drizzle-orm';
 
 // Session is set by middleware (which redirects if not authenticated)
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 if (!session?.user) {
   return Astro.redirect('/auth/signin?callbackUrl=/dashboard');
 }
 
 const db = getDb();
 const userId = session.user.id!;
-const userRole = (session.user as any).role || 'donor';
+const userRole = session.user.role || 'donor';
 
 // Get the user's org if they're an organizer
 const user = await db.query.users.findFirst({

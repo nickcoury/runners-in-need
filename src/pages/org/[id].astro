@@ -4,6 +4,7 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import { getDb, schema } from "../../db";
 import { eq, and, inArray } from "drizzle-orm";
+import { categoryStyles, categoryLabels } from "../../lib/constants";
 
 const { id } = Astro.params;
 const db = getDb();
@@ -27,20 +28,6 @@ const activeNeeds = await db.query.needs.findMany({
   orderBy: (needs, { desc }) => [desc(needs.createdAt)],
 });
 
-const categoryLabelMap: Record<string, string> = {
-  shoes: "Shoes",
-  apparel: "Apparel",
-  accessories: "Accessories",
-  other: "Other",
-};
-
-const categoryStyleMap: Record<string, string> = {
-  shoes: "bg-[#2D4A2D] text-white",
-  apparel: "bg-blue-600 text-white",
-  accessories: "bg-amber-600 text-white",
-  other: "bg-gray-500 text-white",
-};
-
 const msPerDay = 1000 * 60 * 60 * 24;
 
 const needsWithComputed = activeNeeds.map((n) => {
@@ -51,8 +38,8 @@ const needsWithComputed = activeNeeds.map((n) => {
     id: n.id,
     title: n.title,
     categoryTag: n.categoryTag,
-    categoryLabel: categoryLabelMap[n.categoryTag] || "Other",
-    categoryStyle: categoryStyleMap[n.categoryTag] || categoryStyleMap.other,
+    categoryLabel: categoryLabels[n.categoryTag] || "Other",
+    categoryStyle: categoryStyles[n.categoryTag] || categoryStyles.other,
     body: n.body,
     location: n.location,
     pledgeCount: n.pledges.length,

@@ -1,4 +1,12 @@
 import { useState } from "react";
+import {
+  categoryStyles,
+  categoryLabels,
+  needStatusStyles,
+  needStatusLabels,
+  pledgeStatusStyles,
+  pledgeStatusLabels,
+} from "../lib/constants";
 
 type Tab = "needs" | "pledges" | "account";
 
@@ -50,47 +58,6 @@ const donorTabs: { key: Tab; label: string }[] = [
   { key: "account", label: "Account" },
 ];
 
-const categoryStyles: Record<string, string> = {
-  shoes: "bg-[#2D4A2D] text-white",
-  apparel: "bg-blue-600 text-white",
-  accessories: "bg-amber-600 text-white",
-  other: "bg-gray-500 text-white",
-};
-
-const categoryLabels: Record<string, string> = {
-  shoes: "Shoes",
-  apparel: "Apparel",
-  accessories: "Accessories",
-  other: "Other",
-};
-
-const statusStyles: Record<string, string> = {
-  active: "bg-green-50 text-green-700 border-green-200",
-  partially_fulfilled: "bg-amber-50 text-amber-700 border-amber-200",
-  fulfilled: "bg-blue-50 text-blue-700 border-blue-200",
-  expired: "bg-gray-100 text-gray-500 border-gray-200",
-};
-
-const statusLabels: Record<string, string> = {
-  active: "Active",
-  partially_fulfilled: "Partially Fulfilled",
-  fulfilled: "Fulfilled",
-  expired: "Expired",
-};
-
-const pledgeStatusStyles: Record<string, string> = {
-  collecting: "bg-amber-50 text-amber-700 border-amber-200",
-  ready_to_deliver: "bg-green-50 text-green-700 border-green-200",
-  delivered: "bg-blue-50 text-blue-700 border-blue-200",
-  withdrawn: "bg-red-50 text-red-600 border-red-200",
-};
-
-const pledgeStatusLabels: Record<string, string> = {
-  collecting: "Collecting",
-  ready_to_deliver: "Ready to Deliver",
-  delivered: "Delivered",
-  withdrawn: "Withdrawn",
-};
 
 export default function DashboardTabs({
   needs,
@@ -204,10 +171,10 @@ export default function DashboardTabs({
                   </span>
                   <span
                     className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                      statusStyles[need.status] || statusStyles.active
+                      needStatusStyles[need.status] || needStatusStyles.active
                     }`}
                   >
-                    {statusLabels[need.status] || need.status}
+                    {needStatusLabels[need.status] || need.status}
                   </span>
                 </div>
 

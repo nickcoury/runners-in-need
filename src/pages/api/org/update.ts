@@ -6,7 +6,7 @@ import { geocode } from "../../../lib/geocode";
 import { sanitize } from "../../../lib/html";
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const session = (locals as any).session;
+  const session = locals.session;
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
   }

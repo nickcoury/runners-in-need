@@ -5,7 +5,7 @@ import Layout from '../layouts/Layout.astro';
 import { getDb, schema } from '../db';
 import { desc, eq, gte, lt } from 'drizzle-orm';
 
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 const isSignedIn = !!session?.user?.id;
 const success = Astro.url.searchParams.get('success') === 'true';
 

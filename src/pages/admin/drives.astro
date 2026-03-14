@@ -5,7 +5,7 @@ import Layout from '../../layouts/Layout.astro';
 import { getDb, schema } from '../../db';
 import { desc } from 'drizzle-orm';
 
-const session = (Astro.locals as any).session;
+const session = Astro.locals.session;
 
 const db = getDb();
 const drives = await db.query.pledgeDrives.findMany({
