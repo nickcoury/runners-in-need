@@ -48,6 +48,8 @@ const totalPledges = userPledges.length;
 const deliveredPledges = userPledges.filter(p => p.status === 'delivered').length;
 const image = session.user.image || null;
 const initials = user.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+
+const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
 ---
 
 <Layout title="Profile">
@@ -95,131 +97,184 @@ const initials = user.name.split(' ').map((w: string) => w[0]).join('').toUpperC
       </div>
     </div>
 
-    {/* Edit profile form */}
-    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-      <h3 class="text-sm font-semibold text-gray-900 mb-4">Edit Profile</h3>
-
-      <form id="profile-form" class="space-y-4">
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-            Display Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={user.name}
-            required
-            minlength="1"
-            maxlength="100"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            value={user.email}
-            disabled
-            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500"
-          />
-          <p class="text-xs text-gray-400 mt-1">Managed by your sign-in provider</p>
-        </div>
-
-        <div class="flex items-center gap-3">
+    {/* Tabs (only shown for organizers) */}
+    {isOrganizer && (
+      <div class="mb-6">
+        <div class="flex border-b border-gray-200">
           <button
-            type="submit"
-            id="save-btn"
-            class="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+            data-tab="profile"
+            class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-[#2D4A2D] text-[#2D4A2D] -mb-px"
           >
-            Save Changes
+            Profile
           </button>
-          <span id="save-status" class="text-sm text-green-600 hidden">Saved!</span>
-          <span id="save-error" class="text-sm text-red-600 hidden"></span>
+          <button
+            data-tab="organization"
+            class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 -mb-px"
+          >
+            Organization
+          </button>
         </div>
-      </form>
-    </div>
+      </div>
+    )}
 
-    {/* Organization settings (organizers only) */}
-    {userRole === 'organizer' && user.orgId && user.organization && (
+    {/* Profile tab content */}
+    <div id="tab-profile">
       <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Organization Details</h3>
-        <form id="org-form" class="space-y-4">
-          <input type="hidden" name="orgId" value={user.orgId} />
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Edit Profile</h3>
 
+        <form id="profile-form" class="space-y-4">
           <div>
-            <label for="org-name" class="block text-sm font-medium text-gray-700 mb-1">
-              Organization Name
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+              Display Name
             </label>
             <input
               type="text"
-              id="org-name"
+              id="name"
               name="name"
-              value={user.organization.name}
+              value={user.name}
               required
-              minlength="2"
-              maxlength="200"
+              minlength="1"
+              maxlength="100"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
             />
           </div>
 
           <div>
-            <label for="org-location" class="block text-sm font-medium text-gray-700 mb-1">
-              Location <span class="text-gray-400 font-normal">(City, State)</span>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email
             </label>
             <input
-              type="text"
-              id="org-location"
-              name="location"
-              value={user.organization.location}
-              required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              type="email"
+              value={user.email}
+              disabled
+              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500"
             />
-          </div>
-
-          <div>
-            <label for="org-description" class="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              id="org-description"
-              name="description"
-              rows="3"
-              maxlength="2000"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
-            >{user.organization.description || ''}</textarea>
+            <p class="text-xs text-gray-400 mt-1">Managed by your sign-in provider</p>
           </div>
 
           <div class="flex items-center gap-3">
             <button
               type="submit"
-              id="org-save-btn"
+              id="save-btn"
               class="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
             >
-              Save Organization
+              Save Changes
             </button>
-            <span id="org-save-status" class="text-sm text-green-600 hidden">Saved!</span>
+            <span id="save-status" class="text-sm text-green-600 hidden">Saved!</span>
+            <span id="save-error" class="text-sm text-red-600 hidden"></span>
           </div>
         </form>
+      </div>
+    </div>
+
+    {/* Organization tab content (organizers only) */}
+    {isOrganizer && (
+      <div id="tab-organization" class="hidden">
+        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-900">Organization Details</h3>
+            <a href={`/org/${user.orgId}`} class="text-xs text-[#2D4A2D] hover:underline">View public page &rarr;</a>
+          </div>
+          <form id="org-form" class="space-y-4">
+            <input type="hidden" name="orgId" value={user.orgId} />
+
+            <div>
+              <label for="org-name" class="block text-sm font-medium text-gray-700 mb-1">
+                Organization Name
+              </label>
+              <input
+                type="text"
+                id="org-name"
+                name="name"
+                value={user.organization.name}
+                required
+                minlength="2"
+                maxlength="200"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              />
+            </div>
+
+            <div>
+              <label for="org-location" class="block text-sm font-medium text-gray-700 mb-1">
+                Location <span class="text-gray-400 font-normal">(City, State)</span>
+              </label>
+              <input
+                type="text"
+                id="org-location"
+                name="location"
+                value={user.organization.location}
+                required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              />
+            </div>
+
+            <div>
+              <label for="org-description" class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                id="org-description"
+                name="description"
+                rows="3"
+                maxlength="2000"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              >{user.organization.description || ''}</textarea>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                type="submit"
+                id="org-save-btn"
+                class="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+              >
+                Save Organization
+              </button>
+              <span id="org-save-status" class="text-sm text-green-600 hidden">Saved!</span>
+            </div>
+          </form>
+        </div>
       </div>
     )}
 
     {/* Danger zone */}
     <div class="bg-white border border-gray-200 rounded-lg p-6">
       <h3 class="text-sm font-semibold text-gray-900 mb-4">Account</h3>
-      <button
-        id="sign-out-profile-btn"
-        class="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
-      >
-        Sign Out
-      </button>
+      <div class="flex gap-3">
+        <button
+          id="sign-out-profile-btn"
+          class="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+        >
+          Sign Out
+        </button>
+        <button
+          id="delete-account-btn"
+          class="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+        >
+          Delete Account
+        </button>
+      </div>
     </div>
   </div>
 
   <script>
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = (btn as HTMLElement).dataset.tab!;
+        // Update button styles
+        tabBtns.forEach((b) => {
+          b.classList.remove('border-[#2D4A2D]', 'text-[#2D4A2D]');
+          b.classList.add('border-transparent', 'text-gray-500');
+        });
+        btn.classList.add('border-[#2D4A2D]', 'text-[#2D4A2D]');
+        btn.classList.remove('border-transparent', 'text-gray-500');
+        // Show/hide tab content
+        document.getElementById('tab-profile')?.classList.toggle('hidden', tab !== 'profile');
+        document.getElementById('tab-organization')?.classList.toggle('hidden', tab !== 'organization');
+      });
+    });
+
     // Profile name update
     const profileForm = document.getElementById('profile-form') as HTMLFormElement;
     profileForm?.addEventListener('submit', async (e) => {
@@ -283,6 +338,22 @@ const initials = user.name.split(' ').map((w: string) => w[0]).join('').toUpperC
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save Organization';
+      }
+    });
+
+    // Delete account
+    document.getElementById('delete-account-btn')?.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+      if (!confirm('This will permanently delete your account, withdraw your pledges, and remove your data. Continue?')) return;
+      try {
+        const res = await fetch('/api/user/delete', { method: 'POST' });
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          alert('Failed to delete account. Please try again.');
+        }
+      } catch {
+        alert('Network error. Please try again.');
       }
     });
 

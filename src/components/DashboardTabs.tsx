@@ -561,7 +561,7 @@ export default function DashboardTabs({
             </form>
           )}
 
-          <div className="max-w-lg">
+          <div className="max-w-lg flex gap-3">
             <button
               onClick={async () => {
                 try {
@@ -578,6 +578,21 @@ export default function DashboardTabs({
               className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
             >
               Sign Out
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
+                if (!confirm("This will permanently delete your account, withdraw your pledges, and remove your data. Continue?")) return;
+                const res = await fetch("/api/user/delete", { method: "POST" });
+                if (res.ok) {
+                  window.location.href = "/";
+                } else {
+                  alert("Failed to delete account. Please try again.");
+                }
+              }}
+              className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+            >
+              Delete Account
             </button>
           </div>
         </div>

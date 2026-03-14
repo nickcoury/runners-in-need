@@ -40,13 +40,7 @@ export const POST: APIRoute = async ({ locals }) => {
       .where(eq(schema.needs.orgId, user.orgId));
   }
 
-  // Anonymize messages (set sender to null-safe placeholder)
-  await db
-    .update(schema.messages)
-    .set({ body: "[deleted]" })
-    .where(eq(schema.messages.senderId, userId));
-
-  // Delete messages, then orphan pledges
+  // Delete messages (senderId is NOT NULL, so we must delete rather than orphan)
   await db.delete(schema.messages).where(eq(schema.messages.senderId, userId));
   await db
     .update(schema.pledges)
