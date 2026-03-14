@@ -52,6 +52,17 @@ export const POST: APIRoute = async ({ locals }) => {
     .delete(schema.organizerRequests)
     .where(eq(schema.organizerRequests.userId, userId));
 
+  // Nullify reviewedBy on organizer requests this user reviewed
+  await db
+    .update(schema.organizerRequests)
+    .set({ reviewedBy: null })
+    .where(eq(schema.organizerRequests.reviewedBy, userId));
+
+  // Delete pledge drives (FK on organizer_user_id is NOT NULL, no cascade)
+  await db
+    .delete(schema.pledgeDrives)
+    .where(eq(schema.pledgeDrives.organizerUserId, userId));
+
   // Auth.js sessions and accounts cascade on user delete
   // Delete the user
   await db.delete(schema.users).where(eq(schema.users.id, userId));
