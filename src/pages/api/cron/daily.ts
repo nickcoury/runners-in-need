@@ -36,8 +36,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   try {
     await sendExpiryReminders(results);
-    await expireOverdueNeeds();
-    results.needsExpired = -1; // handled by shared function, count not available
+    results.needsExpired = await expireOverdueNeeds();
     await expireStalePledges(results);
     await processFulfillmentReminders(results);
   } catch (err) {

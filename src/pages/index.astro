@@ -53,6 +53,8 @@ const mapNeeds = allNeeds
     lng: n.lng!,
   }));
 
+const errorParam = Astro.url.searchParams.get('error');
+
 const categories = [
   { tag: "all", label: "All", icon: "" },
   { tag: "shoes", label: "Shoes", icon: "👟" },
@@ -63,6 +65,12 @@ const categories = [
 ---
 
 <Layout title="Home" description="Browse running gear needs and pledge donations to help runners in your community.">
+  {errorParam === 'forbidden' && (
+    <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-sm text-red-800">
+      You don't have permission to access that page.
+    </div>
+  )}
+
   {/* Compact hero */}
   <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
     <div>
