@@ -6,16 +6,18 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 ## Remaining Work
 
-- [ ] **Full codebase audit and quality pass (3+ hours)** — _Started 2026-03-14T07:12:10Z, in progress_
-  - Research best practices for AI-assisted code audits first
-  - Architecture review: identify duplication, unnecessary complexity, dead code
-  - Performance: N+1 queries, unnecessary re-renders, bundle size, lazy loading
-  - Code quality: consistent patterns, error handling, type safety
-  - UI/UX: minor polish, accessibility, responsive issues
-  - Tests: fix brittle tests, add coverage for gaps, improve test infrastructure
-  - Record start time programmatically, spend minimum 3 hours
-  - Commit and push in small logical blocks throughout
-  - Do this LAST — after all other TODOs are complete
+- [x] **Full codebase audit and quality pass (3+ hours)** — Completed 2026-03-14, 50+ commits
+  - 4 audit passes (security, performance, architecture, final sweep)
+  - Fixed 3 critical security issues (XSS, timing attacks, auth bypasses)
+  - Added 6 DB indexes, removed N+1 queries, optimized data loading
+  - Extracted shared utilities (sanitize, constants, auth helpers, API helpers)
+  - Added typed App.Locals, removed 20+ `as any` casts
+  - Split DashboardTabs into 3 focused components
+  - Added security headers (CSP, HSTS, X-Frame-Options, etc.)
+  - Added accessibility: ARIA roles, skip-to-content, keyboard nav, focus management
+  - Mobile responsive polish, print styles, SEO meta tags
+  - Tests: 50 → 74, replaced brittle selectors with data-testid
+  - Prerendered static pages, parallelized email sending
 
 ---
 
