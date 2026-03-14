@@ -11,12 +11,11 @@ interface Props {
   lat?: number | null;
   lng?: number | null;
   extrasWelcome: boolean;
-  status: string;
   expiresAt: Date;
   pledgeCount?: number;
 }
 
-const { id, title, categoryTag, body, orgName, location, lat, lng, extrasWelcome, status, expiresAt, pledgeCount = 0 } = Astro.props;
+const { id, title, categoryTag, body, orgName, location, lat, lng, extrasWelcome, expiresAt, pledgeCount = 0 } = Astro.props;
 
 const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 ---

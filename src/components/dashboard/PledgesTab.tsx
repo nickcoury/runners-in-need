@@ -3,20 +3,10 @@ import {
   pledgeStatusStyles,
   pledgeStatusLabels,
 } from "../../lib/constants";
-
-interface Pledge {
-  id: string;
-  needId: string;
-  needTitle: string;
-  donorName: string;
-  donorEmail: string;
-  description: string;
-  status: string;
-  createdAt: string;
-}
+import type { DashboardPledge } from "./types";
 
 interface PledgesTabProps {
-  pledges: Pledge[];
+  pledges: DashboardPledge[];
 }
 
 export default function PledgesTab({ pledges }: PledgesTabProps) {

@@ -4,19 +4,10 @@ import {
   needStatusStyles,
   needStatusLabels,
 } from "../../lib/constants";
-
-interface Need {
-  id: string;
-  title: string;
-  categoryTag: string;
-  status: string;
-  pledgeCount: number;
-  daysLeft: number;
-  location: string;
-}
+import type { DashboardNeed } from "./types";
 
 interface NeedsTabProps {
-  needs: Need[];
+  needs: DashboardNeed[];
 }
 
 export default function NeedsTab({ needs }: NeedsTabProps) {

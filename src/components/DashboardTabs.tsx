@@ -2,33 +2,13 @@ import { useState } from "react";
 import NeedsTab from "./dashboard/NeedsTab";
 import PledgesTab from "./dashboard/PledgesTab";
 import AccountTab from "./dashboard/AccountTab";
+import type { DashboardNeed, DashboardPledge } from "./dashboard/types";
 
 type Tab = "needs" | "pledges" | "account";
 
-interface Need {
-  id: string;
-  title: string;
-  categoryTag: string;
-  status: string;
-  pledgeCount: number;
-  daysLeft: number;
-  location: string;
-}
-
-interface Pledge {
-  id: string;
-  needId: string;
-  needTitle: string;
-  donorName: string;
-  donorEmail: string;
-  description: string;
-  status: string;
-  createdAt: string;
-}
-
 interface DashboardTabsProps {
-  needs: Need[];
-  pledges: Pledge[];
+  needs: DashboardNeed[];
+  pledges: DashboardPledge[];
   orgName: string;
   orgEmail: string;
   orgLocation: string;

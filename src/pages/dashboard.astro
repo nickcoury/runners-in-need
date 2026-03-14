@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import DashboardTabs from '../components/DashboardTabs';
+import type { DashboardNeed, DashboardPledge } from '../components/dashboard/types';
 import { getDb, schema } from '../db';
 import { eq } from 'drizzle-orm';
 
@@ -32,26 +33,9 @@ const orgShippingAttn = user?.organization?.shippingAttn || '';
 const orgShowShippingAddress = user?.organization?.showShippingAddress || false;
 const orgPledgeDriveInterest = user?.organization?.pledgeDriveInterest || false;
 
-let needs: Array<{
-  id: string;
-  title: string;
-  categoryTag: string;
-  status: string;
-  pledgeCount: number;
-  daysLeft: number;
-  location: string;
-}> = [];
+let needs: DashboardNeed[] = [];
 
-let pledges: Array<{
-  id: string;
-  needId: string;
-  needTitle: string;
-  donorName: string;
-  donorEmail: string;
-  description: string;
-  status: string;
-  createdAt: string;
-}> = [];
+let pledges: DashboardPledge[] = [];
 
 if (userRole === 'organizer' && user?.orgId) {
   // Organizer: show their org's needs with pledge counts
