@@ -209,8 +209,8 @@ const { title, description = 'Connecting runners who have extra gear with organi
         }
       });
 
-      // Sign out handler (POST with CSRF)
-      async function handleSignOut() {
+      // Sign out handler (POST with CSRF) — global so other pages can reuse it
+      (window as any).signOut = async function signOut() {
         try {
           const csrfRes = await fetch('/api/auth/csrf');
           const { csrfToken } = await csrfRes.json();
@@ -221,9 +221,9 @@ const { title, description = 'Connecting runners who have extra gear with organi
         } catch {
           window.location.href = '/api/auth/signout';
         }
-      }
-      document.getElementById('sign-out-btn')?.addEventListener('click', handleSignOut);
-      document.getElementById('mobile-sign-out-btn')?.addEventListener('click', handleSignOut);
+      };
+      document.getElementById('sign-out-btn')?.addEventListener('click', (window as any).signOut);
+      document.getElementById('mobile-sign-out-btn')?.addEventListener('click', (window as any).signOut);
     </script>
 
     <main id="main-content" class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>

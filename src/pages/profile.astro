@@ -367,18 +367,9 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
       }
     });
 
-    // Sign out
-    document.getElementById('sign-out-profile-btn')?.addEventListener('click', async () => {
-      try {
-        const csrfRes = await fetch('/api/auth/csrf');
-        const { csrfToken } = await csrfRes.json();
-        const form = new FormData();
-        form.set('csrfToken', csrfToken);
-        await fetch('/api/auth/signout', { method: 'POST', body: form });
-        window.location.href = '/';
-      } catch {
-        window.location.href = '/api/auth/signout';
-      }
+    // Sign out — uses global handler defined in Layout
+    document.getElementById('sign-out-profile-btn')?.addEventListener('click', () => {
+      (window as any).signOut?.();
     });
   </script>
 </Layout>

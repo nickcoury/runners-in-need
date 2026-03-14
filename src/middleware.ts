@@ -77,6 +77,14 @@ async function getSession(req: Request): Promise<Session | null> {
   return data as Session;
 }
 
+function addSecurityHeaders(response: Response): Response {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  return response;
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const method = context.request.method;
@@ -89,13 +97,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
       // (browsers always send Origin on cross-origin requests and fetch())
       const secFetchSite = context.request.headers.get("Sec-Fetch-Site");
       if (secFetchSite && secFetchSite !== "same-origin" && secFetchSite !== "none") {
-        return new Response("CSRF check failed", { status: 403 });
+        return addSecurityHeaders(new Response("CSRF check failed", { status: 403 }));
       }
     } else {
       const requestHost = context.url.host;
       const originHost = new URL(origin).host;
       if (originHost !== requestHost) {
-        return new Response("CSRF check failed", { status: 403 });
+        return addSecurityHeaders(new Response("CSRF check failed", { status: 403 }));
       }
     }
   }
@@ -113,13 +121,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
       "unknown";
     pruneIfNeeded();
     if (isRateLimited(ip)) {
-      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+      return addSecurityHeaders(new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
         status: 429,
         headers: {
           "Content-Type": "application/json",
           "Retry-After": "60",
         },
-      });
+      }));
     }
   }
 
@@ -129,7 +137,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/auth/") ||
     pathname === "/api/health"
   ) {
-    return next();
+    return addSecurityHeaders(await next());
   }
 
   // Public endpoints/pages that benefit from session but don't require it
@@ -138,29 +146,29 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (session?.user) {
       context.locals.session = session;
     }
-    return next();
+    return addSecurityHeaders(await next());
   }
 
   if (!isProtected(pathname)) {
-    return next();
+    return addSecurityHeaders(await next());
   }
 
   const session = await getSession(context.request);
 
   if (!session?.user) {
     const callbackUrl = encodeURIComponent(context.url.pathname);
-    return context.redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
+    return addSecurityHeaders(context.redirect(`/auth/signin?callbackUrl=${callbackUrl}`));
   }
 
   if (isAdminRoute(pathname)) {
     const role = session.user.role;
     if (role !== "admin") {
-      return new Response("Forbidden", { status: 403 });
+      return addSecurityHeaders(new Response("Forbidden", { status: 403 }));
     }
   }
 
   // Store session on locals for downstream use
   context.locals.session = session;
 
-  return next();
+  return addSecurityHeaders(await next());
 });

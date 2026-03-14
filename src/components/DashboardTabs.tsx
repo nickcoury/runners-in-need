@@ -400,6 +400,9 @@ export default function DashboardTabs({
                   const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
                   btn.textContent = "Saved!";
                   setTimeout(() => { btn.textContent = "Save Changes"; }, 2000);
+                } else {
+                  const text = await res.text();
+                  alert(text || "Failed to save organization details. Please try again.");
                 }
               }}
             >
@@ -474,6 +477,9 @@ export default function DashboardTabs({
                   const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
                   btn.textContent = "Saved!";
                   setTimeout(() => { btn.textContent = "Save Shipping Address"; }, 2000);
+                } else {
+                  const text = await res.text();
+                  alert(text || "Failed to save shipping address. Please try again.");
                 }
               }}
             >
@@ -577,18 +583,7 @@ export default function DashboardTabs({
 
           <div className="max-w-lg flex gap-3">
             <button
-              onClick={async () => {
-                try {
-                  const csrfRes = await fetch('/api/auth/csrf');
-                  const { csrfToken } = await csrfRes.json();
-                  const form = new FormData();
-                  form.set('csrfToken', csrfToken);
-                  await fetch('/api/auth/signout', { method: 'POST', body: form });
-                  window.location.href = '/';
-                } catch {
-                  window.location.href = '/api/auth/signout';
-                }
-              }}
+              onClick={() => (window as any).signOut?.()}
               className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
             >
               Sign Out
