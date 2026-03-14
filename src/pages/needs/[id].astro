@@ -165,10 +165,19 @@ const pledgesWithComputed = pledges.map((p) => {
       </div>
 
       {/* Metadata bar */}
-      <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400 border-t border-b border-gray-100 py-3 mb-4" data-testid="need-metadata-bar">
-        <span>{pledgeCountText}</span>
-        <span>Expires {expiresDateStr}</span>
-        <span class="capitalize">Status: {need.status}</span>
+      <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 border-t border-b border-gray-100 py-3 mb-4" data-testid="need-metadata-bar">
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+          {pledgeCountText}
+        </span>
+        <span class:list={["flex items-center gap-1", expiryClass]}>
+          <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          Expires {expiresDateStr}
+        </span>
+        <span class="capitalize flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" /></svg>
+          Status: {need.status.replace('_', ' ')}
+        </span>
       </div>
 
       {/* Body text */}

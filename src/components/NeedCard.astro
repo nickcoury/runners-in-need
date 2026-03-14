@@ -45,7 +45,7 @@ const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 6
   <p class="text-sm text-gray-600 line-clamp-3 mb-3 whitespace-pre-line flex-1">{body}</p>
 
   {/* Footer: metadata */}
-  <div class="flex items-center justify-between text-xs text-gray-400 mb-3">
+  <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
     <span>{pledgeCount} pledge{pledgeCount !== 1 ? "s" : ""}</span>
     <span class:list={[daysUntilExpiry <= 14 ? "text-amber-600 font-medium" : ""]}>
       {daysUntilExpiry > 0 ? `${daysUntilExpiry} days left` : "Expired"}

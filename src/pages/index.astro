@@ -92,12 +92,22 @@ const categories = [
   {/* Search + category filter pills */}
   <div class="mb-6 space-y-3">
     <div class="flex gap-2">
-      <input
-        id="search-input"
-        type="text"
-        placeholder="Search needs, items, locations..."
-        class="flex-1 rounded-lg px-4 py-2 text-sm text-gray-900 placeholder-gray-400 bg-white border border-gray-300 focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
-      />
+      <div class="relative flex-1">
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search needs, items, locations..."
+          class="w-full rounded-lg px-4 py-2 pr-8 text-sm text-gray-900 placeholder-gray-400 bg-white border border-gray-300 focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+        />
+        <button
+          id="search-clear"
+          type="button"
+          aria-label="Clear search"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+        >
+          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
       <button
         id="location-btn"
         type="button"

@@ -242,13 +242,41 @@ const { title, description = 'Connecting runners who have extra gear with organi
     <footer class="bg-[#2D4A2D] text-green-100 mt-auto">
       <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
         <p>Runners In Need &mdash; Connecting gear with those who need it most.</p>
-        <div class="flex gap-4 text-green-300">
+        <div class="flex flex-wrap gap-4 text-green-300">
           <a href="/about" class="hover:text-white">About</a>
+          <a href="/why" class="hover:text-white">Why</a>
           <a href="/terms" class="hover:text-white">Terms</a>
           <a href="/privacy" class="hover:text-white">Privacy</a>
           <a href="/contact" class="hover:text-white">Contact</a>
         </div>
       </div>
     </footer>
+
+    {/* Back to top button */}
+    <button
+      id="back-to-top"
+      type="button"
+      aria-label="Back to top"
+      class="fixed bottom-6 right-6 z-40 hidden w-10 h-10 rounded-full bg-[#2D4A2D] text-white shadow-lg hover:bg-[#1F361F] transition-all items-center justify-center"
+    >
+      <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
+    </button>
+    <script>
+      const backToTop = document.getElementById('back-to-top');
+      if (backToTop) {
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 400) {
+            backToTop.classList.remove('hidden');
+            backToTop.classList.add('flex');
+          } else {
+            backToTop.classList.add('hidden');
+            backToTop.classList.remove('flex');
+          }
+        }, { passive: true });
+        backToTop.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    </script>
   </body>
 </html>

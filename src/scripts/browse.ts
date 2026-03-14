@@ -79,7 +79,30 @@ function filterCards() {
   });
 }
 
-searchInput?.addEventListener('input', filterCards);
+const searchClear = document.getElementById('search-clear');
+
+function updateSearchClear() {
+  if (!searchClear || !searchInput) return;
+  if (searchInput.value.length > 0) {
+    searchClear.classList.remove('hidden');
+  } else {
+    searchClear.classList.add('hidden');
+  }
+}
+
+searchInput?.addEventListener('input', () => {
+  filterCards();
+  updateSearchClear();
+});
+
+searchClear?.addEventListener('click', () => {
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.focus();
+  }
+  filterCards();
+  updateSearchClear();
+});
 
 categoryBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
