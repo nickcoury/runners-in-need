@@ -251,13 +251,22 @@ export default function AccountTab({
         </div>
       )}
 
-      <div className="max-w-lg flex gap-3">
+      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg">
         <button
           onClick={() => (window as any).signOut?.()}
-          className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
         >
           Sign Out
         </button>
+      </div>
+
+      <div className="bg-white border border-red-200 rounded-lg p-6 space-y-3 max-w-lg">
+        <h3 className="text-sm font-semibold text-red-700">
+          Danger Zone
+        </h3>
+        <p className="text-xs text-gray-500">
+          Permanently delete your account, withdraw all pledges, and remove your data. This cannot be undone.
+        </p>
         <button
           onClick={async () => {
             if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
@@ -269,7 +278,7 @@ export default function AccountTab({
               alert("Failed to delete account. Please try again.");
             }
           }}
-          className="border border-red-300 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
         >
           Delete Account
         </button>
