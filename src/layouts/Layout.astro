@@ -83,6 +83,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
               </div>
               <a href="/dashboard" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Dashboard</a>
               <a href="/profile" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Profile</a>
+              <a id="admin-link" href="/admin" role="menuitem" class="hidden px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Admin</a>
               <div class="border-t border-gray-100 mt-1 pt-1">
                 <button id="sign-out-btn" role="menuitem" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
               </div>
@@ -117,6 +118,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
             </div>
             <a href="/dashboard" class="block hover:text-green-200 transition-colors">Dashboard</a>
             <a href="/profile" class="block hover:text-green-200 transition-colors">Profile</a>
+            <a id="mobile-admin-link" href="/admin" class="hidden hover:text-green-200 transition-colors">Admin</a>
             <button id="mobile-sign-out-btn" class="text-red-300 hover:text-red-200 transition-colors text-left">Sign Out</button>
           </div>
         </div>
@@ -180,6 +182,14 @@ const { title, description = 'Connecting runners who have extra gear with organi
             if (dropdownName) dropdownName.textContent = name;
             const dropdownEmail = document.getElementById('dropdown-email');
             if (dropdownEmail) dropdownEmail.textContent = email;
+
+            // Admin links (show only for admin role)
+            if (user.role === 'admin') {
+              const adminLink = document.getElementById('admin-link');
+              if (adminLink) adminLink.classList.remove('hidden'), adminLink.classList.add('block');
+              const mobileAdminLink = document.getElementById('mobile-admin-link');
+              if (mobileAdminLink) mobileAdminLink.classList.remove('hidden'), mobileAdminLink.classList.add('block');
+            }
 
             // Mobile user section
             const mobileSection = document.getElementById('mobile-user-section');
@@ -258,6 +268,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
           <a href="/terms" class="hover:text-white">Terms</a>
           <a href="/privacy" class="hover:text-white">Privacy</a>
           <a href="/contact" class="hover:text-white">Contact</a>
+          <a href="/become-organizer" class="hover:text-white">Become an Organizer</a>
         </div>
       </div>
     </footer>

@@ -36,12 +36,16 @@ The nav bar shows "Sign In" prominently even when the user is logged in via sess
 
 **Root cause:** The session cookie set via Playwright may not be picked up by the middleware's `getSession()` in the same way Auth.js sets it. This could be a cookie format issue (Auth.js may sign/encrypt session tokens) or the session lookup may fail. Need to verify if this is a test-only issue or affects real sessions.
 
+Nick - I can reproduce this. Further, I just get sign in, not sign up. We should make sure to have sign up, sign in, and signed-in (where the profile picture menu shows) like most sites. Think about the most elegant way to handle sign up vs sign in. I always wanted to make them the same form (if you have an account it signs in, if you don't it creates it) but I suspect there's a reason most sites don't. Lets do a bit of research on the best UX pattern and update our plan and then execute that.
+
 ### C3. Donor has no way to see or manage their pledges
 **Personas:** Sarah, Priya | **Severity:** Critical
 
 The donor dashboard renders blank (see C1), but even if it worked, there's no visible way for a donor to: see pledge status, withdraw a pledge, or track their donation. The pledge status labels ("Collecting", "Ready to Deliver") are organizer-centric and wouldn't make sense to donors.
 
 **Recommendation:** Add donor-facing status labels (e.g., "Waiting for response," "Accepted — ready to ship," "Delivered"). Add a "Withdraw pledge" button for donors.
+
+Nick - Agreed. On the statuses, let's make sure they're simple but comprehensive. You mentioned ready to ship but it could also be an in-person hand off or a drop off e.g. to a schoo. I don't know if we want to bloat out the responses with too many options so we should consider something that covers the bases clearly without being overwhelming.
 
 ### C5. Sign-in buttons stay disabled when CSRF fetch fails
 **Personas:** All | **Severity:** Critical
@@ -50,12 +54,16 @@ When the CSRF token fetch (`/api/auth/csrf`) fails (returns 500 in certain condi
 
 **Recommendation:** Add error handling for the CSRF fetch. If it fails, either retry or show an error message ("Sign-in is temporarily unavailable. Please try again.").
 
+Nick - Agreed on graceful handling. Is there a better option than that error message? Wondering because if it doesn't work, will trying again make it work? If so that's fine but if this is more likely systemic we'll want to make sure we get alerted to fix it. Speaking of that, what's our monitoring, alerting, and observability plan for this site? How will I get notified if something major happens while not getting overwhelmed with minor issues? Let's add a separate project to dive into that, specifically looking for prior art on small sites and how that's best maintained.
+
 ### C6. Pledge is fire-and-forget for unauthenticated users
 **Personas:** Sarah | **Severity:** Critical
 
 After an unauthenticated user submits a pledge, they get a success message but have zero way to track, edit, or cancel their pledge. No confirmation email is sent. No dashboard link (they're not signed in). The pledge is effectively a one-way drop with no follow-up possible.
 
 **Recommendation:** Send a confirmation email to the donor's provided email address. Include a link to sign up for an account to track their pledge. Consider generating a "pledge tracking" link that works without an account.
+
+Nick - I think we'll want everyone that pledges to have an account. To lower friction perhaps we make it in-situ when they're creating the pledge? E.g. we will create an account using your email when you submit your pledge. Set your password now or we'll send you a link to create it later. What do you think? Anonymous pledges might bring problems even though we want to keep friction low.
 
 ### ~~C7. Double-escaping bug causes garbled text display (BUG)~~ [FIXED]
 **Personas:** All | **Severity:** Critical bug
@@ -69,10 +77,14 @@ After an unauthenticated user submits a pledge, they get a success message but h
 
 No unique constraint on `(needId, donorId)` or `(needId, donorEmail)`. A donor can pledge the same need multiple times. The client-side guard resets on page reload.
 
+Nick - Thinking through why someone might need this. Could be they just need the ability to update a pledge? That should fix half of this problem. The other half goes back to a previous decision to make partial pledges close a need and re-open it with a new needID. But what if there are multiple pledges at a time? We might want to re-think that. Perhaps its fine to have multiple pledges and just add pledgeId in as a third key? Then we can close pledges, and perhaps keep an edit history of needs? Or have two sections, one with the need and a second with fulfilled needs to show history of what has been pledged for it? What do you think? I'm ok with any variant of these ideas, let's pick one and implement it.
+
 ### C9. Orphaned org on account deletion
 **Personas:** Coach Maria | **Severity:** High bug
 
 When an organizer deletes their account, the organization record is orphaned (never deleted). Active pledges from OTHER donors on the org's needs are not withdrawn. No notification sent to affected donors.
+
+Nick - Do we have or do we need a one to many relationship between organizations and accounts? So humans have accounts, and they can always be donors. They can also be linked to an organization and then that lets them manage it. Perhaps we should keep it max one person per org to keep it simple for now, and keep emails and communication straightforward. But then an org can still exist without a human if the human deletes their account, and we can swap humans if they need to be handed over. We can also indicate if an org is "inactive" via having no human. Then we can label offers accordingly so people know there's no contacts for the org without losing the org history or deleting things that peolpe might expect to find still.
 
 ### C4. No post-pledge next steps
 **Personas:** Sarah, Priya | **Severity:** Critical
@@ -80,6 +92,8 @@ When an organizer deletes their account, the organization record is orphaned (ne
 After submitting a pledge, the user sees "Pledge submitted! The organizer will be notified." with no link to their dashboard, no way to message the organizer, and no explanation of what happens next. The user is stuck on the page.
 
 **Recommendation:** Add next-step CTAs: "View your pledges" (→ dashboard), "Message the organizer" (inline), and a timeline explanation ("The organizer will review your pledge and contact you about pickup/shipping.").
+
+Nick - sounds great! Let's do it.
 
 ---
 
@@ -92,12 +106,16 @@ The site supports anonymous pledges (donorEmail from form), but clicking "Pledge
 
 **Recommendation:** Make the anonymous pledge flow as frictionless as possible. Consider whether Turnstile is strictly necessary for signed-in users (already skipped) and ensure the form clearly communicates "no account needed."
 
+Nick - mentioned this above but probably don't want fully anonymous pledges. Even something like Craigslist requires an account. Let's keep it low friction but make this required.
+
 ### 2. No shipping/logistics info on need detail pages
 **Personas:** Sarah, Priya | **Severity:** High
 
 After Sarah finds a need she wants to pledge to, there's no information about HOW to get her shoes to the organization. The shipping address feature exists (organizers can opt in) but most needs show nothing. A first-time donor is left wondering: "Do I ship it? Drop it off? Who pays for shipping?"
 
 **Recommendation:** Add a "How to donate" section to every need detail page. If the org has a shipping address, show it. If not, show a generic message like "After your pledge is accepted, the organizer will contact you with pickup/shipping details."
+
+Nick - Let's make shipping, drop off, meet up, and other first class ways to deliver a pledge. Let's have orgs have a preferred set in their preferences that populate on every need, but each need can be overridden. This is displayed to the pledge when making it and they can be shared in the next steps so they can take action immediately. Also let organizers have a free form text field to explain their preferences like always contact first before shipping or dropping off, or feel free to drop off at school office with a note, etc.
 
 ### 3. "Become an Organizer" is not discoverable
 **Personas:** Aisha, Marcus | **Severity:** High
@@ -106,12 +124,16 @@ The `/become-organizer` page is not linked from the homepage, footer, or any CTA
 
 **Recommendation:** Add a "Become an Organizer" link to the footer and a CTA on the homepage (perhaps in a secondary section: "Run a program that needs gear? Apply to become an organizer.").
 
+Nick - let's do it.
+
 ### 4. No admin link in navigation
 **Personas:** Admin Alex | **Severity:** High
 
 Admin pages (`/admin/requests`, `/admin/drives`) are only accessible by typing the URL directly. There's no admin link in the nav, user menu, or dashboard for admin users.
 
 **Recommendation:** Show an "Admin" link in the user dropdown menu when the user has the admin role.
+
+Nick - let's do it.
 
 ---
 
