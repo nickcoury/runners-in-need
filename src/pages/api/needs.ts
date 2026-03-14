@@ -5,8 +5,7 @@ import { eq } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sanitize } from "../../lib/html";
 import { jsonError, requireOrganizer } from "../../lib/api";
-
-const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
+import { VALID_CATEGORIES } from "../../lib/constants";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const auth = await requireOrganizer(locals);

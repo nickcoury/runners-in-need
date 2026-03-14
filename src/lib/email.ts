@@ -61,6 +61,7 @@ function emailLayout(title: string, body: string): string {
     </div>
     <div style="padding:16px 32px;border-top:1px solid #e5e5e5;color:#999999;font-size:12px;">
       <a href="${getSiteUrl()}" style="color:#2D4A2D;text-decoration:none;">Runners In Need</a> &mdash; connecting donors with teams that need gear.
+      <br>This is an automated message. Please do not reply directly to this email.
     </div>
   </div>
 </body>
@@ -195,7 +196,7 @@ export async function sendOrganizerDeniedEmail(
   const html = emailLayout(
     "Request Not Approved",
     `<p>Thank you for your interest in Runners In Need. Unfortunately, your request to create <strong>${escapeHtml(orgName)}</strong> was not approved at this time.</p>
-     <p>If you believe this was an error or would like more information, please reach out to us.</p>`
+     <p>If you believe this was an error or would like more information, please <a href="${getSiteUrl()}/contact" style="color:#2D4A2D;text-decoration:underline;">contact us</a>.</p>`
   );
 
   await sendEmail(applicantEmail, subject, html);

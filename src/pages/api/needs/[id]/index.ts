@@ -5,8 +5,7 @@ import { schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 import { sanitize } from "../../../../lib/html";
 import { jsonError, requireOrganizer } from "../../../../lib/api";
-
-const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
+import { VALID_CATEGORIES } from "../../../../lib/constants";
 
 // Also handle POST (HTML forms can't send PUT)
 export const POST: APIRoute = async (context) => {

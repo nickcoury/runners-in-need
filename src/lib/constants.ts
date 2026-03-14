@@ -1,5 +1,8 @@
 // Shared style and label maps for categories, need statuses, and pledge statuses.
 
+export const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
+export type CategoryTag = (typeof VALID_CATEGORIES)[number];
+
 export const categoryStyles: Record<string, string> = {
   shoes: "bg-[#2D4A2D] text-white",
   apparel: "bg-blue-600 text-white",
