@@ -14,10 +14,9 @@ These are broken features that affect core user journeys.
   - Authenticated donors can't message on their own pledges
   - Fix: Set `donorId` from session in the pledge creation endpoint when user is logged in
 
-- [ ] **GAP-2: Need status never transitions on pledge delivery**
-  - When all pledges reach `delivered`, the need stays `active`
-  - Nothing triggers `fulfilled` or `partially_fulfilled` status
-  - Decision needed from Nick: automatic vs organizer confirmation (see NICK-TODOS.md)
+- [x] **GAP-2: Need status transitions on pledge delivery**
+  - Auto-fulfills 60 days after all pledges delivered, with reminders at 30/45/55 days
+  - One-click email buttons: Fulfilled, Partially Fulfilled (copies to new need), Not Fulfilled
 
 - [x] **GAP-7: `reviewedBy` never set on approve/deny**
   - Already implemented — both endpoints set `reviewedBy: session.user.id`
@@ -54,17 +53,16 @@ These are broken features that affect core user journeys.
 
 - [x] **LLM-assisted partial fulfillment** (src/lib/llm.ts, needs `ANTHROPIC_API_KEY` env var, stores in `suggestedText` column)
 
-- [ ] **Account deletion flow (GAP-9)**
-  - GDPR/CCPA requirement
-  - Nick needs to decide if this is MVP-blocking (see NICK-TODOS.md)
+- [x] **Account deletion flow (GAP-9)** — MVP-blocking, double-confirm UI
 
-- [ ] **Org public profile page (GAP-12)**
-  - `/org/[id]` page so donors can learn about organizations
-  - Nick needs to decide if MVP-blocking (see NICK-TODOS.md)
+- [x] **Org public profile page (GAP-12)** — `/org/[id]` page + profile editing tabs
 
-- [ ] **Allow organizer reapplication after denial (GAP-5)**
-  - Currently denied applicants see permanent "denied" banner, can't reapply
-  - Nick needs to choose: allow reapply, show "contact us", or auto-expire denial
+- [x] **Organizer reapplication after denial (GAP-5)** — 12-month cooldown
+
+- [ ] **Pledge Drive feature**
+  - "Organize a Pledge Drive" button encouraging running groups/orgs to hold donation events at club runs, races, etc. to collect larger amounts of gear
+  - Organizations can opt into interest for pledge drives, allowing them to be contacted during/after drives to receive gear not on their specific requests
+  - Enables larger-scale collections that are less targeted but higher volume
 
 ---
 
