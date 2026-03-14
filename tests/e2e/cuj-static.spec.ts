@@ -120,6 +120,27 @@ test.describe("Static Pages", () => {
     await expect(homeLink).toBeVisible();
   });
 
+  test("/500 page renders with expected structure", async ({ page }) => {
+    const response = await page.goto("/500");
+    expect(response?.status()).toBe(500);
+
+    await expect(page.getByText("500")).toBeVisible();
+    await expect(page.getByText("Something went wrong")).toBeVisible();
+
+    // Has "Try Again" button
+    await expect(
+      page.locator("button", { hasText: "Try Again" })
+    ).toBeVisible();
+
+    // Has "Back to Home" link
+    const homeLink = page.locator('a[href="/"]').first();
+    await expect(homeLink).toBeVisible();
+
+    // Has contact link
+    const contactLink = page.locator('a[href="/contact"]').first();
+    await expect(contactLink).toBeVisible();
+  });
+
   test("/api/health returns 200 with valid response", async ({ request }) => {
     const response = await request.get("/api/health");
     expect(response.status()).toBe(200);

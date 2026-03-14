@@ -95,6 +95,15 @@ searchInput?.addEventListener('input', () => {
   updateSearchClear();
 });
 
+searchInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    searchInput.value = '';
+    searchInput.blur();
+    filterCards();
+    updateSearchClear();
+  }
+});
+
 searchClear?.addEventListener('click', () => {
   if (searchInput) {
     searchInput.value = '';
