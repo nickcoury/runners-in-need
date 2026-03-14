@@ -1,0 +1,69 @@
+export const prerender = false;
+import type { APIRoute } from "astro";
+import { getDb, schema } from "../../../db";
+import { eq } from "drizzle-orm";
+
+export const POST: APIRoute = async ({ locals }) => {
+  const session = (locals as any).session;
+  if (!session?.user?.id) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const db = getDb();
+  const userId = session.user.id;
+
+  const user = await db.query.users.findFirst({
+    where: eq(schema.users.id, userId),
+  });
+  if (!user) {
+    return new Response("User not found", { status: 404 });
+  }
+
+  // Withdraw active pledges
+  const userPledges = await db.query.pledges.findMany({
+    where: eq(schema.pledges.donorId, userId),
+  });
+  for (const pledge of userPledges) {
+    if (pledge.status === "collecting" || pledge.status === "ready_to_deliver") {
+      await db
+        .update(schema.pledges)
+        .set({ status: "withdrawn", updatedAt: new Date() })
+        .where(eq(schema.pledges.id, pledge.id));
+    }
+  }
+
+  // Expire organizer's active needs
+  if (user.role === "organizer" && user.orgId) {
+    await db
+      .update(schema.needs)
+      .set({ status: "expired", updatedAt: new Date() })
+      .where(eq(schema.needs.orgId, user.orgId));
+  }
+
+  // Anonymize messages (set sender to null-safe placeholder)
+  await db
+    .update(schema.messages)
+    .set({ body: "[deleted]" })
+    .where(eq(schema.messages.senderId, userId));
+
+  // Delete messages, then orphan pledges
+  await db.delete(schema.messages).where(eq(schema.messages.senderId, userId));
+  await db
+    .update(schema.pledges)
+    .set({ donorId: null, donorName: "Deleted User" })
+    .where(eq(schema.pledges.donorId, userId));
+
+  // Delete organizer requests
+  await db
+    .delete(schema.organizerRequests)
+    .where(eq(schema.organizerRequests.userId, userId));
+
+  // Auth.js sessions and accounts cascade on user delete
+  // Delete the user
+  await db.delete(schema.users).where(eq(schema.users.id, userId));
+
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};

@@ -6,6 +6,47 @@ import { getEnv } from "./lib/env";
 const protectedRoutes = ["/post", "/dashboard", "/profile"];
 const adminRoutes = ["/admin"];
 
+// Simple in-memory rate limiting for API mutation endpoints.
+// NOTE: Cloudflare Workers are stateless — this map resets on each deploy or
+// cold start. For production-grade rate limiting, use Cloudflare Rate Limiting
+// rules (https://developers.cloudflare.com/waf/rate-limiting-rules/).
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 30; // max requests per window
+const rateLimitMap = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimitMap.get(ip) ?? [];
+
+  // Evict entries outside the window
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+
+  if (recent.length >= RATE_LIMIT_MAX) {
+    rateLimitMap.set(ip, recent);
+    return true;
+  }
+
+  recent.push(now);
+  rateLimitMap.set(ip, recent);
+  return false;
+}
+
+// Periodically prune stale IPs to prevent unbounded memory growth
+let lastPrune = Date.now();
+function pruneIfNeeded() {
+  const now = Date.now();
+  if (now - lastPrune < RATE_LIMIT_WINDOW_MS) return;
+  lastPrune = now;
+  for (const [ip, timestamps] of rateLimitMap) {
+    const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+    if (recent.length === 0) {
+      rateLimitMap.delete(ip);
+    } else {
+      rateLimitMap.set(ip, recent);
+    }
+  }
+}
+
 function isProtected(pathname: string): boolean {
   return (
     protectedRoutes.some((r) => pathname === r || pathname.startsWith(r + "/")) ||
@@ -59,13 +100,44 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
+  // Rate limit API mutation requests (POST/PUT/DELETE), excluding auth endpoints
+  if (
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/auth") &&
+    method !== "GET" &&
+    method !== "HEAD"
+  ) {
+    const ip =
+      context.request.headers.get("CF-Connecting-IP") ??
+      context.request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ??
+      "unknown";
+    pruneIfNeeded();
+    if (isRateLimited(ip)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": "60",
+        },
+      });
+    }
+  }
+
   // Skip auth routes and public API endpoints
   if (
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/auth/") ||
-    pathname === "/api/health" ||
-    pathname === "/api/pledges"
+    pathname === "/api/health"
   ) {
+    return next();
+  }
+
+  // Public endpoints that benefit from session but don't require it
+  if (pathname === "/api/pledges") {
+    const session = await getSession(context.request);
+    if (session?.user) {
+      (context.locals as any).session = session;
+    }
     return next();
   }
 

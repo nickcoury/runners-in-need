@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
-import { getDb, schema } from "../../../db";
+import { getDb, schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;

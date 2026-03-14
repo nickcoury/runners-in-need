@@ -2,7 +2,6 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
-import { geocode } from "../../../lib/geocode";
 
 function sanitize(s: string): string {
   return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -25,32 +24,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const form = await request.formData();
   const orgId = form.get("orgId") as string;
-  const name = form.get("name") as string;
-  const location = form.get("location") as string;
-  const description = form.get("description") as string;
+  const shippingAddress = form.get("shippingAddress") as string;
+  const shippingAttn = form.get("shippingAttn") as string;
+  const showShippingAddress = form.has("showShippingAddress");
 
   if (orgId !== user.orgId) {
     return new Response("Cannot update another organization", { status: 403 });
   }
 
-  if (!name || name.length < 2 || name.length > 200) {
-    return new Response("Name must be 2-200 characters", { status: 400 });
+  if (showShippingAddress && !shippingAddress?.trim()) {
+    return new Response("Shipping address is required when visibility is enabled", { status: 400 });
   }
-
-  if (!location) {
-    return new Response("Location is required", { status: 400 });
-  }
-
-  const sanitizedLocation = sanitize(location);
-  const coords = await geocode(sanitizedLocation);
 
   await db
     .update(schema.organizations)
     .set({
-      name: sanitize(name),
-      location: sanitizedLocation,
-      description: description ? sanitize(description) : null,
-      ...(coords && { latitude: coords.latitude, longitude: coords.longitude }),
+      shippingAddress: shippingAddress ? sanitize(shippingAddress) : null,
+      shippingAttn: shippingAttn ? sanitize(shippingAttn) : null,
+      showShippingAddress,
     })
     .where(eq(schema.organizations.id, orgId));
 

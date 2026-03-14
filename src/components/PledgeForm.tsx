@@ -86,6 +86,12 @@ export default function PledgeForm({
     >
       <input type="hidden" name="needId" value={needId} />
 
+      {/* Honeypot field — hidden from real users, bots will fill it in */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <h3 className="font-semibold text-gray-900">Pledge Gear</h3>
       <p className="text-sm text-gray-500">
         Tell the organizer what you can provide. You'll coordinate delivery
@@ -140,6 +146,8 @@ export default function PledgeForm({
           id="description"
           name="description"
           required
+          minLength={5}
+          maxLength={2000}
           rows={4}
           className="w-full border rounded-lg px-3 py-2 text-sm"
           placeholder="e.g., I have 3 pairs of men's running shoes (sizes 9, 9.5, 10), lightly used Nike and Brooks. Happy to ship or drop off."

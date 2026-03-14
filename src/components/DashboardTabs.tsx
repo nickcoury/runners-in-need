@@ -31,6 +31,9 @@ interface DashboardTabsProps {
   orgLocation: string;
   orgDescription: string;
   orgId: string;
+  orgShippingAddress: string;
+  orgShippingAttn: string;
+  orgShowShippingAddress: boolean;
   userId: string;
   userRole: string;
 }
@@ -96,6 +99,9 @@ export default function DashboardTabs({
   orgLocation,
   orgDescription,
   orgId,
+  orgShippingAddress,
+  orgShippingAttn,
+  orgShowShippingAddress,
   userId,
   userRole,
 }: DashboardTabsProps) {
@@ -150,6 +156,19 @@ export default function DashboardTabs({
           </button>
         ))}
       </div>
+
+      {/* TBD location warning */}
+      {userRole === "organizer" && orgLocation === "TBD" && (
+        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Your organization location is set to <strong>TBD</strong>. Needs you post will inherit this placeholder.{" "}
+          <button
+            onClick={() => setActive("account")}
+            className="font-medium underline hover:text-amber-900"
+          >
+            Update it in Account settings
+          </button>
+        </div>
+      )}
 
       {/* My Needs */}
       {active === "needs" && (
@@ -463,6 +482,81 @@ export default function DashboardTabs({
                 className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
               >
                 Save Changes
+              </button>
+            </form>
+          )}
+
+          {userRole === "organizer" && orgId && (
+            <form
+              className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const data = new FormData(form);
+                data.set("orgId", orgId);
+                const res = await fetch("/api/org/shipping", {
+                  method: "POST",
+                  body: data,
+                });
+                if (res.ok) {
+                  const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
+                  btn.textContent = "Saved!";
+                  setTimeout(() => { btn.textContent = "Save Shipping Address"; }, 2000);
+                }
+              }}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">
+                Shipping Address
+              </h3>
+              <p className="text-xs text-gray-500">
+                Provide an address where donors can ship gear. When visible, this address appears on your posted needs.
+              </p>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Attention Line <span className="text-gray-400 font-normal">(optional, e.g. "Attn: Coach Smith")</span>
+                </label>
+                <input
+                  type="text"
+                  name="shippingAttn"
+                  defaultValue={orgShippingAttn}
+                  maxLength={200}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Address
+                </label>
+                <textarea
+                  name="shippingAddress"
+                  defaultValue={orgShippingAddress}
+                  rows={3}
+                  maxLength={500}
+                  placeholder={"123 Main St\nSuite 100\nPortland, OR 97201"}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="showShippingAddress"
+                  id="showShippingAddress"
+                  defaultChecked={orgShowShippingAddress}
+                  className="rounded border-gray-300 text-[#2D4A2D] focus:ring-[#2D4A2D]/30"
+                />
+                <label htmlFor="showShippingAddress" className="text-sm text-gray-700">
+                  Show shipping address on my posted needs
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+              >
+                Save Shipping Address
               </button>
             </form>
           )}

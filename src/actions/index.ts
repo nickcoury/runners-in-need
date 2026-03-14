@@ -4,6 +4,7 @@ import { getDb, schema } from "../db";
 import { createId } from "../lib/id";
 import { eq } from "drizzle-orm";
 import { sendPledgeStatusEmail } from "../lib/email";
+import { generateRemainingNeedText } from "../lib/llm";
 
 function sanitize(s: string): string {
   return s
@@ -63,6 +64,51 @@ export const server = {
         );
       }
 
+      // On delivery, check if need is partially fulfilled and generate suggested text
+      if (input.status === "delivered") {
+        const allPledges = await db.query.pledges.findMany({
+          where: eq(schema.pledges.needId, pledge.needId),
+        });
+
+        const deliveredPledges = allPledges.filter(
+          (p) => p.id === input.pledgeId || p.status === "delivered"
+        );
+        const activePledges = allPledges.filter(
+          (p) =>
+            p.id !== input.pledgeId &&
+            (p.status === "collecting" || p.status === "ready_to_deliver")
+        );
+
+        const allResolved = activePledges.length === 0;
+
+        if (allResolved && deliveredPledges.length === allPledges.length) {
+          // Fully fulfilled — all pledges delivered
+          await db
+            .update(schema.needs)
+            .set({ status: "fulfilled", updatedAt: new Date() })
+            .where(eq(schema.needs.id, pledge.needId));
+        } else {
+          // Partially fulfilled — generate suggested remaining text
+          const deliveredDescriptions = deliveredPledges.map(
+            (p) => p.description
+          );
+
+          const suggestedText = await generateRemainingNeedText(
+            pledge.need.body,
+            deliveredDescriptions
+          );
+
+          await db
+            .update(schema.needs)
+            .set({
+              status: "partially_fulfilled",
+              suggestedText,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.needs.id, pledge.needId));
+        }
+      }
+
       return { success: true };
     },
   }),
@@ -74,8 +120,14 @@ export const server = {
       orgName: z.string().min(2).max(200),
       orgDescription: z.string().min(10).max(2000),
       orgUrl: z.string().url().optional(),
+      website: z.string().optional(),
     }),
     handler: async (input) => {
+      // Honeypot check — if filled, it's a bot; return fake success
+      if (input.website) {
+        return { id: "ok" };
+      }
+
       const db = getDb();
       const request = {
         id: createId(),

@@ -19,6 +19,7 @@
     "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@astrojs/cloudflare": "^13.1.0",
     "@astrojs/react": "^5.0.0",
     "@auth/drizzle-adapter": "^1.11.1",

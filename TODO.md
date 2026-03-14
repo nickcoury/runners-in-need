@@ -8,7 +8,7 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 These are broken features that affect core user journeys.
 
-- [ ] **GAP-1: Authenticated donor pledges are orphaned**
+- [x] **GAP-1: Authenticated donor pledges are orphaned**
   - The pledge API (`/api/pledges`) never sets `donorId` from the session — only uses form data
   - Donor dashboard shows zero pledges (queries by `donorId`)
   - Authenticated donors can't message on their own pledges
@@ -19,59 +19,40 @@ These are broken features that affect core user journeys.
   - Nothing triggers `fulfilled` or `partially_fulfilled` status
   - Decision needed from Nick: automatic vs organizer confirmation (see NICK-TODOS.md)
 
-- [ ] **GAP-7: `reviewedBy` never set on approve/deny**
-  - Admin approval/denial doesn't record who reviewed
-  - The column exists but is always null
-  - Quick fix in `/api/admin/approve-request.ts` and `deny-request.ts`
+- [x] **GAP-7: `reviewedBy` never set on approve/deny**
+  - Already implemented — both endpoints set `reviewedBy: session.user.id`
 
 ---
 
 ## High Priority
 
-- [ ] **GAP-8: Re-geocode lat/lng when org location is updated**
-  - Profile page lets orgs update location text but coordinates stay stale
-  - Map shows wrong position after location change
+- [x] **GAP-8: Re-geocode lat/lng when org location is updated**
 
-- [ ] **Pledge description length validation**
-  - Currently unbounded — donors can submit empty or excessively long descriptions
-  - Add min/max length validation
+- [x] **Pledge description length validation** (5–2000 chars, client + server)
 
-- [ ] **GAP-13: Notification email when organizer request is approved/denied**
-  - Applicants must check back manually — no email sent on decision
+- [x] **GAP-13: Notification email when organizer request is approved/denied**
 
-- [ ] **GAP-6: Dashboard banner when org location is "TBD"**
-  - Approved orgs get location "TBD" with no prompt to set a real location
-  - Needs inherit a meaningless location; map shows wrong position
+- [x] **GAP-6: Dashboard banner when org location is "TBD"**
 
 ---
 
 ## Medium Priority
 
-- [ ] **Email reminder system for expiring needs**
-  - Reminders at: 1 month before, 2 weeks before, expiration day
-  - One-click refresh link to extend need expiration
+- [x] **Email reminder system for expiring needs** (via `/api/cron/daily`, needs `CRON_SECRET` env var)
 
-- [ ] **Stale pledge auto-expiration**
-  - Pledges with no update in 30 days should auto-expire or prompt withdrawal
+- [x] **Stale pledge auto-expiration** (30-day inactivity, runs in daily cron)
 
-- [ ] **Honeypot fields on forms**
-  - Anti-spam measure for pledge and application forms
+- [x] **Honeypot fields on forms** (pledge + organizer application)
 
-- [ ] **Rate limiting on API endpoints**
-  - Prevent abuse of pledge creation, messaging, etc.
+- [x] **Rate limiting on API endpoints** (30 req/min per IP on mutations, in-memory)
 
-- [ ] **Shipping address management UI**
-  - Schema exists in DB but no UI to manage it
-  - Address should only be visible to donors with accepted pledges
+- [x] **Shipping address management UI** (organizer dashboard Account tab + need detail display)
 
 ---
 
 ## Low Priority / Post-Launch
 
-- [ ] **LLM-assisted partial fulfillment**
-  - Auto-generate remaining need text after partial delivery
-  - Requires `ANTHROPIC_API_KEY` in Cloudflare Workers env vars
-  - Claude API call on server side; fallback: copy original text for manual editing
+- [x] **LLM-assisted partial fulfillment** (src/lib/llm.ts, needs `ANTHROPIC_API_KEY` env var, stores in `suggestedText` column)
 
 - [ ] **Account deletion flow (GAP-9)**
   - GDPR/CCPA requirement

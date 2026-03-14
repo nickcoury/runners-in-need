@@ -3,6 +3,7 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { sendOrganizerApprovedEmail } from "../../../lib/email";
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   // Defense-in-depth: verify admin role at handler level
@@ -45,6 +46,15 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
     .update(schema.organizerRequests)
     .set({ status: "approved", reviewedAt: new Date() })
     .where(eq(schema.organizerRequests.id, requestId));
+
+  // Notify applicant (fire-and-forget)
+  const applicant = await db.query.users.findFirst({
+    where: eq(schema.users.id, orgRequest.userId),
+    columns: { email: true },
+  });
+  if (applicant) {
+    sendOrganizerApprovedEmail(applicant.email, orgRequest.orgName);
+  }
 
   return redirect("/admin/requests");
 };

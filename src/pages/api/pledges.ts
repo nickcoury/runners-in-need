@@ -10,8 +10,17 @@ function sanitize(s: string): string {
   return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const form = await request.formData();
+  // Honeypot check — if filled, it's a bot
+  const honeypot = form.get("website") as string | null;
+  if (honeypot) {
+    return new Response(JSON.stringify({ id: "ok" }), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const needId = form.get("needId") as string;
   const donorEmail = form.get("donorEmail") as string;
   const donorName = form.get("donorName") as string | null;
@@ -19,6 +28,13 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!needId || !donorEmail || !description) {
     return new Response(JSON.stringify({ error: "Missing required fields" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (description.trim().length < 5 || description.trim().length > 2000) {
+    return new Response(JSON.stringify({ error: "Description must be between 5 and 2000 characters" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -67,9 +83,13 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
+  const session = (locals as any).session;
+  const donorId = session?.user?.id ?? null;
+
   const pledge = {
     id: nanoid(),
     needId,
+    donorId,
     donorEmail: donorEmail.trim(),
     donorName: donorName ? sanitize(donorName) : undefined,
     description: sanitize(description),

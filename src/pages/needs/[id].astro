@@ -123,6 +123,10 @@ if (currentUserId) {
 }
 const isOrgMember = currentUserOrgId === needRow.orgId;
 
+const showShipping = needRow.organization.showShippingAddress && !!needRow.organization.shippingAddress;
+const shippingAddress = needRow.organization.shippingAddress || "";
+const shippingAttn = needRow.organization.shippingAttn || "";
+
 const pledgesWithComputed = pledges.map((p) => {
   const badge = statusBadgeMap[p.status] || statusBadgeMap.pending;
   const label = statusLabelMap[p.status] || "Pending";
@@ -196,6 +200,17 @@ const pledgesWithComputed = pledges.map((p) => {
 
       {/* Body text */}
       <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{need.body}</div>
+
+      {/* Shipping address */}
+      {showShipping && (
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <p class="text-xs font-medium text-gray-500 mb-1">Ship donations to:</p>
+          <div class="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+            {shippingAttn && <p class="font-medium">{shippingAttn}</p>}
+            <p class="whitespace-pre-line">{shippingAddress}</p>
+          </div>
+        </div>
+      )}
     </div>
 
     {/* Pledges section */}

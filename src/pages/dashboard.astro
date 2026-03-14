@@ -27,6 +27,9 @@ const orgEmail = session.user.email || '';
 const orgLocation = user?.organization?.location || '';
 const orgDescription = user?.organization?.description || '';
 const orgId = user?.orgId || '';
+const orgShippingAddress = user?.organization?.shippingAddress || '';
+const orgShippingAttn = user?.organization?.shippingAttn || '';
+const orgShowShippingAddress = user?.organization?.showShippingAddress || false;
 
 let needs: Array<{
   id: string;
@@ -120,6 +123,9 @@ if (userRole === 'organizer' && user?.orgId) {
     orgLocation={orgLocation}
     orgDescription={orgDescription}
     orgId={orgId}
+    orgShippingAddress={orgShippingAddress}
+    orgShippingAttn={orgShippingAttn}
+    orgShowShippingAddress={orgShowShippingAddress}
     userId={userId}
     userRole={userRole}
   />

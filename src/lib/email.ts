@@ -154,3 +154,101 @@ export async function sendMessageNotificationEmail(
 
   await sendEmail(recipientEmail, subject, html);
 }
+
+// ============================================================
+// Template: Organizer request approved
+// ============================================================
+
+export async function sendOrganizerApprovedEmail(
+  applicantEmail: string,
+  orgName: string
+): Promise<void> {
+  const subject = "Your organizer request has been approved!";
+  const html = emailLayout(
+    "Request Approved",
+    `<p>Great news! Your request to create <strong>${orgName}</strong> on Runners In Need has been approved.</p>
+     <p>You now have organizer access. You can start posting needs for your organization right away.</p>
+     <p style="margin-top:24px;">
+       <a href="${getSiteUrl()}/dashboard" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">Go to Dashboard</a>
+     </p>`
+  );
+
+  await sendEmail(applicantEmail, subject, html);
+}
+
+// ============================================================
+// Template: Organizer request denied
+// ============================================================
+
+export async function sendOrganizerDeniedEmail(
+  applicantEmail: string,
+  orgName: string
+): Promise<void> {
+  const subject = "Update on your organizer request";
+  const html = emailLayout(
+    "Request Not Approved",
+    `<p>Thank you for your interest in Runners In Need. Unfortunately, your request to create <strong>${orgName}</strong> was not approved at this time.</p>
+     <p>If you believe this was an error or would like more information, please reach out to us.</p>`
+  );
+
+  await sendEmail(applicantEmail, subject, html);
+}
+
+// ============================================================
+// Template: Need expiring reminder (sent to org members)
+// ============================================================
+
+export async function sendNeedExpiryReminderEmail(
+  orgEmail: string,
+  needTitle: string,
+  needId: string,
+  extendToken: string,
+  timeframe: "1 month" | "2 weeks" | "today"
+): Promise<void> {
+  const siteUrl = getSiteUrl();
+  const extendUrl = `${siteUrl}/api/needs/${needId}/extend?token=${extendToken}`;
+
+  const urgencyText =
+    timeframe === "today"
+      ? "expires <strong>today</strong>"
+      : `expires in <strong>${timeframe}</strong>`;
+
+  const subject =
+    timeframe === "today"
+      ? `"${needTitle}" expires today`
+      : `"${needTitle}" expires in ${timeframe}`;
+
+  const html = emailLayout(
+    "Need Expiring Soon",
+    `<p>Your need ${needLink(needId, `"${needTitle}"`)} ${urgencyText}.</p>
+     <p>If this need is still active, you can extend it for another 90 days with one click:</p>
+     <p style="margin-top:24px;">
+       <a href="${extendUrl}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">Extend Need 90 Days</a>
+     </p>
+     <p style="margin-top:16px;color:#666;font-size:13px;">If this need has been fulfilled or is no longer relevant, you can ignore this email and it will expire automatically.</p>`
+  );
+
+  await sendEmail(orgEmail, subject, html);
+}
+
+// ============================================================
+// Template: Pledge auto-expired notification (sent to donor)
+// ============================================================
+
+export async function sendPledgeExpiredEmail(
+  donorEmail: string,
+  needTitle: string,
+  needId: string
+): Promise<void> {
+  const subject = `Your pledge for "${needTitle}" has expired`;
+  const html = emailLayout(
+    "Pledge Expired",
+    `<p>Your pledge for ${needLink(needId, `"${needTitle}"`)} has been automatically expired due to inactivity (no updates for 30 days).</p>
+     <p>If you'd still like to help, you can visit the need page and create a new pledge.</p>
+     <p style="margin-top:24px;">
+       <a href="${getSiteUrl()}/needs/${needId}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">View Need</a>
+     </p>`
+  );
+
+  await sendEmail(donorEmail, subject, html);
+}
