@@ -116,6 +116,8 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
     <div className="relative">
       <div
         ref={containerRef}
+        role="application"
+        aria-label="Map showing locations of gear needs"
         className={fullscreen ? "w-full h-full" : "rounded-lg h-56 w-full"}
         style={{ background: "#e5e7eb" }}
       />
