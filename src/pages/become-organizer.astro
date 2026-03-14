@@ -37,7 +37,7 @@ if (isSignedIn) {
         // existingRequest stays null → form will show
       } else {
         existingRequest = request;
-        reapplyDate = twelveMonthsLater.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        reapplyDate = twelveMonthsLater.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       }
     } else {
       existingRequest = request ?? null;

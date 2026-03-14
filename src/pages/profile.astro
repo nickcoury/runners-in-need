@@ -169,8 +169,8 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
             >
               Save Changes
             </button>
-            <span id="save-status" class="text-sm text-green-600 hidden">Saved!</span>
-            <span id="save-error" class="text-sm text-red-600 hidden"></span>
+            <span id="save-status" role="status" class="text-sm text-green-600 hidden">Saved!</span>
+            <span id="save-error" role="alert" class="text-sm text-red-600 hidden"></span>
           </div>
         </form>
       </div>
@@ -238,8 +238,8 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
               >
                 Save Organization
               </button>
-              <span id="org-save-status" class="text-sm text-green-600 hidden">Saved!</span>
-              <span id="org-save-error" class="text-sm text-red-600 hidden"></span>
+              <span id="org-save-status" role="status" class="text-sm text-green-600 hidden">Saved!</span>
+              <span id="org-save-error" role="alert" class="text-sm text-red-600 hidden"></span>
             </div>
           </form>
         </div>

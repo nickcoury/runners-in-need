@@ -17,6 +17,7 @@ export default function PledgeForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const turnstileRef = useRef<HTMLDivElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
 
   useEffect(() => {
@@ -44,9 +45,15 @@ export default function PledgeForm({
     if (window.turnstile) render();
   }, [turnstileSiteKey]);
 
+  useEffect(() => {
+    if (submitted && successRef.current) {
+      successRef.current.focus();
+    }
+  }, [submitted]);
+
   if (submitted) {
     return (
-      <div className="border border-green-200 bg-green-50 rounded-lg p-4 text-sm text-green-800">
+      <div ref={successRef} tabIndex={-1} role="status" className="border border-green-200 bg-green-50 rounded-lg p-4 text-sm text-green-800 outline-none">
         <p className="font-medium">Pledge submitted!</p>
         <p className="mt-1">
           The organizer will be notified. You'll receive updates at the email
