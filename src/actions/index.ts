@@ -31,6 +31,10 @@ export const server = {
       });
       if (!pledge) throw new Error("Pledge not found");
 
+      if (pledge.need.status === "fulfilled" || pledge.need.status === "expired") {
+        throw new Error("This need is no longer active");
+      }
+
       const user = await db.query.users.findFirst({
         where: eq(schema.users.id, userId),
       });
@@ -54,7 +58,7 @@ export const server = {
           pledge.need.title,
           pledge.need.id,
           input.status
-        );
+        ).catch((err) => console.error("[email] pledge status notification failed:", err));
       }
 
       // On delivery, check if need is partially fulfilled and generate suggested text

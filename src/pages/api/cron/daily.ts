@@ -147,7 +147,7 @@ async function expireStalePledges(results: { pledgesExpired: number }) {
         pledge.donorEmail,
         pledge.need.title,
         pledge.need.id
-      );
+      ).catch((err) => console.error("[email] pledge expired notification failed:", err));
     }
   }
 }

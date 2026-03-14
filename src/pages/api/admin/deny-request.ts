@@ -35,7 +35,8 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
       columns: { email: true },
     });
     if (applicant) {
-      sendOrganizerDeniedEmail(applicant.email, orgRequest.orgName);
+      sendOrganizerDeniedEmail(applicant.email, orgRequest.orgName)
+        .catch((err) => console.error("[email] organizer denied notification failed:", err));
     }
   }
 

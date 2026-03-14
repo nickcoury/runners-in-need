@@ -70,7 +70,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
           pledge.need.id,
           user.name,
           sanitized
-        );
+        ).catch((err) => console.error("[email] message notification failed:", err));
       }
     } else {
       // Org member sent a message — notify the donor
@@ -81,7 +81,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
           pledge.need.id,
           user.name,
           sanitized
-        );
+        ).catch((err) => console.error("[email] message notification failed:", err));
       }
     }
 

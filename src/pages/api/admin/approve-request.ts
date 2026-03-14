@@ -54,7 +54,8 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
     columns: { email: true },
   });
   if (applicant) {
-    sendOrganizerApprovedEmail(applicant.email, orgRequest.orgName);
+    sendOrganizerApprovedEmail(applicant.email, orgRequest.orgName)
+      .catch((err) => console.error("[email] organizer approved notification failed:", err));
   }
 
   return redirect("/admin/requests");

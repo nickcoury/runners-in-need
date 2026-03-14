@@ -101,7 +101,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         need.id,
         pledge.donorName ?? null,
         pledge.description
-      );
+      ).catch((err) => console.error("[email] pledge received notification failed:", err));
     }
 
     return new Response(JSON.stringify({ id: pledge.id }), {
