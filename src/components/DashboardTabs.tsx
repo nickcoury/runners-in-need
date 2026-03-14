@@ -110,10 +110,14 @@ export default function DashboardTabs({
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
+      <div className="flex gap-1 border-b border-gray-200 mb-6" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
+            role="tab"
+            aria-selected={active === tab.key}
+            aria-controls={`tabpanel-${tab.key}`}
+            id={`tab-${tab.key}`}
             onClick={() => setActive(tab.key)}
             className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
               active === tab.key
@@ -141,7 +145,7 @@ export default function DashboardTabs({
 
       {/* My Needs */}
       {active === "needs" && (
-        <div>
+        <div role="tabpanel" id="tabpanel-needs" aria-labelledby="tab-needs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
               Your Posted Needs
@@ -248,7 +252,7 @@ export default function DashboardTabs({
 
       {/* Incoming Pledges */}
       {active === "pledges" && (
-        <div>
+        <div role="tabpanel" id="tabpanel-pledges" aria-labelledby="tab-pledges">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Incoming Pledges
           </h2>
@@ -350,7 +354,7 @@ export default function DashboardTabs({
 
       {/* Account */}
       {active === "account" && (
-        <div className="space-y-6">
+        <div className="space-y-6" role="tabpanel" id="tabpanel-account" aria-labelledby="tab-account">
           <h2 className="text-lg font-semibold text-gray-900">
             Account Settings
           </h2>

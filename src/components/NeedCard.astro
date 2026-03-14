@@ -24,7 +24,7 @@ const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 6
 <div class="need-card bg-white border border-gray-200 rounded-lg p-4 flex flex-col hover:border-[#3D7A3D] transition-colors" data-category={categoryTag} data-searchable={`${title} ${body} ${orgName} ${location}`.toLowerCase()} data-lat={lat ?? ''} data-lng={lng ?? ''}>
   {/* Category badge + extras */}
   <div class="flex items-center gap-2 mb-2">
-    <span class:list={["text-xs font-medium px-2 py-0.5 rounded-full", categoryStyles[categoryTag] || categoryStyles.other]}>
+    <span class:list={["text-xs font-medium px-2 py-0.5 rounded-full", categoryStyles[categoryTag] || categoryStyles.other]} data-testid="need-card-category">
       {categoryLabels[categoryTag] || "Other"}
     </span>
     {extrasWelcome && (
@@ -40,7 +40,7 @@ const daysUntilExpiry = Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 6
   </a>
 
   {/* Org + location */}
-  <p class="text-xs text-gray-500 mb-2">{orgName} &middot; {location}</p>
+  <p class="text-xs text-gray-500 mb-2" data-testid="need-card-org-location">{orgName} &middot; {location}</p>
 
   {/* Description */}
   <p class="text-sm text-gray-600 line-clamp-3 mb-3 whitespace-pre-line flex-1">{body}</p>

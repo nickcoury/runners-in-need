@@ -40,6 +40,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
     </style>
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-[#2D4A2D] focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-medium">Skip to main content</a>
     <header class="bg-[#2D4A2D] text-white sticky top-0 z-50" style="view-transition-name: site-header;">
       <nav class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-6">
         <a href="/" class="text-xl font-bold shrink-0">Runners In Need</a>
@@ -55,31 +56,31 @@ const { title, description = 'Connecting runners who have extra gear with organi
 
           {/* Signed-in state — hidden by default, shown by JS */}
           <div id="user-menu" class="relative hidden">
-            <button id="user-menu-btn" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 pl-1.5 pr-3 py-1 rounded-lg transition-colors">
+            <button id="user-menu-btn" aria-haspopup="true" aria-expanded="false" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 pl-1.5 pr-3 py-1 rounded-lg transition-colors">
               <span id="user-avatar" class="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold overflow-hidden">
                 <span id="user-initials"></span>
               </span>
               <span id="user-name-display" class="max-w-[120px] truncate"></span>
-              <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg class="w-3.5 h-3.5 opacity-70" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div id="user-dropdown" class="hidden absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 text-gray-700">
+            <div id="user-dropdown" role="menu" class="hidden absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 text-gray-700">
               <div id="dropdown-user-info" class="px-4 py-2.5 border-b border-gray-100">
                 <p id="dropdown-name" class="text-sm font-medium text-gray-900 truncate"></p>
                 <p id="dropdown-email" class="text-xs text-gray-500 truncate"></p>
               </div>
-              <a href="/dashboard" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Dashboard</a>
-              <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Profile</a>
+              <a href="/dashboard" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Dashboard</a>
+              <a href="/profile" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Profile</a>
               <div class="border-t border-gray-100 mt-1 pt-1">
-                <button id="sign-out-btn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
+                <button id="sign-out-btn" role="menuitem" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
               </div>
             </div>
           </div>
         </div>
 
         <button id="mobile-menu-btn" class="md:hidden ml-auto p-1" aria-label="Toggle menu" aria-expanded="false">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
@@ -186,12 +187,26 @@ const { title, description = 'Connecting runners who have extra gear with organi
       // Desktop dropdown toggle
       const userMenuBtn = document.getElementById('user-menu-btn');
       const userDropdown = document.getElementById('user-dropdown');
+
+      function closeDropdown() {
+        userDropdown?.classList.add('hidden');
+        userMenuBtn?.setAttribute('aria-expanded', 'false');
+      }
+      function toggleDropdown() {
+        const isHidden = userDropdown?.classList.toggle('hidden');
+        userMenuBtn?.setAttribute('aria-expanded', String(!isHidden));
+      }
+
       userMenuBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
-        userDropdown?.classList.toggle('hidden');
+        toggleDropdown();
       });
-      document.addEventListener('click', () => {
-        userDropdown?.classList.add('hidden');
+      document.addEventListener('click', closeDropdown);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !userDropdown?.classList.contains('hidden')) {
+          closeDropdown();
+          userMenuBtn?.focus();
+        }
       });
 
       // Sign out handler (POST with CSRF)
@@ -211,7 +226,7 @@ const { title, description = 'Connecting runners who have extra gear with organi
       document.getElementById('mobile-sign-out-btn')?.addEventListener('click', handleSignOut);
     </script>
 
-    <main class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>
+    <main id="main-content" class:list={["flex-1 w-full", fullWidth ? "" : "max-w-6xl mx-auto px-4 py-6"]}>
       <slot />
     </main>
 

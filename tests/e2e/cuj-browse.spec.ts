@@ -78,11 +78,11 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     expect(title?.trim().length).toBeGreaterThan(0);
 
     // Org name and location line
-    const orgLocationLine = firstCard.locator("p.text-xs.text-gray-500");
+    const orgLocationLine = firstCard.locator('[data-testid="need-card-org-location"]');
     await expect(orgLocationLine).toBeVisible();
 
     // Category badge
-    const badge = firstCard.locator("span.rounded-full").first();
+    const badge = firstCard.locator('[data-testid="need-card-category"]');
     await expect(badge).toBeVisible();
 
     // MATCH NEED button
@@ -133,21 +133,19 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     expect(titleText?.trim().length).toBeGreaterThan(0);
 
     // Org name — in the metadata line
-    const orgName = page.locator(".font-medium.text-gray-700").first();
+    const orgName = page.locator('[data-testid="need-org-name"]');
     await expect(orgName).toBeVisible();
 
     // Location — adjacent to org name in the metadata row
-    const metaRow = page.locator(
-      ".flex.flex-wrap.items-center.gap-x-3.text-sm.text-gray-500"
-    );
+    const metaRow = page.locator('[data-testid="need-meta-row"]');
     await expect(metaRow).toBeVisible();
 
     // Category badge (in the need card header area, visible)
-    const categoryBadge = page.locator(".max-w-3xl span.rounded-full").first();
+    const categoryBadge = page.locator('[data-testid="need-category-badge"]');
     await expect(categoryBadge).toBeVisible();
 
     // Expiry info — in the metadata bar (e.g. "Expires March 15, 2026" or "X days left")
-    const metadataBar = page.locator(".border-t.border-b.border-gray-100");
+    const metadataBar = page.locator('[data-testid="need-metadata-bar"]');
     await expect(metadataBar).toBeVisible();
     const metaText = await metadataBar.textContent();
     expect(metaText).toMatch(/Expires|days left|Expired/);

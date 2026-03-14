@@ -119,10 +119,13 @@ test.describe("CUJ-3: Auth Flow", () => {
   test("signin page has links to terms and privacy", async ({ page }) => {
     await page.goto("/auth/signin");
 
-    const termsLink = page.locator('.max-w-sm a[href="/terms"]');
+    const legalText = page.locator('[data-testid="signin-legal"]');
+    await expect(legalText).toBeVisible();
+
+    const termsLink = legalText.locator('a[href="/terms"]');
     await expect(termsLink).toBeVisible();
 
-    const privacyLink = page.locator('.max-w-sm a[href="/privacy"]');
+    const privacyLink = legalText.locator('a[href="/privacy"]');
     await expect(privacyLink).toBeVisible();
   });
 });

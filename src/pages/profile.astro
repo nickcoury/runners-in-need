@@ -100,15 +100,23 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
     {/* Tabs (only shown for organizers) */}
     {isOrganizer && (
       <div class="mb-6">
-        <div class="flex border-b border-gray-200">
+        <div class="flex border-b border-gray-200" role="tablist">
           <button
             data-tab="profile"
+            role="tab"
+            aria-selected="true"
+            aria-controls="tab-profile"
+            id="tab-btn-profile"
             class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-[#2D4A2D] text-[#2D4A2D] -mb-px"
           >
             Profile
           </button>
           <button
             data-tab="organization"
+            role="tab"
+            aria-selected="false"
+            aria-controls="tab-organization"
+            id="tab-btn-organization"
             class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 -mb-px"
           >
             Organization
@@ -118,7 +126,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
     )}
 
     {/* Profile tab content */}
-    <div id="tab-profile">
+    <div id="tab-profile" role="tabpanel" aria-labelledby="tab-btn-profile">
       <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
         <h3 class="text-sm font-semibold text-gray-900 mb-4">Edit Profile</h3>
 
@@ -169,7 +177,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
 
     {/* Organization tab content (organizers only) */}
     {isOrganizer && (
-      <div id="tab-organization" class="hidden">
+      <div id="tab-organization" class="hidden" role="tabpanel" aria-labelledby="tab-btn-organization">
         <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-gray-900">Organization Details</h3>
@@ -262,13 +270,15 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
     tabBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = (btn as HTMLElement).dataset.tab!;
-        // Update button styles
+        // Update button styles and aria-selected
         tabBtns.forEach((b) => {
           b.classList.remove('border-[#2D4A2D]', 'text-[#2D4A2D]');
           b.classList.add('border-transparent', 'text-gray-500');
+          b.setAttribute('aria-selected', 'false');
         });
         btn.classList.add('border-[#2D4A2D]', 'text-[#2D4A2D]');
         btn.classList.remove('border-transparent', 'text-gray-500');
+        btn.setAttribute('aria-selected', 'true');
         // Show/hide tab content
         document.getElementById('tab-profile')?.classList.toggle('hidden', tab !== 'profile');
         document.getElementById('tab-organization')?.classList.toggle('hidden', tab !== 'organization');

@@ -139,7 +139,7 @@ const pledgesWithComputed = pledges.map((p) => {
     <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
       {/* Header: category + extras + expiry */}
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class:list={["text-xs font-medium px-2.5 py-1 rounded-full", categoryStyle]}>
+        <span class:list={["text-xs font-medium px-2.5 py-1 rounded-full", categoryStyle]} data-testid="need-category-badge">
           {categoryLabel}
         </span>
         {need.extrasWelcome && (
@@ -156,8 +156,8 @@ const pledgesWithComputed = pledges.map((p) => {
       <h1 class="text-2xl font-bold text-gray-900 mb-2">{need.title}</h1>
 
       {/* Org + location + date */}
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4">
-        <a href={`/org/${needRow.orgId}`} class="font-medium text-gray-700 hover:text-[#2D4A2D] hover:underline">{need.orgName}</a>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4" data-testid="need-meta-row">
+        <a href={`/org/${needRow.orgId}`} class="font-medium text-gray-700 hover:text-[#2D4A2D] hover:underline" data-testid="need-org-name">{need.orgName}</a>
         <span>&middot;</span>
         <span>{need.location}</span>
         <span>&middot;</span>
@@ -165,7 +165,7 @@ const pledgesWithComputed = pledges.map((p) => {
       </div>
 
       {/* Metadata bar */}
-      <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400 border-t border-b border-gray-100 py-3 mb-4">
+      <div class="flex flex-wrap items-center gap-4 text-xs text-gray-400 border-t border-b border-gray-100 py-3 mb-4" data-testid="need-metadata-bar">
         <span>{pledgeCountText}</span>
         <span>Expires {expiresDateStr}</span>
         <span class="capitalize">Status: {need.status}</span>
