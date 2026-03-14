@@ -161,12 +161,19 @@ const categories = [
     {/* Card grid — hidden on mobile when map tab active */}
     <div id="listings-view" class="flex-1 min-w-0">
       {allNeeds.length === 0 ? (
-        <div class="text-center py-12 text-gray-500">
-          <p class="text-lg font-medium mb-2">No needs posted yet</p>
-          <p class="text-sm mb-4">Be the first to post a need for your running organization.</p>
-          <a href="/post" class="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F]">
-            Post a Need
-          </a>
+        <div class="text-center py-16 text-gray-500">
+          <p class="text-lg font-medium mb-2 text-gray-700">No needs posted yet</p>
+          <p class="text-sm mb-6 max-w-md mx-auto">
+            When running organizations post gear needs, they'll appear here. If you run a program that serves runners, you can post what your athletes need.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/become-organizer" class="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors">
+              Become an Organizer
+            </a>
+            <a href="/about" class="inline-block border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium hover:border-[#2D4A2D] hover:text-[#2D4A2D] transition-colors">
+              Learn More
+            </a>
+          </div>
         </div>
       ) : (
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

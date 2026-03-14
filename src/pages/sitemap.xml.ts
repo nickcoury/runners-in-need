@@ -19,6 +19,7 @@ export const GET: APIRoute = async () => {
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
     { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     { loc: "/become-organizer", priority: "0.6", changefreq: "monthly" },
+    { loc: "/drives", priority: "0.7", changefreq: "daily" },
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
