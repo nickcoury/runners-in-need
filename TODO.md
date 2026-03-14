@@ -21,13 +21,13 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 ## Testing
 
-62+ Playwright e2e tests exist covering all Critical User Journeys. Run with:
+72+ Playwright e2e tests exist covering all Critical User Journeys. Run with:
 ```bash
 npm run dev       # start dev server first
 npm run test:e2e  # run tests
 ```
 
-No unit tests yet. Integration tests cover: browsing, pledge forms, auth redirects, navigation, static pages, organizer application flow. Auth-required tests (dashboard, posting, messaging) verify redirect behavior only.
+No unit tests yet. Integration tests cover: browsing, pledge forms, auth redirects, navigation, static pages, organizer application flow, quality/SEO checks. Auth-required tests (dashboard, posting, messaging) verify redirect behavior only.
 
 ---
 
