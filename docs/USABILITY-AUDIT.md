@@ -29,14 +29,12 @@ Focus: usability bugs, missing functionality, UX friction points.
 
 **Fix applied:** Guarded `window.location.hash` access in `useState` initializer with `typeof window !== 'undefined'` check for SSR safety.
 
-### C2. "Sign In" shows in nav even when authenticated
+### C2. "Sign In" shows in nav even when authenticated — PARTIALLY FIXED
 **Personas:** Priya, Coach Maria | **Severity:** Critical
 
-The nav bar shows "Sign In" prominently even when the user is logged in via session cookie. Dashboard and Profile links exist but the user menu dropdown doesn't appear. Users can't tell they're signed in.
+**What was fixed:** Redesigned sign-in as combined sign-up/sign-in flow ("Welcome to Runners In Need"), nav link changed to "Get Started", contextual subheading based on callbackUrl. Research confirmed combined flow is best practice for magic link + OAuth auth.
 
-**Root cause:** The session cookie set via Playwright may not be picked up by the middleware's `getSession()` in the same way Auth.js sets it. This could be a cookie format issue (Auth.js may sign/encrypt session tokens) or the session lookup may fail. Need to verify if this is a test-only issue or affects real sessions.
-
-Nick - I can reproduce this. Further, I just get sign in, not sign up. We should make sure to have sign up, sign in, and signed-in (where the profile picture menu shows) like most sites. Think about the most elegant way to handle sign up vs sign in. I always wanted to make them the same form (if you have an account it signs in, if you don't it creates it) but I suspect there's a reason most sites don't. Lets do a bit of research on the best UX pattern and update our plan and then execute that.
+**Still open:** The nav still shows "Get Started" when authenticated via Playwright session cookies. This may be a test-only issue (Auth.js cookie format mismatch) or a real production bug. Needs verification with real Auth.js sessions in production.
 
 ### C3. Donor has no way to see or manage their pledges
 **Personas:** Sarah, Priya | **Severity:** Critical
@@ -86,14 +84,8 @@ When an organizer deletes their account, the organization record is orphaned (ne
 
 Nick - Do we have or do we need a one to many relationship between organizations and accounts? So humans have accounts, and they can always be donors. They can also be linked to an organization and then that lets them manage it. Perhaps we should keep it max one person per org to keep it simple for now, and keep emails and communication straightforward. But then an org can still exist without a human if the human deletes their account, and we can swap humans if they need to be handed over. We can also indicate if an org is "inactive" via having no human. Then we can label offers accordingly so people know there's no contacts for the org without losing the org history or deleting things that peolpe might expect to find still.
 
-### C4. No post-pledge next steps
-**Personas:** Sarah, Priya | **Severity:** Critical
-
-After submitting a pledge, the user sees "Pledge submitted! The organizer will be notified." with no link to their dashboard, no way to message the organizer, and no explanation of what happens next. The user is stuck on the page.
-
-**Recommendation:** Add next-step CTAs: "View your pledges" (→ dashboard), "Message the organizer" (inline), and a timeline explanation ("The organizer will review your pledge and contact you about pickup/shipping.").
-
-Nick - sounds great! Let's do it.
+### ~~C4. No post-pledge next steps~~ [FIXED]
+Added 3-step "what happens next" timeline, "View your pledges" link (authenticated), and "Browse more needs" link.
 
 ---
 
