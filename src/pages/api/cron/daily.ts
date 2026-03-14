@@ -95,18 +95,19 @@ async function sendExpiryReminders(results: { expiryReminders: number }) {
     const token = await createActionToken(need.id);
     const orgMembers = need.organization.members;
 
-    for (const member of orgMembers) {
-      if (member.email) {
-        await sendNeedExpiryReminderEmail(
-          member.email,
+    const emailPromises = orgMembers
+      .filter((member) => member.email)
+      .map((member) =>
+        sendNeedExpiryReminderEmail(
+          member.email!,
           need.title,
           need.id,
           token,
-          timeframe
-        );
-        results.expiryReminders++;
-      }
-    }
+          timeframe!
+        )
+      );
+    const settled = await Promise.allSettled(emailPromises);
+    results.expiryReminders += settled.filter((r) => r.status === "fulfilled").length;
   }
 }
 
@@ -204,18 +205,19 @@ async function processFulfillmentReminders(results: {
       const token = await createActionToken(need.id);
       const orgMembers = need.organization.members;
 
-      for (const member of orgMembers) {
-        if (member.email) {
-          await sendFulfillmentReminderEmail(
-            member.email,
+      const emailPromises = orgMembers
+        .filter((member) => member.email)
+        .map((member) =>
+          sendFulfillmentReminderEmail(
+            member.email!,
             need.title,
             need.id,
             token,
             daysRemaining
-          );
-          results.fulfillmentReminders++;
-        }
-      }
+          )
+        );
+      const settled = await Promise.allSettled(emailPromises);
+      results.fulfillmentReminders += settled.filter((r) => r.status === "fulfilled").length;
     }
   }
 }

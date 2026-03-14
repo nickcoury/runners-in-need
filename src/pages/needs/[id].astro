@@ -19,7 +19,7 @@ const needRow = await db.query.needs.findFirst({
       with: {
         messages: {
           with: {
-            sender: true,
+            sender: { columns: { name: true, orgId: true } },
           },
         },
       },
