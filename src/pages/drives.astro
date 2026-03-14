@@ -133,7 +133,7 @@ const driveStatusLabels: Record<string, string> = {
                 {driveStatusLabels[drive.status] || drive.status}
               </span>
             </div>
-            <div class="text-sm text-gray-600 mb-2">
+            <div class="text-sm text-gray-600 mb-2 break-words">
               <span class="font-medium">{formatDate(drive.eventDate)}</span> &middot; {drive.eventLocation}
               {drive.estimatedAttendees && (
                 <span> &middot; ~{drive.estimatedAttendees} expected attendees</span>
@@ -177,7 +177,7 @@ const driveStatusLabels: Record<string, string> = {
   {isSignedIn && (
     <div id="organize-form" class="max-w-2xl mx-auto mb-10 scroll-mt-6">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Organize a Pledge Drive</h2>
-      <form method="POST" action="/api/drives" class="space-y-6 bg-white border border-gray-200 rounded-lg p-6">
+      <form method="POST" action="/api/drives" class="space-y-6 bg-white border border-gray-200 rounded-lg p-4 sm:p-6">
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
             <label for="organizerName" class="block text-sm font-medium text-gray-700 mb-1">

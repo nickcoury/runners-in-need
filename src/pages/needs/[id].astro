@@ -136,7 +136,7 @@ const pledgesWithComputed = pledges.map((p) => {
     )}
 
     {/* Main need card */}
-    <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+    <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 mb-6">
       {/* Header: category + extras + expiry */}
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <span class:list={["text-xs font-medium px-2.5 py-1 rounded-full", categoryStyle]} data-testid="need-category-badge">
@@ -153,7 +153,7 @@ const pledgesWithComputed = pledges.map((p) => {
       </div>
 
       {/* Title */}
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">{need.title}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2 break-words">{need.title}</h1>
 
       {/* Org + location + date */}
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4" data-testid="need-meta-row">
@@ -247,7 +247,7 @@ const pledgesWithComputed = pledges.map((p) => {
                   </Fragment>
                 )}
                 {pledge.canMessage && (
-                  <form method="POST" action="/api/messages" class="flex gap-2">
+                  <form method="POST" action="/api/messages" class="flex flex-col sm:flex-row gap-2">
                     <input type="hidden" name="pledgeId" value={pledge.id} />
                     <input
                       type="text"

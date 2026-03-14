@@ -120,6 +120,14 @@ const { title, description = 'Connecting runners who have extra gear with organi
         btn.setAttribute('aria-expanded', String(open));
       });
 
+      // Close mobile menu when a link is clicked
+      menu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menu.classList.add('hidden');
+          btn?.setAttribute('aria-expanded', 'false');
+        });
+      });
+
       // Check for session cookie and fetch user info
       const hasSession = document.cookie.includes('authjs.session-token') || document.cookie.includes('__Secure-authjs.session-token');
       if (hasSession) {
