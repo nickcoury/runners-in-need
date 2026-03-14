@@ -1,3 +1,19 @@
+// Clean up query params (error/deleted banners) from URL
+if (window.location.search) {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('error') || params.has('deleted')) {
+    history.replaceState(null, '', window.location.pathname);
+  }
+}
+
+// Banner dismiss (close button + auto-dismiss after 5s)
+document.querySelectorAll<HTMLElement>('.banner-alert').forEach((banner) => {
+  const close = banner.querySelector('.banner-close');
+  const dismiss = () => banner.remove();
+  close?.addEventListener('click', dismiss);
+  setTimeout(dismiss, 5000);
+});
+
 // Mobile bottom nav toggle
 const tabListings = document.getElementById('tab-listings');
 const tabMap = document.getElementById('tab-map');
