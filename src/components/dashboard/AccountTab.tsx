@@ -264,7 +264,7 @@ export default function AccountTab({
             if (!confirm("This will permanently delete your account, withdraw your pledges, and remove your data. Continue?")) return;
             const res = await fetch("/api/user/delete", { method: "POST" });
             if (res.ok) {
-              window.location.href = "/";
+              window.location.href = "/?deleted=1";
             } else {
               alert("Failed to delete account. Please try again.");
             }

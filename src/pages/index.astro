@@ -54,6 +54,7 @@ const mapNeeds = allNeeds
   }));
 
 const errorParam = Astro.url.searchParams.get('error');
+const deletedParam = Astro.url.searchParams.get('deleted');
 
 const categories = [
   { tag: "all", label: "All", icon: "" },
@@ -65,6 +66,11 @@ const categories = [
 ---
 
 <Layout title="Home" description="Browse running gear needs and pledge donations to help runners in your community.">
+  {deletedParam === '1' && (
+    <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 text-sm text-green-800">
+      Your account has been deleted.
+    </div>
+  )}
   {errorParam === 'forbidden' && (
     <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4 text-sm text-red-800">
       You don't have permission to access that page.
