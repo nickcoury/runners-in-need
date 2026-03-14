@@ -20,6 +20,7 @@ Nick Coury (nickcoury@gmail.com). Solo developer/founder. Experienced engineer.
 - **Triple-check destructive actions.** A previous `--force` flag wiped the entire issue database (44+ issues lost). Before any risky operation: consider consequences, check for rollback, evaluate alternatives.
 - **Don't over-engineer.** Keep solutions simple. Don't add error handling for impossible scenarios. Don't create abstractions for one-time operations.
 - **Avoid unnecessary additions.** Don't add docstrings, comments, or type annotations to code you didn't change. Don't refactor adjacent code. Don't add features beyond what was asked.
+- **Timed tasks.** When Nick asks for work to last a specific duration (e.g., "spend 3 hours"), record the start time programmatically (`date -u > /tmp/task-start.txt`) and check elapsed time periodically. Do not stop before the minimum time has elapsed.
 
 ## Tech Stack
 
