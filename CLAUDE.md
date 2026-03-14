@@ -41,7 +41,7 @@ Nick Coury (nickcoury@gmail.com). Solo developer/founder. Experienced engineer.
 npm install
 cp .env.example .env    # Fill in values
 npm run dev              # http://localhost:4321
-npm run test:e2e         # 72+ Playwright e2e tests (needs dev server running)
+npm run test:e2e         # 74+ Playwright e2e tests (needs dev server running)
 npm run build            # Production build
 ```
 
@@ -51,7 +51,7 @@ Additional env vars beyond `.env.example`: `CRON_SECRET` (authenticates daily cr
 
 ## Current State (as of 2026-03-14)
 
-The app is **functional and feature-complete for launch**. All core features are implemented and wired to a real Turso database. Auth works. 72+ e2e tests pass.
+The app is **functional and feature-complete for launch**. All core features are implemented and wired to a real Turso database. Auth works. 74+ e2e tests pass.
 
 ### What's Built
 

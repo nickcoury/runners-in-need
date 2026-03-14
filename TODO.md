@@ -6,7 +6,7 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 ## Remaining Work
 
-- [ ] **Full codebase audit and quality pass (3+ hours)**
+- [ ] **Full codebase audit and quality pass (3+ hours)** — _Started 2026-03-14T07:12:10Z, in progress_
   - Research best practices for AI-assisted code audits first
   - Architecture review: identify duplication, unnecessary complexity, dead code
   - Performance: N+1 queries, unnecessary re-renders, bundle size, lazy loading
@@ -21,7 +21,7 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 ## Testing
 
-72+ Playwright e2e tests exist covering all Critical User Journeys. Run with:
+74+ Playwright e2e tests exist covering all Critical User Journeys. Run with:
 ```bash
 npm run dev       # start dev server first
 npm run test:e2e  # run tests
