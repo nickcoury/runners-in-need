@@ -79,8 +79,6 @@ if (isSignedIn) {
       </div>
     ) : (
       <form method="POST" action="/_actions/submitOrganizerRequest" class="space-y-6">
-        <input type="hidden" name="userId" value={session.user.id} />
-
         <!-- Honeypot field — hidden from real users, bots will fill it in -->
         <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
           <label for="website">Website</label>

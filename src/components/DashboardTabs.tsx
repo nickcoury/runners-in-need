@@ -43,7 +43,6 @@ interface DashboardTabsProps {
   orgShippingAttn: string;
   orgShowShippingAddress: boolean;
   orgPledgeDriveInterest: boolean;
-  userId: string;
   userRole: string;
 }
 
@@ -71,7 +70,6 @@ export default function DashboardTabs({
   orgShippingAttn,
   orgShowShippingAddress,
   orgPledgeDriveInterest,
-  userId,
   userRole,
 }: DashboardTabsProps) {
   const tabs = userRole === "organizer" ? organizerTabs : donorTabs;
@@ -86,7 +84,6 @@ export default function DashboardTabs({
     try {
       const form = new FormData();
       form.set("pledgeId", pledgeId);
-      form.set("userId", userId);
       form.set("status", newStatus);
       const res = await fetch("/_actions/updatePledgeStatus", { method: "POST", body: form });
       if (res.ok) {

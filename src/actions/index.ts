@@ -12,7 +12,6 @@ export const server = {
     accept: "form",
     input: z.object({
       pledgeId: z.string(),
-      userId: z.string(),
       status: z.enum([
         "collecting",
         "ready_to_deliver",
@@ -20,7 +19,10 @@ export const server = {
         "withdrawn",
       ]),
     }),
-    handler: async (input) => {
+    handler: async (input, ctx) => {
+      const userId = ctx.locals.session?.user?.id;
+      if (!userId) throw new Error("Unauthorized");
+
       const db = getDb();
 
       const pledge = await db.query.pledges.findFirst({
@@ -30,7 +32,7 @@ export const server = {
       if (!pledge) throw new Error("Pledge not found");
 
       const user = await db.query.users.findFirst({
-        where: eq(schema.users.id, input.userId),
+        where: eq(schema.users.id, userId),
       });
       if (!user) throw new Error("User not found");
 
@@ -119,13 +121,15 @@ export const server = {
   submitOrganizerRequest: defineAction({
     accept: "form",
     input: z.object({
-      userId: z.string(),
       orgName: z.string().min(2).max(200),
       orgDescription: z.string().min(10).max(2000),
       orgUrl: z.string().url().optional(),
       website: z.string().optional(),
     }),
-    handler: async (input) => {
+    handler: async (input, ctx) => {
+      const userId = ctx.locals.session?.user?.id;
+      if (!userId) throw new Error("Unauthorized");
+
       // Honeypot check — if filled, it's a bot; return fake success
       if (input.website) {
         return { id: "ok" };
@@ -134,7 +138,7 @@ export const server = {
       const db = getDb();
       const request = {
         id: createId(),
-        userId: input.userId,
+        userId,
         orgName: sanitize(input.orgName),
         orgDescription: sanitize(input.orgDescription),
         orgUrl: input.orgUrl,

@@ -4,6 +4,7 @@ import {
   integer,
   real,
   primaryKey,
+  index,
 } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
@@ -85,7 +86,9 @@ export const organizerRequests = sqliteTable("organizer_requests", {
     .notNull()
     .$defaultFn(() => new Date()),
   reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
-});
+}, (table) => [
+  index("idx_organizer_requests_user_id").on(table.userId),
+]);
 
 // ============================================================
 // Needs
@@ -122,7 +125,10 @@ export const needs = sqliteTable("needs", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index("idx_needs_status").on(table.status),
+  index("idx_needs_org_id").on(table.orgId),
+]);
 
 export const needsRelations = relations(needs, ({ one, many }) => ({
   organization: one(organizations, {
@@ -161,7 +167,10 @@ export const pledges = sqliteTable("pledges", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index("idx_pledges_need_id").on(table.needId),
+  index("idx_pledges_donor_id").on(table.donorId),
+]);
 
 export const pledgesRelations = relations(pledges, ({ one, many }) => ({
   need: one(needs, {
@@ -191,7 +200,9 @@ export const messages = sqliteTable("messages", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => [
+  index("idx_messages_pledge_id").on(table.pledgeId),
+]);
 
 export const messagesRelations = relations(messages, ({ one }) => ({
   pledge: one(pledges, {
