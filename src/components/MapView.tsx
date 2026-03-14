@@ -17,8 +17,12 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Stabilize the dependency — only re-run when the actual data changes,
+  // not when the parent passes a new array reference with the same contents.
+  const needsKey = JSON.stringify(needs.map((n) => n.id).sort());
+
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current) return;
 
     let cancelled = false;
 
@@ -106,7 +110,7 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
         mapRef.current = null;
       }
     };
-  }, [needs]);
+  }, [needsKey]);
 
   return (
     <div className="relative">

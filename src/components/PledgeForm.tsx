@@ -70,10 +70,15 @@ export default function PledgeForm({
         method: "POST",
         body: data,
       });
-      if (!res.ok) throw new Error("Failed to submit pledge");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || "Failed to submit pledge");
+      }
       setSubmitted(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error && err.message !== "Failed to submit pledge"
+        ? err.message
+        : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }

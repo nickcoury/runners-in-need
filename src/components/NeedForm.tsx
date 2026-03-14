@@ -72,6 +72,7 @@ export default function NeedForm({
           name="title"
           type="text"
           required
+          minLength={5}
           maxLength={200}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -92,6 +93,8 @@ export default function NeedForm({
           id="body"
           name="body"
           required
+          minLength={10}
+          maxLength={5000}
           rows={8}
           value={body}
           onChange={(e) => setBody(e.target.value)}
