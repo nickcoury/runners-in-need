@@ -3,31 +3,32 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import { getDb, schema } from '../../db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray } from 'drizzle-orm';
 
 // Auth is checked by middleware (admin-only route)
 const session = (Astro.locals as any).session;
 
 const db = getDb();
 const requests = await db.query.organizerRequests.findMany({
-  with: { },
   orderBy: [desc(schema.organizerRequests.createdAt)],
 });
 
-// Get user info for each request
-const requestsWithUsers = await Promise.all(
-  requests.map(async (r) => {
-    const user = await db.query.users.findFirst({
-      where: eq(schema.users.id, r.userId),
-    });
-    return {
-      ...r,
-      userName: user?.name || 'Unknown',
-      userEmail: user?.email || '',
-      createdAtStr: r.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    };
-  })
-);
+// Batch-fetch all users referenced by requests
+const userIds = [...new Set(requests.map((r) => r.userId))];
+const users = userIds.length > 0
+  ? await db.query.users.findMany({ where: inArray(schema.users.id, userIds) })
+  : [];
+const usersById = new Map(users.map((u) => [u.id, u]));
+
+const requestsWithUsers = requests.map((r) => {
+  const user = usersById.get(r.userId);
+  return {
+    ...r,
+    userName: user?.name || 'Unknown',
+    userEmail: user?.email || '',
+    createdAtStr: r.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  };
+});
 
 const pending = requestsWithUsers.filter((r) => r.status === 'pending');
 const reviewed = requestsWithUsers.filter((r) => r.status !== 'pending');

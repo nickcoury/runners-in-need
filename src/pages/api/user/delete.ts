@@ -1,7 +1,7 @@
 export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
-import { eq } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 export const POST: APIRoute = async ({ locals }) => {
   const session = (locals as any).session;
@@ -19,17 +19,18 @@ export const POST: APIRoute = async ({ locals }) => {
     return new Response("User not found", { status: 404 });
   }
 
-  // Withdraw active pledges
+  // Withdraw active pledges in a single batch update
   const userPledges = await db.query.pledges.findMany({
     where: eq(schema.pledges.donorId, userId),
   });
-  for (const pledge of userPledges) {
-    if (pledge.status === "collecting" || pledge.status === "ready_to_deliver") {
-      await db
-        .update(schema.pledges)
-        .set({ status: "withdrawn", updatedAt: new Date() })
-        .where(eq(schema.pledges.id, pledge.id));
-    }
+  const activePledgeIds = userPledges
+    .filter((p) => p.status === "collecting" || p.status === "ready_to_deliver")
+    .map((p) => p.id);
+  if (activePledgeIds.length > 0) {
+    await db
+      .update(schema.pledges)
+      .set({ status: "withdrawn", updatedAt: new Date() })
+      .where(inArray(schema.pledges.id, activePledgeIds));
   }
 
   // Expire organizer's active needs

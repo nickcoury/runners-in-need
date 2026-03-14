@@ -2,13 +2,10 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
 import { eq, and } from "drizzle-orm";
-import { nanoid } from "nanoid";
+import { createId } from "../../lib/id";
 import { sendPledgeReceivedEmail } from "../../lib/email";
 import { getEnv } from "../../lib/env";
-
-function sanitize(s: string): string {
-  return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+import { sanitize } from "../../lib/html";
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const form = await request.formData();
@@ -28,6 +25,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   if (!needId || !donorEmail || !description) {
     return new Response(JSON.stringify({ error: "Missing required fields" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail)) {
+    return new Response(JSON.stringify({ error: "Invalid email format" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -87,7 +91,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const donorId = session?.user?.id ?? null;
 
   const pledge = {
-    id: nanoid(),
+    id: createId(),
     needId,
     donorId,
     donorEmail: donorEmail.trim(),

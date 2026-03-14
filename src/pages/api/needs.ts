@@ -3,12 +3,9 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
 import { eq } from "drizzle-orm";
 import { createId } from "../../lib/id";
+import { sanitize } from "../../lib/html";
 
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
-
-function sanitize(s: string): string {
-  return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = (locals as any).session;

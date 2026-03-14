@@ -2,8 +2,9 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../db";
 import { eq, and } from "drizzle-orm";
-import { nanoid } from "nanoid";
+import { createId } from "../../lib/id";
 import { sendMessageNotificationEmail } from "../../lib/email";
+import { sanitize } from "../../lib/html";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = (locals as any).session;
@@ -44,14 +45,10 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Sanitize body
-  const sanitized = body
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  const sanitized = sanitize(body);
 
   await db.insert(schema.messages).values({
-    id: nanoid(),
+    id: createId(),
     pledgeId,
     senderId: user.id,
     body: sanitized,

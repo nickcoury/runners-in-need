@@ -3,12 +3,9 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../../db";
 import { eq } from "drizzle-orm";
+import { sanitize } from "../../../../lib/html";
 
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
-
-function sanitize(s: string): string {
-  return s.trim().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
 
 // Also handle POST (HTML forms can't send PUT)
 export const POST: APIRoute = async (context) => {

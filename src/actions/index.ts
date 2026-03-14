@@ -5,16 +5,7 @@ import { createId } from "../lib/id";
 import { eq } from "drizzle-orm";
 import { sendPledgeStatusEmail } from "../lib/email";
 import { generateRemainingNeedText } from "../lib/llm";
-
-function sanitize(s: string): string {
-  return s
-    .trim()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { sanitize } from "../lib/html";
 
 export const server = {
   updatePledgeStatus: defineAction({

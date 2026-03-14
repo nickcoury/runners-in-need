@@ -2,7 +2,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
+import { createId } from "../../../lib/id";
 import { sendOrganizerApprovedEmail } from "../../../lib/email";
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
@@ -26,7 +26,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   }
 
   // Create the organization
-  const orgId = nanoid();
+  const orgId = createId();
   await db.insert(schema.organizations).values({
     id: orgId,
     name: orgRequest.orgName,

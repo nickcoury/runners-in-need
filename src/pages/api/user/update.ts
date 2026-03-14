@@ -2,6 +2,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
+import { sanitize } from "../../../lib/html";
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const session = (locals as any).session;
@@ -16,16 +17,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response("Name must be 1-100 characters", { status: 400 });
   }
 
-  // Sanitize
-  const sanitized = name
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
   const db = getDb();
   await db
     .update(schema.users)
-    .set({ name: sanitized })
+    .set({ name: sanitize(name) })
     .where(eq(schema.users.id, session.user.id));
 
   return new Response(JSON.stringify({ success: true }), {
