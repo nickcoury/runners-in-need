@@ -82,6 +82,21 @@ function addSecurityHeaders(response: Response): Response {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  // CSP only in production — Vite dev server uses inline scripts
+  if (import.meta.env.PROD) {
+    response.headers.set(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' https://challenges.cloudflare.com",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: https:",
+        "font-src 'self'",
+        "connect-src 'self' https://challenges.cloudflare.com https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org",
+        "frame-src https://challenges.cloudflare.com",
+      ].join("; ")
+    );
+  }
   return response;
 }
 

@@ -53,31 +53,36 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     return jsonError("Invalid expiration", 400);
   }
 
-  const org = await db.query.organizations.findFirst({
-    where: eq(schema.organizations.id, orgId),
-  });
-  if (!org) {
-    return jsonError("Organization not found", 404);
+  try {
+    const org = await db.query.organizations.findFirst({
+      where: eq(schema.organizations.id, orgId),
+    });
+    if (!org) {
+      return jsonError("Organization not found", 404);
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    const needId = createId();
+    await db.insert(schema.needs).values({
+      id: needId,
+      orgId,
+      categoryTag,
+      title: sanitize(title),
+      body: sanitize(body),
+      extrasWelcome,
+      location: org.location,
+      latitude: org.latitude,
+      longitude: org.longitude,
+      status: "active",
+      continuedFromId: continuedFromId || undefined,
+      expiresAt,
+    });
+
+    return redirect(`/needs/${needId}`);
+  } catch (e) {
+    console.error("Need creation failed:", e);
+    return jsonError("Internal server error", 500);
   }
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + expiresInDays);
-
-  const needId = createId();
-  await db.insert(schema.needs).values({
-    id: needId,
-    orgId,
-    categoryTag,
-    title: sanitize(title),
-    body: sanitize(body),
-    extrasWelcome,
-    location: org.location,
-    latitude: org.latitude,
-    longitude: org.longitude,
-    status: "active",
-    continuedFromId: continuedFromId || undefined,
-    expiresAt,
-  });
-
-  return redirect(`/needs/${needId}`);
 };

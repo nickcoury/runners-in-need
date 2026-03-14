@@ -50,22 +50,27 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     return jsonError("Invalid estimated attendees", 400);
   }
 
-  const db = getDb();
-  const driveId = createId();
+  try {
+    const db = getDb();
+    const driveId = createId();
 
-  await db.insert(schema.pledgeDrives).values({
-    id: driveId,
-    organizerUserId: session.user.id,
-    organizerName: sanitize(organizerName),
-    organizerEmail: sanitize(organizerEmail),
-    groupName: sanitize(groupName),
-    eventName: sanitize(eventName),
-    eventDate,
-    eventLocation: sanitize(eventLocation),
-    estimatedAttendees,
-    description: sanitize(description),
-    status: "planned",
-  });
+    await db.insert(schema.pledgeDrives).values({
+      id: driveId,
+      organizerUserId: session.user.id,
+      organizerName: sanitize(organizerName),
+      organizerEmail: sanitize(organizerEmail),
+      groupName: sanitize(groupName),
+      eventName: sanitize(eventName),
+      eventDate,
+      eventLocation: sanitize(eventLocation),
+      estimatedAttendees,
+      description: sanitize(description),
+      status: "planned",
+    });
 
-  return redirect("/drives?success=true");
+    return redirect("/drives?success=true");
+  } catch (e) {
+    console.error("Drive creation failed:", e);
+    return jsonError("Internal server error", 500);
+  }
 };
