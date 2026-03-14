@@ -146,6 +146,7 @@ const categories = [
     <div id="category-filters" class="flex gap-2 overflow-x-auto pb-1">
       {categories.map((cat, i) => (
         <button
+          data-testid="category-btn"
           data-category={cat.tag}
           class:list={[
             "category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",

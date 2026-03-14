@@ -143,13 +143,21 @@ export default function NeedForm({
         </select>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
-      >
-        {submitting ? "Posting..." : continuedFromId ? "Post Remaining Need" : "Post Need"}
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
+        >
+          {submitting ? "Posting..." : continuedFromId ? "Post Remaining Need" : "Post Need"}
+        </button>
+        <a
+          href="/dashboard"
+          className="px-6 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+        >
+          Cancel
+        </a>
+      </div>
     </form>
   );
 }
