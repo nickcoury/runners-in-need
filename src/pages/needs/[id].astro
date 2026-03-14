@@ -184,7 +184,7 @@ const pledgesWithComputed = pledges.map((p) => {
 
       {/* Org + location + date */}
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4">
-        <span class="font-medium text-gray-700">{need.orgName}</span>
+        <a href={`/org/${needRow.orgId}`} class="font-medium text-gray-700 hover:text-[#2D4A2D] hover:underline">{need.orgName}</a>
         <span>&middot;</span>
         <span>{need.location}</span>
         <span>&middot;</span>
