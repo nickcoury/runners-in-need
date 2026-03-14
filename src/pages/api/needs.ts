@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sanitize } from "../../lib/html";
 import { jsonError, requireOrganizer } from "../../lib/api";
-import { VALID_CATEGORIES } from "../../lib/constants";
+import { VALID_CATEGORIES, VALID_DELIVERY_METHODS } from "../../lib/constants";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const auth = await requireOrganizer(locals);
@@ -25,6 +25,8 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const extrasWelcome = form.get("extrasWelcome") === "on";
   const expiresInDays = parseInt(form.get("expiresInDays") as string, 10) || 90;
   const continuedFromId = form.get("continuedFromId") as string | null;
+  const deliveryMethodsRaw = form.getAll("deliveryMethods") as string[];
+  const deliveryInstructions = form.get("deliveryInstructions") as string | null;
 
   // Validate
   if (!orgId || !title || !body) {
@@ -57,6 +59,11 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
+    // Validate delivery methods
+    const deliveryMethods = deliveryMethodsRaw.filter((m) =>
+      (VALID_DELIVERY_METHODS as readonly string[]).includes(m)
+    );
+
     const needId = createId();
     await db.insert(schema.needs).values({
       id: needId,
@@ -70,6 +77,8 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
       longitude: org.longitude,
       status: "active",
       continuedFromId: continuedFromId || undefined,
+      deliveryMethods: deliveryMethods.length > 0 ? JSON.stringify(deliveryMethods) : null,
+      deliveryInstructions: deliveryInstructions ? sanitize(deliveryInstructions) : null,
       expiresAt,
     });
 

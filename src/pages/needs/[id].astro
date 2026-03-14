@@ -6,7 +6,7 @@ import PledgeForm from "../../components/PledgeForm";
 import { getDb, schema } from "../../db";
 import { getEnv } from "../../lib/env";
 import { eq } from "drizzle-orm";
-import { categoryStyles, categoryLabels, pledgeStatusStyles, pledgeStatusLabels } from "../../lib/constants";
+import { categoryStyles, categoryLabels, pledgeStatusStyles, pledgeStatusLabels, deliveryMethodLabels } from "../../lib/constants";
 
 const { id } = Astro.params;
 const db = getDb();
@@ -100,6 +100,16 @@ const showShipping = needRow.organization?.showShippingAddress && !!needRow.orga
 const shippingAddress = needRow.organization?.shippingAddress || "";
 const shippingAttn = needRow.organization?.shippingAttn || "";
 
+// Resolve delivery methods: need-level override > org defaults
+const effectiveDeliveryMethods: string[] = needRow.deliveryMethods
+  ? JSON.parse(needRow.deliveryMethods)
+  : needRow.organization?.deliveryMethods
+    ? JSON.parse(needRow.organization.deliveryMethods)
+    : [];
+const effectiveDeliveryInstructions = needRow.deliveryInstructions
+  || needRow.organization?.deliveryInstructions
+  || "";
+
 const pledgesWithComputed = pledges.map((p) => {
   const badge = pledgeStatusStyles[p.status] || pledgeStatusStyles.pending;
   const label = pledgeStatusLabels[p.status] || "Pending";
@@ -182,6 +192,26 @@ const pledgesWithComputed = pledges.map((p) => {
 
       {/* Body text */}
       <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{need.body}</div>
+
+      {/* How to donate */}
+      {effectiveDeliveryMethods.length > 0 && (
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <p class="text-sm font-medium text-gray-900 mb-2">How to Donate</p>
+          <ul class="space-y-1.5">
+            {effectiveDeliveryMethods.map((method: string) => (
+              <li class="flex items-center gap-2 text-sm text-gray-700">
+                <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {deliveryMethodLabels[method] || method}
+              </li>
+            ))}
+          </ul>
+          {effectiveDeliveryInstructions && (
+            <div class="mt-2 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2 whitespace-pre-line">
+              {effectiveDeliveryInstructions}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Shipping address */}
       {showShipping && (
@@ -292,6 +322,10 @@ const pledgesWithComputed = pledges.map((p) => {
             turnstileSiteKey={getEnv("TURNSTILE_SITE_KEY") || undefined}
             userEmail={session?.user?.email || undefined}
             userName={session?.user?.name || undefined}
+            deliveryMethods={effectiveDeliveryMethods}
+            deliveryInstructions={effectiveDeliveryInstructions}
+            shippingAddress={showShipping ? shippingAddress : ""}
+            shippingAttn={showShipping ? shippingAttn : ""}
           />
         </>
       ) : (

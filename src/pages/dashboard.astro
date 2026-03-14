@@ -31,6 +31,8 @@ const orgId = user?.orgId || '';
 const orgShippingAddress = user?.organization?.shippingAddress || '';
 const orgShippingAttn = user?.organization?.shippingAttn || '';
 const orgShowShippingAddress = user?.organization?.showShippingAddress || false;
+const orgDeliveryMethods: string[] = user?.organization?.deliveryMethods ? JSON.parse(user.organization.deliveryMethods) : [];
+const orgDeliveryInstructions = user?.organization?.deliveryInstructions || '';
 const orgPledgeDriveInterest = user?.organization?.pledgeDriveInterest || false;
 
 let needs: DashboardNeed[] = [];
@@ -106,6 +108,8 @@ if (userRole === 'organizer' && user?.orgId) {
     orgShippingAddress={orgShippingAddress}
     orgShippingAttn={orgShippingAttn}
     orgShowShippingAddress={orgShowShippingAddress}
+    orgDeliveryMethods={orgDeliveryMethods}
+    orgDeliveryInstructions={orgDeliveryInstructions}
     orgPledgeDriveInterest={orgPledgeDriveInterest}
     userRole={userRole}
   />

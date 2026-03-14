@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 
+import { deliveryMethodLabels } from "../lib/constants";
+
 interface PledgeFormProps {
   needId: string;
   userEmail?: string;
   userName?: string;
   turnstileSiteKey?: string;
+  deliveryMethods?: string[];
+  deliveryInstructions?: string;
+  shippingAddress?: string;
+  shippingAttn?: string;
 }
 
 export default function PledgeForm({
@@ -12,6 +18,10 @@ export default function PledgeForm({
   userEmail,
   userName,
   turnstileSiteKey,
+  deliveryMethods = [],
+  deliveryInstructions = "",
+  shippingAddress = "",
+  shippingAttn = "",
 }: PledgeFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -58,9 +68,30 @@ export default function PledgeForm({
         <p className="mt-2 font-medium">Here's what happens next:</p>
         <ol className="mt-1 list-decimal list-inside space-y-1">
           <li>The organizer will review your pledge</li>
-          <li>They'll contact you about pickup or shipping</li>
           <li>Once delivered, the need will be marked fulfilled</li>
         </ol>
+        {deliveryMethods.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-green-200">
+            <p className="font-medium mb-1">How to get gear to them:</p>
+            <ul className="space-y-1">
+              {deliveryMethods.map((method) => (
+                <li key={method} className="flex items-center gap-1.5">
+                  <span>&#x2713;</span> {deliveryMethodLabels[method] || method}
+                </li>
+              ))}
+            </ul>
+            {deliveryInstructions && (
+              <p className="mt-2 text-green-700 whitespace-pre-line">{deliveryInstructions}</p>
+            )}
+            {deliveryMethods.includes("shipping") && shippingAddress && (
+              <div className="mt-2 bg-green-100/50 rounded px-3 py-2">
+                <p className="text-xs font-medium text-green-800 mb-0.5">Ship to:</p>
+                {shippingAttn && <p className="font-medium">{shippingAttn}</p>}
+                <p className="whitespace-pre-line">{shippingAddress}</p>
+              </div>
+            )}
+          </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-3">
           {userEmail && (
             <a href="/dashboard" className="font-medium text-green-700 hover:text-green-900 underline">

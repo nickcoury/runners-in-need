@@ -1,3 +1,5 @@
+import { deliveryMethodLabels, VALID_DELIVERY_METHODS } from "../../lib/constants";
+
 interface AccountTabProps {
   orgEmail: string;
   orgName: string;
@@ -7,6 +9,8 @@ interface AccountTabProps {
   orgShippingAddress: string;
   orgShippingAttn: string;
   orgShowShippingAddress: boolean;
+  orgDeliveryMethods: string[];
+  orgDeliveryInstructions: string;
   orgPledgeDriveInterest: boolean;
   userRole: string;
 }
@@ -20,6 +24,8 @@ export default function AccountTab({
   orgShippingAddress,
   orgShippingAttn,
   orgShowShippingAddress,
+  orgDeliveryMethods,
+  orgDeliveryInstructions,
   orgPledgeDriveInterest,
   userRole,
 }: AccountTabProps) {
@@ -118,6 +124,46 @@ export default function AccountTab({
               defaultValue={orgDescription}
               rows={3}
               maxLength={2000}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Preferred Delivery Methods
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Select how donors can get gear to you. These defaults will be pre-selected on every new need you post.
+            </p>
+            <div className="space-y-2">
+              {VALID_DELIVERY_METHODS.map((method) => (
+                <label key={method} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="deliveryMethods"
+                    value={method}
+                    defaultChecked={orgDeliveryMethods.includes(method)}
+                    className="rounded border-gray-300 text-[#2D4A2D] focus:ring-[#2D4A2D]/30"
+                  />
+                  {deliveryMethodLabels[method]}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Delivery Instructions
+            </label>
+            <p className="text-xs text-gray-500 mb-1">
+              Any additional details for donors about how to get gear to you (e.g., drop-off hours, contact info).
+            </p>
+            <textarea
+              name="deliveryInstructions"
+              defaultValue={orgDeliveryInstructions}
+              rows={3}
+              maxLength={2000}
+              placeholder="e.g., Drop off at the school gym M-F 3-5pm. Ask for Coach Smith at the front office."
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
             />
           </div>

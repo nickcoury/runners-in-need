@@ -1,16 +1,21 @@
 import { useState } from "react";
 import { needTemplates, type CategoryTag } from "../lib/templates";
+import { deliveryMethodLabels, VALID_DELIVERY_METHODS } from "../lib/constants";
 
 interface NeedFormProps {
   orgId: string;
   continuedFromId?: string;
   initialBody?: string;
+  orgDeliveryMethods?: string[];
+  orgDeliveryInstructions?: string;
 }
 
 export default function NeedForm({
   orgId,
   continuedFromId,
   initialBody,
+  orgDeliveryMethods = [],
+  orgDeliveryInstructions = "",
 }: NeedFormProps) {
   const [categoryTag, setCategoryTag] = useState<CategoryTag>("shoes");
   const [title, setTitle] = useState("");
@@ -18,6 +23,8 @@ export default function NeedForm({
   const [extrasWelcome, setExtrasWelcome] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState(90);
   const [submitting, setSubmitting] = useState(false);
+  const [deliveryMethods, setDeliveryMethods] = useState<string[]>(orgDeliveryMethods);
+  const [deliveryInstructions, setDeliveryInstructions] = useState(orgDeliveryInstructions);
 
   function insertTemplate(tag: CategoryTag) {
     setCategoryTag(tag);
@@ -120,6 +127,57 @@ export default function NeedForm({
           useful
         </span>
       </label>
+
+      {/* Delivery methods */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Delivery Methods
+        </label>
+        <p className="text-xs text-gray-400 mb-2">
+          How can donors get gear to you? Pre-filled from your org preferences.
+        </p>
+        <div className="space-y-2">
+          {VALID_DELIVERY_METHODS.map((method) => (
+            <label key={method} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="deliveryMethods"
+                value={method}
+                checked={deliveryMethods.includes(method)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setDeliveryMethods([...deliveryMethods, method]);
+                  } else {
+                    setDeliveryMethods(deliveryMethods.filter((m) => m !== method));
+                  }
+                }}
+                className="rounded border-gray-300"
+              />
+              {deliveryMethodLabels[method]}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Delivery instructions */}
+      <div>
+        <label
+          htmlFor="deliveryInstructions"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Delivery Instructions <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <textarea
+          id="deliveryInstructions"
+          name="deliveryInstructions"
+          maxLength={2000}
+          rows={3}
+          value={deliveryInstructions}
+          onChange={(e) => setDeliveryInstructions(e.target.value)}
+          placeholder="e.g., Drop off at the school gym M-F 3-5pm. Ask for Coach Smith."
+          className="w-full border rounded-lg px-3 py-2 text-sm"
+        />
+      </div>
 
       {/* Expiration */}
       <div>

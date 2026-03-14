@@ -46,3 +46,13 @@ export const pledgeStatusLabels: Record<string, string> = {
   delivered: "Delivered",
   withdrawn: "Withdrawn",
 };
+
+export const VALID_DELIVERY_METHODS = ["shipping", "drop_off", "meetup", "other"] as const;
+export type DeliveryMethod = (typeof VALID_DELIVERY_METHODS)[number];
+
+export const deliveryMethodLabels: Record<string, string> = {
+  shipping: "Ship to organization",
+  drop_off: "Drop off at location",
+  meetup: "Arrange a meet-up",
+  other: "Other (see instructions)",
+};

@@ -5,7 +5,7 @@ import { schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 import { sanitize } from "../../../../lib/html";
 import { jsonError, requireOrganizer } from "../../../../lib/api";
-import { VALID_CATEGORIES } from "../../../../lib/constants";
+import { VALID_CATEGORIES, VALID_DELIVERY_METHODS } from "../../../../lib/constants";
 
 // Also handle POST (HTML forms can't send PUT)
 export const POST: APIRoute = async (context) => {
@@ -34,6 +34,8 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
   const categoryTag = form.get("categoryTag") as string;
   const extrasWelcome = form.get("extrasWelcome") === "on";
   const expiresInDays = parseInt(form.get("expiresInDays") as string, 10) || 90;
+  const deliveryMethodsRaw = form.getAll("deliveryMethods") as string[];
+  const deliveryInstructions = form.get("deliveryInstructions") as string | null;
 
   // Validate
   if (!title || !body) {
@@ -55,6 +57,10 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
+  const deliveryMethods = deliveryMethodsRaw.filter((m) =>
+    (VALID_DELIVERY_METHODS as readonly string[]).includes(m)
+  );
+
   await db
     .update(schema.needs)
     .set({
@@ -63,6 +69,8 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
       categoryTag,
       extrasWelcome,
       expiresAt,
+      deliveryMethods: deliveryMethods.length > 0 ? JSON.stringify(deliveryMethods) : null,
+      deliveryInstructions: deliveryInstructions ? sanitize(deliveryInstructions) : null,
       updatedAt: new Date(),
     })
     .where(eq(schema.needs.id, params.id!));

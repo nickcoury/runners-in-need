@@ -24,6 +24,8 @@ interface DashboardTabsProps {
   orgShippingAddress: string;
   orgShippingAttn: string;
   orgShowShippingAddress: boolean;
+  orgDeliveryMethods: string[];
+  orgDeliveryInstructions: string;
   orgPledgeDriveInterest: boolean;
   userRole: string;
 }
@@ -50,6 +52,8 @@ export default function DashboardTabs({
   orgShippingAddress,
   orgShippingAttn,
   orgShowShippingAddress,
+  orgDeliveryMethods,
+  orgDeliveryInstructions,
   orgPledgeDriveInterest,
   userRole,
 }: DashboardTabsProps) {
@@ -120,6 +124,8 @@ export default function DashboardTabs({
           orgShippingAddress={orgShippingAddress}
           orgShippingAttn={orgShippingAttn}
           orgShowShippingAddress={orgShowShippingAddress}
+          orgDeliveryMethods={orgDeliveryMethods}
+          orgDeliveryInstructions={orgDeliveryInstructions}
           orgPledgeDriveInterest={orgPledgeDriveInterest}
           userRole={userRole}
         />

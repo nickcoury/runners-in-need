@@ -4,7 +4,7 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import { getDb, schema } from '../../../db';
 import { eq } from 'drizzle-orm';
-import { categoryLabels } from '../../../lib/constants';
+import { categoryLabels, VALID_DELIVERY_METHODS, deliveryMethodLabels } from '../../../lib/constants';
 
 // Auth check
 const session = Astro.locals.session;
@@ -50,6 +50,8 @@ function closestExpiry(days: number): number {
   return 180;
 }
 const expiresInDays = closestExpiry(daysLeft);
+const needDeliveryMethods: string[] = need.deliveryMethods ? JSON.parse(need.deliveryMethods) : [];
+const needDeliveryInstructions = need.deliveryInstructions || '';
 ---
 
 <Layout title={`Edit: ${need.title}`}>
@@ -130,6 +132,42 @@ const expiresInDays = closestExpiry(daysLeft);
           Extras welcome &mdash; additional items beyond the specific request are useful
         </span>
       </label>
+
+      {/* Delivery methods */}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Delivery Methods
+        </label>
+        <div class="space-y-2">
+          {VALID_DELIVERY_METHODS.map((method) => (
+            <label class="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="deliveryMethods"
+                value={method}
+                checked={needDeliveryMethods.includes(method)}
+                class="rounded border-gray-300"
+              />
+              {deliveryMethodLabels[method]}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Delivery instructions */}
+      <div>
+        <label for="deliveryInstructions" class="block text-sm font-medium text-gray-700 mb-1">
+          Delivery Instructions <span class="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <textarea
+          id="deliveryInstructions"
+          name="deliveryInstructions"
+          maxlength="2000"
+          rows="3"
+          placeholder="e.g., Drop off at the school gym M-F 3-5pm."
+          class="w-full border rounded-lg px-3 py-2 text-sm"
+        >{needDeliveryInstructions}</textarea>
+      </div>
 
       {/* Expiration */}
       <div>

@@ -52,6 +52,8 @@ export const organizations = sqliteTable("organizations", {
   showShippingAddress: integer("show_shipping_address", { mode: "boolean" })
     .notNull()
     .default(false),
+  deliveryMethods: text("delivery_methods"), // JSON array: ["shipping","drop_off","meetup","other"]
+  deliveryInstructions: text("delivery_instructions"), // Free-form text
   verified: integer("verified", { mode: "boolean" }).notNull().default(false),
   pledgeDriveInterest: integer("pledge_drive_interest", { mode: "boolean" })
     .notNull()
@@ -117,6 +119,8 @@ export const needs = sqliteTable("needs", {
     .default("active"),
   suggestedText: text("suggested_text"), // LLM-generated remaining need text for organizer review
   continuedFromId: text("continued_from_id").references((): any => needs.id),
+  deliveryMethods: text("delivery_methods"), // JSON array override, null = use org defaults
+  deliveryInstructions: text("delivery_instructions"), // Per-need override, null = use org defaults
   allDeliveredAt: integer("all_delivered_at", { mode: "timestamp" }),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })

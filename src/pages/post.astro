@@ -19,6 +19,17 @@ const user = await db.query.users.findFirst({
 
 const orgId = user?.orgId || '';
 const isOrganizer = user?.role === 'organizer' && !!orgId;
+
+let orgDeliveryMethods: string[] = [];
+let orgDeliveryInstructions = '';
+if (isOrganizer && user?.orgId) {
+  const org = await db.query.organizations.findFirst({
+    where: eq(schema.organizations.id, user.orgId),
+    columns: { deliveryMethods: true, deliveryInstructions: true },
+  });
+  orgDeliveryMethods = org?.deliveryMethods ? JSON.parse(org.deliveryMethods) : [];
+  orgDeliveryInstructions = org?.deliveryInstructions || '';
+}
 ---
 
 <Layout title="Post a Need">
@@ -34,7 +45,7 @@ const isOrganizer = user?.role === 'organizer' && !!orgId;
         Only verified organizers can post needs. <a href="/become-organizer" class="underline font-medium">Request organizer access</a> to get started.
       </div>
     ) : (
-      <NeedForm client:load orgId={orgId} />
+      <NeedForm client:load orgId={orgId} orgDeliveryMethods={orgDeliveryMethods} orgDeliveryInstructions={orgDeliveryInstructions} />
     )}
   </div>
 </Layout>

@@ -89,6 +89,8 @@ export const GET: APIRoute = async ({ params, url }) => {
       longitude: need.longitude,
       status: "active",
       continuedFromId: needId,
+      deliveryMethods: need.deliveryMethods,
+      deliveryInstructions: need.deliveryInstructions,
       expiresAt: newExpiry,
       createdAt: new Date(),
       updatedAt: new Date(),
