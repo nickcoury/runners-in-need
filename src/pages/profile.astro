@@ -269,21 +269,40 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
   <script>
     // Tab switching
     const tabBtns = document.querySelectorAll('.tab-btn');
+    const validProfileTabs = ['profile', 'organization'];
+
+    function switchToTab(tab: string) {
+      if (!validProfileTabs.includes(tab)) tab = 'profile';
+      tabBtns.forEach((b) => {
+        b.classList.remove('border-[#2D4A2D]', 'text-[#2D4A2D]');
+        b.classList.add('border-transparent', 'text-gray-500');
+        b.setAttribute('aria-selected', 'false');
+      });
+      const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+      activeBtn?.classList.add('border-[#2D4A2D]', 'text-[#2D4A2D]');
+      activeBtn?.classList.remove('border-transparent', 'text-gray-500');
+      activeBtn?.setAttribute('aria-selected', 'true');
+      document.getElementById('tab-profile')?.classList.toggle('hidden', tab !== 'profile');
+      document.getElementById('tab-organization')?.classList.toggle('hidden', tab !== 'organization');
+    }
+
+    // Read hash on load
+    const initialHash = window.location.hash.replace('#', '');
+    if (initialHash && validProfileTabs.includes(initialHash)) {
+      switchToTab(initialHash);
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      switchToTab(hash);
+    });
+
     tabBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         const tab = (btn as HTMLElement).dataset.tab!;
-        // Update button styles and aria-selected
-        tabBtns.forEach((b) => {
-          b.classList.remove('border-[#2D4A2D]', 'text-[#2D4A2D]');
-          b.classList.add('border-transparent', 'text-gray-500');
-          b.setAttribute('aria-selected', 'false');
-        });
-        btn.classList.add('border-[#2D4A2D]', 'text-[#2D4A2D]');
-        btn.classList.remove('border-transparent', 'text-gray-500');
-        btn.setAttribute('aria-selected', 'true');
-        // Show/hide tab content
-        document.getElementById('tab-profile')?.classList.toggle('hidden', tab !== 'profile');
-        document.getElementById('tab-organization')?.classList.toggle('hidden', tab !== 'organization');
+        window.location.hash = tab;
+        switchToTab(tab);
       });
     });
 

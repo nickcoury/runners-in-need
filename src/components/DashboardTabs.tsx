@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NeedsTab from "./dashboard/NeedsTab";
 import PledgesTab from "./dashboard/PledgesTab";
 import AccountTab from "./dashboard/AccountTab";
 import type { DashboardNeed, DashboardPledge } from "./dashboard/types";
 
 type Tab = "needs" | "pledges" | "account";
+const validTabs: Tab[] = ["needs", "pledges", "account"];
+
+function getTabFromHash(defaultTab: Tab, allowedTabs: Tab[]): Tab {
+  const hash = window.location.hash.replace("#", "") as Tab;
+  return allowedTabs.includes(hash) ? hash : defaultTab;
+}
 
 interface DashboardTabsProps {
   needs: DashboardNeed[];
@@ -47,7 +53,17 @@ export default function DashboardTabs({
   userRole,
 }: DashboardTabsProps) {
   const tabs = userRole === "organizer" ? organizerTabs : donorTabs;
-  const [active, setActive] = useState<Tab>(userRole === "organizer" ? "needs" : "pledges");
+  const allowedKeys = tabs.map((t) => t.key);
+  const defaultTab = userRole === "organizer" ? "needs" : "pledges";
+  const [active, setActive] = useState<Tab>(() => getTabFromHash(defaultTab, allowedKeys));
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setActive(getTabFromHash(defaultTab, allowedKeys));
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   return (
     <div>
@@ -60,7 +76,10 @@ export default function DashboardTabs({
             aria-selected={active === tab.key}
             aria-controls={`tabpanel-${tab.key}`}
             id={`tab-${tab.key}`}
-            onClick={() => setActive(tab.key)}
+            onClick={() => {
+              window.location.hash = tab.key;
+              setActive(tab.key);
+            }}
             className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
               active === tab.key
                 ? "border-[#2D4A2D] text-[#2D4A2D]"
@@ -77,7 +96,10 @@ export default function DashboardTabs({
         <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Your organization location is set to <strong>TBD</strong>. Needs you post will inherit this placeholder.{" "}
           <button
-            onClick={() => setActive("account")}
+            onClick={() => {
+              window.location.hash = "account";
+              setActive("account");
+            }}
             className="font-medium underline hover:text-amber-900"
           >
             Update it in Account settings
