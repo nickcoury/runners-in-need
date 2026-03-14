@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import { getDb, schema } from '../db';
-import { desc, eq, gte, lt } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 
 const session = Astro.locals.session;
 const isSignedIn = !!session?.user?.id;

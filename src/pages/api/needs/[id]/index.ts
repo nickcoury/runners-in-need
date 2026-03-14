@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 import { sanitize } from "../../../../lib/html";
+import { jsonError } from "../../../../lib/api";
 
 const VALID_CATEGORIES = ["shoes", "apparel", "accessories", "other"] as const;
 
@@ -15,7 +16,7 @@ export const POST: APIRoute = async (context) => {
 export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const db = getDb();
@@ -25,7 +26,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
     where: eq(schema.users.id, session.user.id),
   });
   if (!user || user.role !== "organizer" || !user.orgId) {
-    return new Response("Only organizers can update needs", { status: 403 });
+    return jsonError("Only organizers can update needs", 403);
   }
 
   // Load the need
@@ -33,10 +34,10 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
     where: eq(schema.needs.id, params.id!),
   });
   if (!need) {
-    return new Response("Need not found", { status: 404 });
+    return jsonError("Need not found", 404);
   }
   if (need.orgId !== user.orgId) {
-    return new Response("Cannot update another organization's need", { status: 403 });
+    return jsonError("Cannot update another organization's need", 403);
   }
 
   const form = await request.formData();
@@ -48,19 +49,19 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
 
   // Validate
   if (!title || !body) {
-    return new Response("Missing required fields", { status: 400 });
+    return jsonError("Missing required fields", 400);
   }
   if (!VALID_CATEGORIES.includes(categoryTag as any)) {
-    return new Response("Invalid category", { status: 400 });
+    return jsonError("Invalid category", 400);
   }
   if (title.length < 5 || title.length > 200) {
-    return new Response("Title must be 5-200 characters", { status: 400 });
+    return jsonError("Title must be 5-200 characters", 400);
   }
   if (body.length < 10 || body.length > 5000) {
-    return new Response("Description must be 10-5000 characters", { status: 400 });
+    return jsonError("Description must be 10-5000 characters", 400);
   }
   if (expiresInDays < 7 || expiresInDays > 180) {
-    return new Response("Invalid expiration", { status: 400 });
+    return jsonError("Invalid expiration", 400);
   }
 
   const expiresAt = new Date();
@@ -84,7 +85,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
 export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const db = getDb();
@@ -94,7 +95,7 @@ export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
     where: eq(schema.users.id, session.user.id),
   });
   if (!user || user.role !== "organizer" || !user.orgId) {
-    return new Response("Only organizers can delete needs", { status: 403 });
+    return jsonError("Only organizers can delete needs", 403);
   }
 
   // Load the need
@@ -102,10 +103,10 @@ export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
     where: eq(schema.needs.id, params.id!),
   });
   if (!need) {
-    return new Response("Need not found", { status: 404 });
+    return jsonError("Need not found", 404);
   }
   if (need.orgId !== user.orgId) {
-    return new Response("Cannot delete another organization's need", { status: 403 });
+    return jsonError("Cannot delete another organization's need", 403);
   }
 
   // Soft-delete by setting status to expired

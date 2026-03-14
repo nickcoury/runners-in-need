@@ -5,11 +5,12 @@ import { eq, and } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sendMessageNotificationEmail } from "../../lib/email";
 import { sanitize } from "../../lib/html";
+import { jsonError } from "../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const form = await request.formData();
@@ -17,7 +18,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const body = (form.get("body") as string)?.trim();
 
   if (!pledgeId || !body || body.length < 1 || body.length > 2000) {
-    return new Response("Invalid input", { status: 400 });
+    return jsonError("Invalid input", 400);
   }
 
   const db = getDb();
@@ -28,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     with: { need: true },
   });
   if (!pledge) {
-    return new Response("Pledge not found", { status: 404 });
+    return jsonError("Pledge not found", 404);
   }
 
   // Verify sender is either the donor or an org member
@@ -36,13 +37,13 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     where: eq(schema.users.id, session.user.id),
   });
   if (!user) {
-    return new Response("User not found", { status: 404 });
+    return jsonError("User not found", 404);
   }
 
   const isDonor = pledge.donorId === user.id;
   const isOrgMember = user.orgId === pledge.need.orgId;
   if (!isDonor && !isOrgMember) {
-    return new Response("Forbidden", { status: 403 });
+    return jsonError("Forbidden", 403);
   }
 
   const sanitized = sanitize(body);

@@ -2,11 +2,12 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq, and, inArray } from "drizzle-orm";
+import { jsonError } from "../../../lib/api";
 
 export const POST: APIRoute = async ({ locals }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const db = getDb();
@@ -16,7 +17,7 @@ export const POST: APIRoute = async ({ locals }) => {
     where: eq(schema.users.id, userId),
   });
   if (!user) {
-    return new Response("User not found", { status: 404 });
+    return jsonError("User not found", 404);
   }
 
   // Withdraw active pledges in a single batch update

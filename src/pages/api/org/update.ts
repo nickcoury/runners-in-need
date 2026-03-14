@@ -4,11 +4,12 @@ import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { geocode } from "../../../lib/geocode";
 import { sanitize } from "../../../lib/html";
+import { jsonError } from "../../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const db = getDb();
@@ -17,7 +18,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   if (!user || user.role !== "organizer" || !user.orgId) {
-    return new Response("Only organizers can update their organization", { status: 403 });
+    return jsonError("Only organizers can update their organization", 403);
   }
 
   const form = await request.formData();
@@ -27,15 +28,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const description = form.get("description") as string;
 
   if (orgId !== user.orgId) {
-    return new Response("Cannot update another organization", { status: 403 });
+    return jsonError("Cannot update another organization", 403);
   }
 
   if (!name || name.length < 2 || name.length > 200) {
-    return new Response("Name must be 2-200 characters", { status: 400 });
+    return jsonError("Name must be 2-200 characters", 400);
   }
 
   if (!location) {
-    return new Response("Location is required", { status: 400 });
+    return jsonError("Location is required", 400);
   }
 
   const sanitizedLocation = sanitize(location);

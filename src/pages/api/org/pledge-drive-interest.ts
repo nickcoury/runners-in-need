@@ -2,11 +2,12 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
+import { jsonError } from "../../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const db = getDb();
@@ -15,7 +16,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   if (!user || user.role !== "organizer" || !user.orgId) {
-    return new Response("Only organizers can update their organization", { status: 403 });
+    return jsonError("Only organizers can update their organization", 403);
   }
 
   const form = await request.formData();
@@ -23,7 +24,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const pledgeDriveInterest = form.get("pledgeDriveInterest") === "on";
 
   if (orgId !== user.orgId) {
-    return new Response("Cannot update another organization", { status: 403 });
+    return jsonError("Cannot update another organization", 403);
   }
 
   await db

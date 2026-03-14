@@ -218,7 +218,6 @@ export default function DashboardTabs({
                       className="text-xs text-red-500 hover:underline"
                       onClick={async () => {
                         if (!confirm("Are you sure you want to remove this need? It will be marked as expired.")) return;
-                        const form = new FormData();
                         const res = await fetch(`/api/needs/${need.id}`, { method: "DELETE" });
                         if (res.ok || res.redirected) {
                           window.location.reload();

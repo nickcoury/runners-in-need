@@ -4,17 +4,18 @@ import { getDb, schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { createId } from "../../../lib/id";
 import { sendOrganizerApprovedEmail } from "../../../lib/email";
+import { jsonError } from "../../../lib/api";
 
 export const POST: APIRoute = async ({ request, redirect, locals }) => {
   // Defense-in-depth: verify admin role at handler level
   const session = locals.session;
   if (!session?.user || session.user.role !== "admin") {
-    return new Response("Forbidden", { status: 403 });
+    return jsonError("Forbidden", 403);
   }
 
   const form = await request.formData();
   const requestId = form.get("requestId") as string;
-  if (!requestId) return new Response("Missing requestId", { status: 400 });
+  if (!requestId) return jsonError("Missing requestId", 400);
 
   const db = getDb();
   const orgRequest = await db.query.organizerRequests.findFirst({

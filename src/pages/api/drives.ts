@@ -4,11 +4,12 @@ import { getDb, schema } from "../../db";
 import { eq } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sanitize } from "../../lib/html";
+import { jsonError } from "../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = locals.session;
   if (!session?.user?.id) {
-    return new Response("Unauthorized", { status: 401 });
+    return jsonError("Unauthorized", 401);
   }
 
   const form = await request.formData();
@@ -23,30 +24,30 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 
   // Validate required fields
   if (!organizerName || !organizerEmail || !groupName || !eventName || !eventDateStr || !eventLocation || !description) {
-    return new Response("Missing required fields", { status: 400 });
+    return jsonError("Missing required fields", 400);
   }
 
   if (organizerName.length < 2 || organizerName.length > 200) {
-    return new Response("Organizer name must be 2-200 characters", { status: 400 });
+    return jsonError("Organizer name must be 2-200 characters", 400);
   }
   if (groupName.length < 2 || groupName.length > 200) {
-    return new Response("Group name must be 2-200 characters", { status: 400 });
+    return jsonError("Group name must be 2-200 characters", 400);
   }
   if (eventName.length < 2 || eventName.length > 200) {
-    return new Response("Event name must be 2-200 characters", { status: 400 });
+    return jsonError("Event name must be 2-200 characters", 400);
   }
   if (description.length < 10 || description.length > 2000) {
-    return new Response("Description must be 10-2000 characters", { status: 400 });
+    return jsonError("Description must be 10-2000 characters", 400);
   }
 
   const eventDate = new Date(eventDateStr);
   if (isNaN(eventDate.getTime())) {
-    return new Response("Invalid event date", { status: 400 });
+    return jsonError("Invalid event date", 400);
   }
 
   const estimatedAttendees = estimatedAttendeesStr ? parseInt(estimatedAttendeesStr, 10) : null;
   if (estimatedAttendees !== null && (isNaN(estimatedAttendees) || estimatedAttendees < 1)) {
-    return new Response("Invalid estimated attendees", { status: 400 });
+    return jsonError("Invalid estimated attendees", 400);
   }
 
   const db = getDb();

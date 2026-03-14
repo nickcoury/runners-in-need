@@ -23,7 +23,7 @@ export default defineConfig({
   providers: [
     Resend({
       apiKey: getEnv("RESEND_API_KEY"),
-      from: getEnv("EMAIL_FROM") || "noreply@runnersinneed.org",
+      from: getEnv("EMAIL_FROM") || "noreply@runnersinneed.com",
     }),
     Google({
       clientId: getEnv("GOOGLE_CLIENT_ID"),
