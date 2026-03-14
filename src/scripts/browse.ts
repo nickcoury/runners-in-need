@@ -86,13 +86,21 @@ const categoryBtns = document.querySelectorAll<HTMLButtonElement>('.category-btn
 const needCards = document.querySelectorAll<HTMLElement>('.need-card');
 let activeCategory = 'all';
 
+const noResults = document.getElementById('no-results');
+
 function filterCards() {
   const query = searchInput?.value.toLowerCase().trim() || '';
+  let visibleCount = 0;
   needCards.forEach((card) => {
     const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
     const matchesSearch = !query || (card.dataset.searchable || '').includes(query);
-    card.style.display = matchesCategory && matchesSearch ? '' : 'none';
+    const visible = matchesCategory && matchesSearch;
+    card.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
   });
+  if (noResults) {
+    noResults.classList.toggle('hidden', visibleCount > 0);
+  }
 }
 
 const searchClear = document.getElementById('search-clear');
