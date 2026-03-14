@@ -39,7 +39,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
   if (!title || !body) {
     return jsonError("Missing required fields", 400);
   }
-  if (!VALID_CATEGORIES.includes(categoryTag as any)) {
+  if (!(VALID_CATEGORIES as readonly string[]).includes(categoryTag)) {
     return jsonError("Invalid category", 400);
   }
   if (title.length < 5 || title.length > 200) {

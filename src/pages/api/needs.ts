@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   if (orgId !== user.orgId) {
     return jsonError("Cannot post for another organization", 403);
   }
-  if (!VALID_CATEGORIES.includes(categoryTag as any)) {
+  if (!(VALID_CATEGORIES as readonly string[]).includes(categoryTag)) {
     return jsonError("Invalid category", 400);
   }
   if (title.length < 5 || title.length > 200) {
