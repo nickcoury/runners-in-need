@@ -33,7 +33,7 @@ Nick Coury (nickcoury@gmail.com). Solo developer/founder. Experienced engineer.
 | Bot Prevention | Cloudflare Turnstile |
 | Maps | Leaflet + OpenStreetMap |
 | Geocoding | Nominatim (OSM) |
-| LLM | Claude API (planned, not yet configured) |
+| LLM | Claude API (Anthropic, for partial fulfillment suggestions) |
 
 ## Development
 
@@ -41,15 +41,17 @@ Nick Coury (nickcoury@gmail.com). Solo developer/founder. Experienced engineer.
 npm install
 cp .env.example .env    # Fill in values
 npm run dev              # http://localhost:4321
-npm run test:e2e         # 50 Playwright e2e tests (needs dev server running)
+npm run test:e2e         # 62+ Playwright e2e tests (needs dev server running)
 npm run build            # Production build
 ```
 
 Deployment: `main` branch auto-deploys to production via Cloudflare Workers. `dev` branch deploys to dev environment. Env vars managed in Cloudflare Workers dashboard or `wrangler secret put`.
 
-## Current State (as of 2026-03-13)
+Additional env vars beyond `.env.example`: `CRON_SECRET` (authenticates daily cron job), `ANTHROPIC_API_KEY` (LLM partial fulfillment suggestions).
 
-The app is **functional but pre-launch**. All core features are implemented and wired to a real Turso database. Auth works. 50 e2e tests pass.
+## Current State (as of 2026-03-14)
+
+The app is **functional and feature-complete for launch**. All core features are implemented and wired to a real Turso database. Auth works. 62+ e2e tests pass.
 
 ### What's Built
 
@@ -64,15 +66,26 @@ The app is **functional but pre-launch**. All core features are implemented and 
 - Auth (magic link via Resend + Google OAuth)
 - CSRF protection
 - Become-organizer application flow
+- Pledge drives (`/drives` page, org opt-in, admin view)
+- Org public profile pages (`/org/[id]`)
+- Account deletion flow (double-confirm UI)
+- Location-based sorting (CF geolocation auto-sort + "Near me" GPS button)
+- Email reminder system (expiry reminders via `/api/cron/daily`)
+- LLM-assisted partial fulfillment (Claude API)
+- Honeypot fields + rate limiting
+- Shipping address management UI
+- Organizer reapplication after denial (12-month cooldown)
+- Stale pledge auto-expiration
+
+### Shared Utilities
+
+- `src/lib/api.ts` — API response helpers and error handling
+- `src/lib/html.ts` — HTML email templating
+- `src/lib/constants.ts` — App-wide constants
 
 ### What's NOT Built Yet
 
-- LLM partial fulfillment (Anthropic API key not configured)
-- Honeypot fields + rate limiting
-- Email notifications (expiry reminders, pledge updates)
-- Account deletion flow
-- Org public profile page
-- Shipping address management UI
+- Full codebase audit and quality pass (see TODO.md)
 
 ## Key Documentation
 

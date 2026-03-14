@@ -232,4 +232,71 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     expect(page.url()).not.toContain("/browse");
     await expect(page.locator("h1").first()).toHaveText("Runners In Need");
   });
+
+  test("clicking a category filter pill changes active state", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const filterContainer = page.locator("#category-filters");
+    await expect(filterContainer).toBeVisible();
+
+    const buttons = filterContainer.locator(".category-btn");
+    const count = await buttons.count();
+    if (count < 2) {
+      test.skip(true, "Not enough category buttons to test toggling");
+      return;
+    }
+
+    // "All" button should be active by default (has the active/selected class)
+    const allBtn = buttons.first();
+    const allClasses = await allBtn.getAttribute("class");
+    expect(allClasses).toContain("bg-[#2D4A2D]");
+
+    // Click the second category button (e.g. "Shoes")
+    const secondBtn = buttons.nth(1);
+    await secondBtn.click();
+
+    // The clicked button should now be active
+    const secondClasses = await secondBtn.getAttribute("class");
+    expect(secondClasses).toContain("bg-[#2D4A2D]");
+
+    // The "All" button should no longer be active
+    const allClassesAfter = await allBtn.getAttribute("class");
+    expect(allClassesAfter).not.toContain("bg-[#2D4A2D]");
+  });
+
+  test("search input filters displayed cards", async ({ page }) => {
+    await page.goto("/");
+    const needCards = page.locator(".need-card");
+    const initialCount = await needCards.count();
+
+    if (initialCount === 0) {
+      test.skip(true, "No needs in database — cannot test search filtering");
+      return;
+    }
+
+    // Type a nonsense query — all visible cards should be hidden
+    const searchInput = page.locator("#search-input");
+    await searchInput.fill("zzzzxyznonexistent12345");
+
+    // Wait briefly for client-side filtering
+    await page.waitForTimeout(300);
+
+    // Count visible cards after filtering
+    let visibleCount = 0;
+    for (let i = 0; i < initialCount; i++) {
+      if (await needCards.nth(i).isVisible()) visibleCount++;
+    }
+    expect(visibleCount).toBe(0);
+
+    // Clear search — cards should reappear
+    await searchInput.fill("");
+    await page.waitForTimeout(300);
+
+    let restoredCount = 0;
+    for (let i = 0; i < initialCount; i++) {
+      if (await needCards.nth(i).isVisible()) restoredCount++;
+    }
+    expect(restoredCount).toBe(initialCount);
+  });
 });

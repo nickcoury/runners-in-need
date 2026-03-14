@@ -10,7 +10,7 @@ test.describe("CUJ-5: Become Organizer", () => {
   test("page has proper heading and description", async ({ page }) => {
     await page.goto("/become-organizer");
 
-    await expect(page.locator("h1")).toHaveText("Become an Organizer");
+    await expect(page.locator("h1").first()).toHaveText("Become an Organizer");
 
     // Description text
     await expect(

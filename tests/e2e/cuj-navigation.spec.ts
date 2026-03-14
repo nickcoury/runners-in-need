@@ -131,6 +131,34 @@ test.describe("Navigation & Layout", () => {
     await expect(mobileSignIn).toHaveText("Sign In");
   });
 
+  test("/drives link exists in navigation", async ({ page }) => {
+    await page.goto("/");
+
+    const nav = page.locator("header").first().locator("nav");
+    const drivesLink = nav.locator('a[href="/drives"]');
+    await expect(drivesLink).toHaveCount(1);
+    await expect(drivesLink).toHaveText("Pledge Drives");
+  });
+
+  test("skip-to-content link exists and is visually hidden", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const skipLink = page.locator('a[href="#main-content"]');
+    await expect(skipLink).toHaveCount(1);
+
+    // The skip link should be in the DOM but visually hidden (sr-only)
+    const box = await skipLink.boundingBox();
+    // sr-only elements have 1x1 dimensions or are positioned off-screen
+    const isVisuallyHidden =
+      box === null ||
+      (box.width <= 1 && box.height <= 1) ||
+      box.x < 0 ||
+      box.y < 0;
+    expect(isVisuallyHidden).toBe(true);
+  });
+
   test("header is sticky", async ({ page }) => {
     await page.goto("/");
 
