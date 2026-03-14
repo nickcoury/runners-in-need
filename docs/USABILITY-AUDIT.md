@@ -100,14 +100,8 @@ The site supports anonymous pledges (donorEmail from form), but clicking "Pledge
 
 Nick - mentioned this above but probably don't want fully anonymous pledges. Even something like Craigslist requires an account. Let's keep it low friction but make this required.
 
-### 2. No shipping/logistics info on need detail pages
-**Personas:** Sarah, Priya | **Severity:** High
-
-After Sarah finds a need she wants to pledge to, there's no information about HOW to get her shoes to the organization. The shipping address feature exists (organizers can opt in) but most needs show nothing. A first-time donor is left wondering: "Do I ship it? Drop it off? Who pays for shipping?"
-
-**Recommendation:** Add a "How to donate" section to every need detail page. If the org has a shipping address, show it. If not, show a generic message like "After your pledge is accepted, the organizer will contact you with pickup/shipping details."
-
-Nick - Let's make shipping, drop off, meet up, and other first class ways to deliver a pledge. Let's have orgs have a preferred set in their preferences that populate on every need, but each need can be overridden. This is displayed to the pledge when making it and they can be shared in the next steps so they can take action immediately. Also let organizers have a free form text field to explain their preferences like always contact first before shipping or dropping off, or feel free to drop off at school office with a note, etc.
+### ~~2. No shipping/logistics info on need detail pages~~ [FIXED]
+Added first-class delivery methods (shipping, drop off, meet up, other) with org defaults, per-need override, instructions field, and post-pledge display.
 
 ### ~~3. "Become an Organizer" is not discoverable~~ [FIXED]
 Added to footer and homepage CTA section.
