@@ -17,8 +17,14 @@ export async function createActionToken(needId: string): Promise<string> {
     .join("");
 }
 
-/** Verify an action token. */
+/** Verify an action token using timing-safe comparison. */
 export async function verifyActionToken(needId: string, token: string): Promise<boolean> {
   const expected = await createActionToken(needId);
-  return token === expected;
+  const encoder = new TextEncoder();
+  const a = encoder.encode(token);
+  const b = encoder.encode(expected);
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+  return crypto.subtle.timingSafeEqual(a, b);
 }

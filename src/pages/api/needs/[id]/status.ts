@@ -5,6 +5,7 @@ import { getDb, schema } from "../../../../db";
 import { eq, inArray } from "drizzle-orm";
 import { verifyActionToken } from "../../../../lib/tokens";
 import { createId } from "../../../../lib/id";
+import { escapeHtml } from "../../../../lib/html";
 
 const VALID_ACTIONS = new Set([
   "keep_open",
@@ -59,7 +60,7 @@ export const GET: APIRoute = async ({ params, url }) => {
         : "reopened and accepting pledges";
 
     return new Response(
-      page("Status Updated", `<strong>"${need.title}"</strong> has been ${label}.`),
+      page("Status Updated", `<strong>"${escapeHtml(need.title)}"</strong> has been ${label}.`),
       { status: 200, headers: { "Content-Type": "text/html" } }
     );
   }
@@ -125,7 +126,7 @@ export const GET: APIRoute = async ({ params, url }) => {
     return new Response(
       page(
         "Need Kept Open",
-        `<strong>"${need.title}"</strong> remains active. ${deliveredIds.length} delivered pledge(s) have been withdrawn.`
+        `<strong>"${escapeHtml(need.title)}"</strong> remains active. ${deliveredIds.length} delivered pledge(s) have been withdrawn.`
       ),
       { status: 200, headers: { "Content-Type": "text/html" } }
     );

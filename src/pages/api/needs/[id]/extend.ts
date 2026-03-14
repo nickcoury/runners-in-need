@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 import { verifyActionToken } from "../../../../lib/tokens";
+import { escapeHtml } from "../../../../lib/html";
 
 const EXTEND_DAYS = 90;
 
@@ -58,7 +59,7 @@ export const GET: APIRoute = async ({ params, url }) => {
 
   return htmlPage(
     "Need Extended",
-    `<strong>"${need.title}"</strong> has been extended and now expires on <strong>${formattedDate}</strong>.`
+    `<strong>"${escapeHtml(need.title)}"</strong> has been extended and now expires on <strong>${formattedDate}</strong>.`
   );
 };
 

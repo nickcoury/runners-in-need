@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { getEnv } from "./env";
+import { escapeHtml } from "./html";
 
 const FROM_ADDRESS = "Runners In Need <notifications@runnersinneed.com>";
 
@@ -81,13 +82,15 @@ export async function sendPledgeReceivedEmail(
   donorName: string | null,
   pledgeDescription: string
 ): Promise<void> {
-  const displayName = donorName || "An anonymous donor";
+  const displayName = escapeHtml(donorName || "An anonymous donor");
+  const escapedTitle = escapeHtml(needTitle);
+  const escapedPledge = escapeHtml(pledgeDescription);
   const subject = `New pledge for "${needTitle}"`;
   const html = emailLayout(
     "New Pledge Received",
-    `<p><strong>${displayName}</strong> has pledged to help with your need ${needLink(needId, `"${needTitle}"`)}.</p>
+    `<p><strong>${displayName}</strong> has pledged to help with your need ${needLink(needId, `"${escapedTitle}"`)}.</p>
      <p style="background:#f8f8f8;padding:12px 16px;border-radius:4px;border-left:3px solid #2D4A2D;">
-       ${pledgeDescription}
+       ${escapedPledge}
      </p>
      <p>Log in to your dashboard to view and manage this pledge.</p>
      <p style="margin-top:24px;">
@@ -115,11 +118,12 @@ export async function sendPledgeStatusEmail(
     withdrawn: "Withdrawn",
   };
 
-  const label = statusLabels[newStatus] || newStatus;
+  const label = statusLabels[newStatus] || escapeHtml(newStatus);
+  const escapedTitle = escapeHtml(needTitle);
   const subject = `Your pledge for "${needTitle}" is now ${label}`;
   const html = emailLayout(
     "Pledge Status Update",
-    `<p>Your pledge for ${needLink(needId, `"${needTitle}"`)} has been updated.</p>
+    `<p>Your pledge for ${needLink(needId, `"${escapedTitle}"`)} has been updated.</p>
      <p>New status: <strong style="color:#2D4A2D;">${label}</strong></p>
      <p style="margin-top:24px;">
        <a href="${getSiteUrl()}/needs/${needId}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">View Details</a>
@@ -140,12 +144,15 @@ export async function sendMessageNotificationEmail(
   senderName: string,
   messageBody: string
 ): Promise<void> {
+  const escapedSender = escapeHtml(senderName);
+  const escapedTitle = escapeHtml(needTitle);
+  const escapedMessage = escapeHtml(messageBody);
   const subject = `New message about "${needTitle}"`;
   const html = emailLayout(
     "New Message",
-    `<p><strong>${senderName}</strong> sent you a message about ${needLink(needId, `"${needTitle}"`)}:</p>
+    `<p><strong>${escapedSender}</strong> sent you a message about ${needLink(needId, `"${escapedTitle}"`)}:</p>
      <p style="background:#f8f8f8;padding:12px 16px;border-radius:4px;border-left:3px solid #2D4A2D;">
-       ${messageBody}
+       ${escapedMessage}
      </p>
      <p style="margin-top:24px;">
        <a href="${getSiteUrl()}/needs/${needId}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">Reply</a>
@@ -166,7 +173,7 @@ export async function sendOrganizerApprovedEmail(
   const subject = "Your organizer request has been approved!";
   const html = emailLayout(
     "Request Approved",
-    `<p>Great news! Your request to create <strong>${orgName}</strong> on Runners In Need has been approved.</p>
+    `<p>Great news! Your request to create <strong>${escapeHtml(orgName)}</strong> on Runners In Need has been approved.</p>
      <p>You now have organizer access. You can start posting needs for your organization right away.</p>
      <p style="margin-top:24px;">
        <a href="${getSiteUrl()}/dashboard" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">Go to Dashboard</a>
@@ -187,7 +194,7 @@ export async function sendOrganizerDeniedEmail(
   const subject = "Update on your organizer request";
   const html = emailLayout(
     "Request Not Approved",
-    `<p>Thank you for your interest in Runners In Need. Unfortunately, your request to create <strong>${orgName}</strong> was not approved at this time.</p>
+    `<p>Thank you for your interest in Runners In Need. Unfortunately, your request to create <strong>${escapeHtml(orgName)}</strong> was not approved at this time.</p>
      <p>If you believe this was an error or would like more information, please reach out to us.</p>`
   );
 
@@ -207,6 +214,7 @@ export async function sendNeedExpiryReminderEmail(
 ): Promise<void> {
   const siteUrl = getSiteUrl();
   const extendUrl = `${siteUrl}/api/needs/${needId}/extend?token=${extendToken}`;
+  const escapedTitle = escapeHtml(needTitle);
 
   const urgencyText =
     timeframe === "today"
@@ -220,7 +228,7 @@ export async function sendNeedExpiryReminderEmail(
 
   const html = emailLayout(
     "Need Expiring Soon",
-    `<p>Your need ${needLink(needId, `"${needTitle}"`)} ${urgencyText}.</p>
+    `<p>Your need ${needLink(needId, `"${escapedTitle}"`)} ${urgencyText}.</p>
      <p>If this need is still active, you can extend it for another 90 days with one click:</p>
      <p style="margin-top:24px;">
        <a href="${extendUrl}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">Extend Need 90 Days</a>
@@ -254,7 +262,7 @@ export async function sendFulfillmentReminderEmail(
 
   const html = emailLayout(
     "Fulfillment Check",
-    `<p>All pledges for ${needLink(needId, `"${needTitle}"`)} have been marked as delivered.</p>
+    `<p>All pledges for ${needLink(needId, `"${escapeHtml(needTitle)}"`)} have been marked as delivered.</p>
      <p>This need will automatically close as <strong>fulfilled</strong> in <strong>${daysRemaining} days</strong>.</p>
      <p>Please confirm the outcome:</p>
      <div style="margin-top:24px;">
@@ -284,7 +292,7 @@ export async function sendPledgeExpiredEmail(
   const subject = `Your pledge for "${needTitle}" has expired`;
   const html = emailLayout(
     "Pledge Expired",
-    `<p>Your pledge for ${needLink(needId, `"${needTitle}"`)} has been automatically expired due to inactivity (no updates for 30 days).</p>
+    `<p>Your pledge for ${needLink(needId, `"${escapeHtml(needTitle)}"`)} has been automatically expired due to inactivity (no updates for 30 days).</p>
      <p>If you'd still like to help, you can visit the need page and create a new pledge.</p>
      <p style="margin-top:24px;">
        <a href="${getSiteUrl()}/needs/${needId}" style="display:inline-block;background:#2D4A2D;color:#ffffff;padding:10px 20px;border-radius:4px;text-decoration:none;font-weight:600;">View Need</a>
