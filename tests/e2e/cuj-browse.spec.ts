@@ -274,6 +274,46 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     expect(allClassesAfter).not.toContain("bg-[#2D4A2D]");
   });
 
+  test("search clear button resets search and shows all cards", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const needCards = page.locator(".need-card");
+    const initialCount = await needCards.count();
+
+    if (initialCount === 0) {
+      test.skip(true, "No needs in database — cannot test search clear");
+      return;
+    }
+
+    const searchInput = page.locator("#search-input");
+    const clearBtn = page.locator('[data-testid="search-clear"]');
+
+    // Type a query to filter out all cards
+    await searchInput.fill("zzzzxyznonexistent12345");
+    await page.waitForTimeout(300);
+
+    // Clear button should now be visible
+    await expect(clearBtn).toBeVisible();
+
+    // Click clear
+    await clearBtn.click();
+
+    // Input should be empty
+    await expect(searchInput).toHaveValue("");
+
+    // Clear button should be hidden again
+    await expect(clearBtn).toBeHidden();
+
+    // All cards should be visible again
+    await page.waitForTimeout(300);
+    let visibleCount = 0;
+    for (let i = 0; i < initialCount; i++) {
+      if (await needCards.nth(i).isVisible()) visibleCount++;
+    }
+    expect(visibleCount).toBe(initialCount);
+  });
+
   test("search input filters displayed cards", async ({ page }) => {
     await page.goto("/");
     const needCards = page.locator(".need-card");
