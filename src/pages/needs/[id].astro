@@ -72,7 +72,7 @@ const msPerDay = 1000 * 60 * 60 * 24;
 const daysUntilExpiry = Math.ceil((need.expiresAt.getTime() - Date.now()) / msPerDay);
 const isExpiringSoon = daysUntilExpiry <= 14 && daysUntilExpiry > 0;
 const isExpired = daysUntilExpiry <= 0;
-const expiryText = isExpired ? "Expired" : `${daysUntilExpiry} days left`;
+const expiryText = isExpired ? "Expired" : daysUntilExpiry === 1 ? "1 day left" : `${daysUntilExpiry} days left`;
 const expiryClass = isExpiringSoon ? "text-amber-600 font-medium" : isExpired ? "text-red-600 font-medium" : "text-gray-500";
 
 const hasContinuation = need.continuedFromId !== null;

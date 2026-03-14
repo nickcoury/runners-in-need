@@ -17,7 +17,7 @@ const allDrives = await db.query.pledgeDrives.findMany({
 });
 
 const upcoming = allDrives.filter(
-  (d) => d.eventDate >= now && d.status !== 'cancelled'
+  (d) => d.eventDate >= now && d.status !== 'cancelled' && d.status !== 'completed'
 );
 const past = allDrives.filter(
   (d) => d.eventDate < now || d.status === 'completed' || d.status === 'cancelled'
