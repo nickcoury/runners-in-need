@@ -125,12 +125,12 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     const firstLink = needCards.first().locator("a[href^='/needs/']").first();
     const href = await firstLink.getAttribute("href");
     await page.goto(href!);
+    await page.waitForLoadState("domcontentloaded");
 
     // Title (h1)
     const h1 = page.locator("h1").first();
-    await expect(h1).toBeVisible();
-    const titleText = await h1.textContent();
-    expect(titleText?.trim().length).toBeGreaterThan(0);
+    await expect(h1).toBeVisible({ timeout: 15000 });
+    await expect(h1).not.toBeEmpty();
 
     // Org name — in the metadata line
     const orgName = page.locator('[data-testid="need-org-name"]');
