@@ -239,6 +239,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
                 Save Organization
               </button>
               <span id="org-save-status" class="text-sm text-green-600 hidden">Saved!</span>
+              <span id="org-save-error" class="text-sm text-red-600 hidden"></span>
             </div>
           </form>
         </div>
@@ -332,9 +333,12 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
       e.preventDefault();
       const btn = document.getElementById('org-save-btn') as HTMLButtonElement;
       const status = document.getElementById('org-save-status')!;
+      const orgError = document.getElementById('org-save-error')!;
 
       btn.disabled = true;
       btn.textContent = 'Saving...';
+      status.classList.add('hidden');
+      orgError.classList.add('hidden');
 
       try {
         const res = await fetch('/api/org/update', {
@@ -345,7 +349,14 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
         if (res.ok) {
           status.classList.remove('hidden');
           setTimeout(() => status.classList.add('hidden'), 3000);
+        } else {
+          const text = await res.text();
+          orgError.textContent = text || 'Failed to save';
+          orgError.classList.remove('hidden');
         }
+      } catch {
+        orgError.textContent = 'Network error';
+        orgError.classList.remove('hidden');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save Organization';
