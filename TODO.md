@@ -61,22 +61,11 @@ These are broken features that affect core user journeys.
 
 - [x] **Pledge Drive feature** — `/drives` page, org opt-in, admin view
 
-- [ ] **PROD 500s: apply schema migrations to production Turso DB**
-  - New columns (suggestedText, allDeliveredAt, pledgeDriveInterest, shippingAddress, etc.) and pledgeDrives table not yet in prod DB
-  - Run `npx drizzle-kit push --force` against production, or apply migration SQL manually
-  - Also set new env vars: `CRON_SECRET`, `ANTHROPIC_API_KEY`
+- [x] **PROD 500s** — schema already in sync, prod returning 200
 
-- [ ] **Header/footer scroll behavior**
-  - Header and footer jump/unstick when scrolling quickly
-  - Verify `position: sticky` is used correctly within the root scroller
-  - May need `top: 0` / `bottom: 0` and proper stacking context
+- [x] **Header/footer scroll behavior** — removed `contain:layout` breaking sticky
 
-- [ ] **Improve location UX**
-  - Use approximate location (IP-based or browser geolocation API without prompt) to sort needs by proximity by default
-  - Add a button to prompt for exact location via browser Geolocation API
-  - Show all needs globally but sort closest-first when location is available
-  - Let user refine with search/filter from there
-  - Consider: IP geolocation on server side (Cloudflare `cf-ipcountry` / `cf-connecting-ip` + GeoIP), browser geolocation on client side with permission prompt
+- [x] **Improve location UX** — CF geolocation auto-sort + "Near me" GPS button + localStorage persistence
 
 - [ ] **Full codebase audit and quality pass (3+ hours)**
   - Research best practices for AI-assisted code audits first
