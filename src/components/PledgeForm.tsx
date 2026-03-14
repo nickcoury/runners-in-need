@@ -55,10 +55,22 @@ export default function PledgeForm({
     return (
       <div ref={successRef} tabIndex={-1} role="status" className="border border-green-200 bg-green-50 rounded-lg p-4 text-sm text-green-800 outline-none">
         <p className="font-medium">Pledge submitted!</p>
-        <p className="mt-1">
-          The organizer will be notified. You'll receive updates at the email
-          you provided.
-        </p>
+        <p className="mt-2 font-medium">Here's what happens next:</p>
+        <ol className="mt-1 list-decimal list-inside space-y-1">
+          <li>The organizer will review your pledge</li>
+          <li>They'll contact you about pickup or shipping</li>
+          <li>Once delivered, the need will be marked fulfilled</li>
+        </ol>
+        <div className="mt-3 flex flex-wrap gap-3">
+          {userEmail && (
+            <a href="/dashboard" className="font-medium text-green-700 hover:text-green-900 underline">
+              View your pledges &rarr;
+            </a>
+          )}
+          <a href="/" className="font-medium text-green-700 hover:text-green-900 underline">
+            Browse more needs &rarr;
+          </a>
+        </div>
       </div>
     );
   }

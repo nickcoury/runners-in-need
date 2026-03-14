@@ -4,11 +4,28 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 
 const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+
+// Map callback URLs to contextual messages
+function getCallbackContext(url: string): string | null {
+  if (url === '/' || !url) return null;
+  if (url.startsWith('/dashboard')) return 'Sign in to access your dashboard';
+  if (url.startsWith('/drives')) return 'Sign in to pledge gear';
+  if (url.startsWith('/post')) return 'Sign in to post a need';
+  if (url.startsWith('/become-organizer')) return 'Sign in to organize a drive';
+  if (url.startsWith('/pledge')) return 'Sign in to pledge gear';
+  if (url.startsWith('/need')) return 'Sign in to pledge gear';
+  return null;
+}
+
+const callbackContext = getCallbackContext(callbackUrl);
 ---
 
-<Layout title="Sign In">
+<Layout title="Welcome">
   <div class="max-w-sm mx-auto py-16">
-    <h1 class="text-2xl font-bold mb-6 text-center">Sign In</h1>
+    <h1 class="text-2xl font-bold mb-2 text-center">Welcome to Runners In Need</h1>
+    <p class="text-sm text-gray-500 text-center mb-6">
+      {callbackContext || 'Sign in or create your account \u2014 it\u2019s the same form'}
+    </p>
 
     <div class="space-y-4">
       {/* Magic link */}
@@ -31,7 +48,7 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
           disabled
           class="signin-submit w-full bg-green-700 text-white py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send magic link
+          Continue with email
         </button>
       </form>
 
@@ -65,7 +82,7 @@ const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
     </div>
 
     <p class="text-xs text-gray-400 text-center mt-6" data-testid="signin-legal">
-      By signing in, you agree to our <a href="/terms" class="underline hover:text-gray-600">terms of service</a> and <a href="/privacy" class="underline hover:text-gray-600">privacy policy</a>.
+      By continuing, you agree to our <a href="/terms" class="underline hover:text-gray-600">terms of service</a> and <a href="/privacy" class="underline hover:text-gray-600">privacy policy</a>.
     </p>
   </div>
 

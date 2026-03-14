@@ -44,7 +44,7 @@ test.describe("Navigation & Layout", () => {
     // Should exist in the DOM (may be hidden/shown by JS based on session)
     expect(await signInLink.count()).toBe(1);
     await expect(signInLink).toHaveAttribute("href", "/auth/signin");
-    await expect(signInLink).toHaveText("Sign In");
+    await expect(signInLink).toHaveText("Get Started");
   });
 
   test("user menu area exists in header", async ({ page }) => {
@@ -128,7 +128,7 @@ test.describe("Navigation & Layout", () => {
     const mobileSignIn = page.locator("#auth-link-mobile");
     await expect(mobileSignIn).toBeVisible();
     await expect(mobileSignIn).toHaveAttribute("href", "/auth/signin");
-    await expect(mobileSignIn).toHaveText("Sign In");
+    await expect(mobileSignIn).toHaveText("Get Started");
   });
 
   test("/drives link exists in navigation", async ({ page }) => {

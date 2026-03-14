@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("CUJ-3: Auth Flow", () => {
   test("sign-in page renders at /auth/signin", async ({ page }) => {
     await page.goto("/auth/signin");
-    await expect(page.locator("h1").first()).toHaveText("Sign In");
+    await expect(page.locator("h1").first()).toHaveText("Welcome to Runners In Need");
   });
 
   test("has magic link form with email input", async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe("CUJ-3: Auth Flow", () => {
 
     // Submit button
     await expect(
-      magicLinkForm.locator("button", { hasText: "Send magic link" })
+      magicLinkForm.locator("button", { hasText: "Continue with email" })
     ).toBeVisible();
   });
 

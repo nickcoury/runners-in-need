@@ -117,23 +117,11 @@ After Sarah finds a need she wants to pledge to, there's no information about HO
 
 Nick - Let's make shipping, drop off, meet up, and other first class ways to deliver a pledge. Let's have orgs have a preferred set in their preferences that populate on every need, but each need can be overridden. This is displayed to the pledge when making it and they can be shared in the next steps so they can take action immediately. Also let organizers have a free form text field to explain their preferences like always contact first before shipping or dropping off, or feel free to drop off at school office with a note, etc.
 
-### 3. "Become an Organizer" is not discoverable
-**Personas:** Aisha, Marcus | **Severity:** High
+### ~~3. "Become an Organizer" is not discoverable~~ [FIXED]
+Added to footer and homepage CTA section.
 
-The `/become-organizer` page is not linked from the homepage, footer, or any CTA on the main pages. A first-time visitor from a youth shelter (Aisha) would have no way to discover they can register their organization without already knowing the URL or finding it deep in the navigation.
-
-**Recommendation:** Add a "Become an Organizer" link to the footer and a CTA on the homepage (perhaps in a secondary section: "Run a program that needs gear? Apply to become an organizer.").
-
-Nick - let's do it.
-
-### 4. No admin link in navigation
-**Personas:** Admin Alex | **Severity:** High
-
-Admin pages (`/admin/requests`, `/admin/drives`) are only accessible by typing the URL directly. There's no admin link in the nav, user menu, or dashboard for admin users.
-
-**Recommendation:** Show an "Admin" link in the user dropdown menu when the user has the admin role.
-
-Nick - let's do it.
+### ~~4. No admin link in navigation~~ [FIXED]
+Admin link now appears in user dropdown for admin-role users.
 
 ---
 
