@@ -38,7 +38,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       name: sanitize(name),
       location: sanitizedLocation,
       description: description ? sanitize(description) : null,
-      ...(coords && { latitude: coords.latitude, longitude: coords.longitude }),
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
     })
     .where(eq(schema.organizations.id, orgId));
 
