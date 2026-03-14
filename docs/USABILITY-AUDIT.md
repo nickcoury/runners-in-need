@@ -22,14 +22,12 @@ Focus: usability bugs, missing functionality, UX friction points.
 
 ## Critical Findings
 
-### C1. Dashboard React island fails to hydrate (BUG)
+### ~~C1. Dashboard React island fails to hydrate (BUG)~~ [FIXED]
 **Personas:** Priya, Coach Maria, James | **Severity:** Critical
 
-The DashboardTabs React component (`client:load`) fails to mount in the dev server. The heading and subtitle render (server-side) but the entire tab area (My Needs, Incoming Pledges, Account) is blank. A Vite error overlay is visible. This blocks ALL dashboard functionality — organizers can't manage needs/pledges, donors can't see their pledges.
+~~The DashboardTabs React component (`client:load`) fails to mount in the dev server.~~
 
-**Root cause:** Likely a Vite SSR/hydration mismatch after recent refactoring (component split into NeedsTab/PledgesTab/AccountTab). May be dev-only (Cloudflare Workers miniflare issue) or may also affect production.
-
-**Recommendation:** Investigate and fix immediately. Test in production build (`npm run build && npx wrangler dev`).
+**Fix applied:** Guarded `window.location.hash` access in `useState` initializer with `typeof window !== 'undefined'` check for SSR safety.
 
 ### C2. "Sign In" shows in nav even when authenticated
 **Personas:** Priya, Coach Maria | **Severity:** Critical
@@ -59,14 +57,12 @@ After an unauthenticated user submits a pledge, they get a success message but h
 
 **Recommendation:** Send a confirmation email to the donor's provided email address. Include a link to sign up for an account to track their pledge. Consider generating a "pledge tracking" link that works without an account.
 
-### C7. Double-escaping bug causes garbled text display (BUG)
+### ~~C7. Double-escaping bug causes garbled text display (BUG)~~ [FIXED]
 **Personas:** All | **Severity:** Critical bug
 
-The `sanitize()` function HTML-escapes text at write time (`&` → `&amp;`, `<` → `&lt;`, etc.), then Astro/React auto-escapes again at render time. Result: any user text containing `&`, `<`, `>`, `"`, or `'` displays as `&amp;`, `&lt;`, etc. This affects need titles, bodies, pledge descriptions, messages, and org names/descriptions.
+~~`sanitize()` called `escapeHtml()` at write time, then Astro/React escaped again at render time, causing `&amp;` display.~~
 
-**Root cause:** `sanitize()` in `src/lib/html.ts` should NOT HTML-escape — it should only trim. HTML escaping should happen at render time (which Astro/React handle automatically). The function was consolidated from 9 copies during the code audit, and the escaping behavior was standardized when it should have been removed.
-
-**Fix:** Change `sanitize()` to only trim whitespace. Remove the `escapeHtml` call inside it. The framework handles output escaping.
+**Fix applied:** Changed `sanitize()` to only trim whitespace. `escapeHtml` remains available for email templates where it's needed.
 
 ### C8. Duplicate pledges possible — no guard
 **Personas:** Sarah | **Severity:** High bug
@@ -281,10 +277,12 @@ Contains "fellow runner" language — not inclusive of non-runner organizers/don
 
 ## Accessibility Findings
 
-### A1. Search input has no accessible label
+### ~~A1. Search input has no accessible label~~ [FIXED]
 **Severity:** Critical a11y
 
-The homepage search `<input id="search-input">` has no `<label>`, `aria-label`, or `title`. Screen readers can't identify it.
+~~Search input had no accessible label.~~
+
+**Fix applied:** Added `aria-label="Search needs"` to the search input.
 
 ### A2. Color contrast failures
 **Severity:** Serious a11y
@@ -318,10 +316,12 @@ The user dropdown menu doesn't respond to Enter key. Has `aria-expanded` but key
 
 ## Bug Findings
 
-### B1. POST /api/pledges returns 500 on empty/partial body
+### ~~B1. POST /api/pledges returns 500 on empty/partial body~~ [FIXED]
 **Severity:** High bug
 
-Sending empty or partial form data to the pledges API causes an unhandled server error (500 with HTML error page) instead of a proper 400 JSON validation response.
+~~Sending empty or partial form data caused an unhandled 500.~~
+
+**Fix applied:** Wrapped `request.formData()` in try/catch in both `pledges.ts` and `needs.ts`, returning 400 on malformed input.
 
 ### B2. JS error on sign-in page
 **Severity:** Medium bug
@@ -645,17 +645,11 @@ When an organizer marks pledges as "not fulfilled" (rejecting delivered items), 
 
 All emails are fire-and-forget with zero retry logic. Failed emails are permanently lost with no queue, alerting, or retry mechanism.
 
-### SYS5. Dashboard hydration bug — window access during SSR (BUG)
-**Severity:** Critical bug (root cause of C1)
+### ~~SYS5. Dashboard hydration bug — window access during SSR (BUG)~~ [FIXED]
+**Severity:** Critical bug (root cause of C1) — See C1 fix.
 
-`DashboardTabs.tsx` calls `getTabFromHash()` in the `useState` initializer, which accesses `window.location.hash`. During SSR, `window` is undefined, causing a ReferenceError and blank output.
-
-**Fix:** Guard with `typeof window !== 'undefined'` or use `useEffect` for initial hash reading.
-
-### SYS6. formData() called outside try/catch in API routes (BUG)
-**Severity:** High bug (root cause of B1)
-
-`request.formData()` in `pledges.ts` and `needs.ts` is called before the try/catch block. Malformed request bodies throw an unhandled error, returning 500 instead of 400.
+### ~~SYS6. formData() called outside try/catch in API routes (BUG)~~ [FIXED]
+**Severity:** High bug (root cause of B1) — See B1 fix.
 
 ---
 
@@ -681,10 +675,10 @@ The application form collects org name, URL, and description — but NOT locatio
 
 Admins can't provide a reason for denial. The denial email is generic. Applicants don't know what to change before reapplying.
 
-### O5. `reviewedBy` not set on approve/deny (BUG)
+### ~~O5. `reviewedBy` not set on approve/deny (BUG)~~ [FIXED]
 **Severity:** Low bug
 
-The `reviewedBy` column exists in the schema but is not being set in the approve or deny handlers. This was supposedly fixed earlier but the fix appears to have been lost during refactoring.
+**Fix applied:** Re-added `reviewedBy: session.user.id` to both approve and deny handlers.
 
 ## Admin Findings
 
@@ -698,10 +692,8 @@ Admin pages are only accessible by typing the URL. No link in nav, user menu, or
 
 Admin can see pledge drives but can't approve, deny, cancel, or edit them. No management actions available.
 
-### AD3. reviewedBy not set on approve/deny (BUG regression)
-**Severity:** Medium bug
-
-The `reviewedBy` column exists but neither approve nor deny handlers set it. This was fixed earlier in the session but the fix was lost during refactoring. The `reviewedAt` IS set.
+### ~~AD3. reviewedBy not set on approve/deny (BUG regression)~~ [FIXED]
+**Severity:** Medium bug — See O5 fix.
 
 ### AD4. No denial confirmation dialog
 **Severity:** Low
@@ -887,23 +879,24 @@ The site's core functionality works well. The main gaps are around **discoverabi
 
 ### Total Findings by Severity
 
-| Severity | Count |
-|----------|-------|
-| Critical | 8 |
-| High | 12 |
-| Medium | 33 |
-| Low | 18 |
-| **Total** | **71** |
+| Severity | Count | Fixed |
+|----------|-------|-------|
+| Critical | 8 | 3 |
+| High | 12 | 1 |
+| Medium | 33 | 1 |
+| Low | 18 | 0 |
+| **Total** | **71** | **5** |
+| **Remaining** | **66** | |
 
 ---
 
 ### Fix Before Launch (launch blockers)
 
 **Bugs that break core functionality:**
-- C1: Dashboard React island fails to hydrate — entire dashboard is blank
-- C7: Double-escaping bug causes garbled text display on all user content
+- ~~C1: Dashboard React island fails to hydrate~~ [FIXED]
+- ~~C7: Double-escaping bug causes garbled text display~~ [FIXED]
 - C5: Sign-in buttons permanently disabled when CSRF fetch fails
-- B1: POST /api/pledges returns 500 on empty/partial body instead of 400 validation error
+- ~~B1: POST /api/pledges returns 500 on empty/partial body~~ [FIXED]
 - D1: Map markers not clickable due to z-index/CSS stacking bug
 
 **Privacy/security issues:**
@@ -935,7 +928,7 @@ The site's core functionality works well. The main gaps are around **discoverabi
 - H4/AD1: No admin link in navigation — admin pages only accessible by URL
 - H2: No shipping/logistics info on need detail pages — donors don't know how to deliver gear
 - C8: Duplicate pledges possible — no unique constraint guard
-- A1: Search input has no accessible label (critical a11y)
+- ~~A1: Search input has no accessible label~~ [FIXED]
 - A6: Dropdown menu not keyboard operable (serious a11y)
 
 **Trust issues:**
@@ -990,7 +983,7 @@ The site's core functionality works well. The main gaps are around **discoverabi
 - M3: Map toggle button not visible/clickable on mobile
 - H14: No form validation feedback beyond HTML5 defaults
 - B2: JS error on sign-in page — "Unexpected token" parsing HTML as JSON
-- AD3/O5: `reviewedBy` not set on approve/deny (bug regression)
+- ~~AD3/O5: `reviewedBy` not set on approve/deny~~ [FIXED]
 - CQ2: Privacy policy missing data disclosures for messages and third parties
 
 **Content improvements:**
