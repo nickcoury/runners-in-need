@@ -24,9 +24,11 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
     () => Object.fromEntries(pledges.map((p) => [p.id, p.status]))
   );
   const [updating, setUpdating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function updatePledgeStatus(pledgeId: string, newStatus: string) {
     setUpdating(pledgeId);
+    setError(null);
     try {
       const form = new FormData();
       form.set("pledgeId", pledgeId);
@@ -34,7 +36,11 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
       const res = await fetch("/_actions/updatePledgeStatus", { method: "POST", body: form });
       if (res.ok) {
         setPledgeStatuses((prev) => ({ ...prev, [pledgeId]: newStatus }));
+      } else {
+        setError("Failed to update pledge status. Please try again.");
       }
+    } catch {
+      setError("Something went wrong. Please check your connection and try again.");
     } finally {
       setUpdating(null);
     }
@@ -54,6 +60,15 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
         Incoming Pledges
       </h2>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 ml-4">
+            &times;
+          </button>
+        </div>
+      )}
 
       {needIdsWithPledges.length === 0 && (
         <div className="border rounded-lg p-8 text-center text-gray-400">

@@ -186,7 +186,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (isAdminRoute(pathname)) {
     const role = session.user.role;
     if (role !== "admin") {
-      return addSecurityHeaders(new Response("Forbidden", { status: 403 }));
+      if (pathname.startsWith("/api/")) {
+        return addSecurityHeaders(new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        }));
+      }
+      return addSecurityHeaders(context.redirect("/?error=forbidden"));
     }
   }
 
