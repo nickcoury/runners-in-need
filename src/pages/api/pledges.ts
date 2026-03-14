@@ -9,7 +9,12 @@ import { sanitize } from "../../lib/html";
 import { jsonError } from "../../lib/api";
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return jsonError("Invalid form data", 400);
+  }
   // Honeypot check — if filled, it's a bot
   const honeypot = form.get("website") as string | null;
   if (honeypot) {

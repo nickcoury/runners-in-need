@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
   // Mark request as approved
   await db
     .update(schema.organizerRequests)
-    .set({ status: "approved", reviewedAt: new Date() })
+    .set({ status: "approved", reviewedAt: new Date(), reviewedBy: session.user.id })
     .where(eq(schema.organizerRequests.id, requestId));
 
   // Notify applicant (fire-and-forget)

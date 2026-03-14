@@ -8,6 +8,7 @@ type Tab = "needs" | "pledges" | "account";
 const validTabs: Tab[] = ["needs", "pledges", "account"];
 
 function getTabFromHash(defaultTab: Tab, allowedTabs: Tab[]): Tab {
+  if (typeof window === "undefined") return defaultTab;
   const hash = window.location.hash.replace("#", "") as Tab;
   return allowedTabs.includes(hash) ? hash : defaultTab;
 }
