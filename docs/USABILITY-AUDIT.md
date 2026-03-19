@@ -750,6 +750,68 @@ Zero testimonials, zero impact stats on homepage, zero partner logos. The Why pa
 
 ---
 
+## Production Playwright Audit — 2026-03-19
+
+Conducted via headless Chromium against https://runnersinneed.com. Duration: 60+ minutes.
+
+### PROD-C1. CSP blocks ALL inline JavaScript (LAUNCH BLOCKER)
+**Severity:** Critical | **Personas:** All
+
+The production CSP header is `script-src 'self' https://challenges.cloudflare.com`. This blocks every `<script>` tag in Layout.astro (4+ inline scripts), which means the following features are **completely broken in production**:
+
+- Mobile hamburger menu toggle — clicking does nothing
+- Desktop user menu dropdown — clicking does nothing
+- Sign out button — no handler attached
+- Back-to-top button — never shown
+- Auth state detection — "Get Started" link is always visible even when signed in; user menu never appears
+- Cloudflare Web Analytics beacon (`cloudflareinsights.com`) — also blocked
+
+**Fix options:** Either add `'unsafe-inline'` to `script-src` (quick but less secure), or implement nonce-based CSP using Astro middleware (`defineMiddleware` to inject nonces into both CSP header and script tags). Nonce-based is the right long-term answer.
+
+**Impact:** This single bug breaks the entire site's interactivity. The site renders but nothing clickable works beyond basic link navigation. This is the #1 launch blocker.
+
+### PROD-C2. All organization names show "Unknown Organization"
+**Severity:** Critical | **Personas:** All
+
+Every need card on the production browse page displays "Unknown Organization" instead of the actual org name. Either:
+- The org-need relation isn't populated in production data
+- The query joining needs to organizations isn't returning org names
+- The seed data doesn't set org names
+
+This makes the site look broken/unprofessional and removes the trust signal of knowing which organization is behind each need.
+
+### PROD-H1. Map shows "Loading map..." permanently
+**Severity:** High | **Personas:** Sarah, Priya
+
+The Leaflet map on the browse page never renders. The "Loading map..." placeholder text is visible, and CTA content from below the map bleeds through into the map area. Likely related to CSP blocking inline scripts, or a Leaflet initialization issue in production.
+
+### PROD-H2. Pledge form submissions silently fail
+**Severity:** High | **Personas:** Sarah, Priya
+
+Filling out and submitting the pledge form on a need detail page produces no visible response — no success message, no error, no network request to the API. The form appears to be a React island (PledgeForm.tsx) whose hydration or event handlers may be broken by the CSP inline script restrictions.
+
+### PROD-M1. Sign-in buttons show no loading state
+**Severity:** Medium | **Personas:** All
+
+Both "Continue with email" and "Continue with Google" buttons on the sign-in page start disabled and look identical to their enabled state — no spinner, no "Loading..." text. Users see grayed-out buttons with no indication that something is happening. The buttons enable after the CSRF fetch completes, but there's a several-hundred-ms window where they look permanently broken.
+
+### PROD-M2. Admin page returns 404 for unauthenticated users
+**Severity:** Medium | **Personas:** Admin Alex
+
+Navigating to `/admin` while not authenticated returns a 404 page instead of redirecting to `/auth/signin?callbackUrl=/admin` like `/dashboard` and `/profile` do. This inconsistency is confusing and also leaks the existence of the admin route.
+
+### PROD-M3. Turnstile CAPTCHA not rendering
+**Severity:** Medium | **Personas:** Sarah
+
+The Cloudflare Turnstile widget on the pledge form for anonymous users doesn't render. Either `turnstileSiteKey` isn't configured in the production environment, or the widget script is blocked by CSP. This leaves anonymous pledge submissions unprotected from bot abuse.
+
+### PROD-L1. Security headers are solid
+**Severity:** Positive observation
+
+Production returns good security headers: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restricting camera/mic/geolocation. The CSP itself is actually *too* strict (hence PROD-C1), but the security posture is strong.
+
+---
+
 ## Summary
 
 | Priority | Count | Key Themes |
@@ -768,19 +830,23 @@ The site's core functionality works well. The main gaps are around **discoverabi
 
 | Severity | Count |
 |----------|-------|
-| Critical | 5 |
-| High | 11 |
-| Medium | 28 |
+| Critical | 7 |
+| High | 13 |
+| Medium | 31 |
 | Low | 14 |
-| **Total** | **58** |
+| **Total** | **65** |
 
 ---
 
 ### Fix Before Launch (launch blockers)
 
 **Bugs that break core functionality:**
+- **PROD-C1: CSP blocks ALL inline JavaScript — entire site's interactivity is broken in production** (mobile menu, user menu, sign out, back-to-top, auth state detection)
+- PROD-C2: All organization names show "Unknown Organization" in production
 - C3: Sign-in buttons permanently disabled when CSRF fetch fails
 - D1: Map markers not clickable due to z-index/CSS stacking bug
+- PROD-H1: Map shows "Loading map..." permanently — never renders
+- PROD-H2: Pledge form submissions silently fail — no API request made
 
 **Privacy/security issues:**
 - P1/MSG2: Messages visible to all visitors including unauthenticated — may contain phone numbers, addresses
