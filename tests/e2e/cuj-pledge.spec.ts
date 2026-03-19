@@ -10,6 +10,11 @@ test.describe("CUJ-2: Anonymous Pledge", () => {
     page: import("@playwright/test").Page
   ): Promise<boolean> {
     await page.goto("/");
+    // Wait for client-rendered cards to load
+    await page
+      .locator(".need-card, :text('No needs posted yet')")
+      .first()
+      .waitFor({ timeout: 10000 });
     const needCards = page.locator(".need-card");
     const count = await needCards.count();
     if (count === 0) return false;

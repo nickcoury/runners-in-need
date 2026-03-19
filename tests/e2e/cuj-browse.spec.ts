@@ -1,4 +1,14 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+/** Wait for client-rendered need cards or empty state to appear */
+async function waitForNeedsGrid(page: Page) {
+  // NeedsGrid renders: skeleton → cards/empty/error
+  // Wait for either cards or the empty/error state text
+  await page
+    .locator(".need-card, :text('No needs posted yet'), :text('Something went wrong')")
+    .first()
+    .waitFor({ timeout: 10000 });
+}
 
 test.describe("CUJ-1: Anonymous Browsing", () => {
   test("home page loads with proper structure", async ({ page }) => {
@@ -6,6 +16,9 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     await expect(page.locator("h1").first()).toHaveText("Runners In Need");
     await expect(page.locator("#search-input")).toBeVisible();
     await expect(page.locator("#category-filters")).toBeVisible();
+
+    // Wait for client-rendered cards to load
+    await waitForNeedsGrid(page);
 
     // Either need cards exist or empty state is shown
     const needCards = page.locator(".need-card");
@@ -37,6 +50,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
 
   test("search input is functional", async ({ page }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const searchInput = page.locator("#search-input");
     await expect(searchInput).toBeVisible();
     await expect(searchInput).toHaveAttribute(
@@ -60,6 +74,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
 
   test("need cards contain expected elements", async ({ page }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const count = await needCards.count();
 
@@ -85,14 +100,15 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     const badge = firstCard.locator('[data-testid="need-card-category"]');
     await expect(badge).toBeVisible();
 
-    // MATCH NEED button
+    // View Need button
     await expect(
-      firstCard.locator("a", { hasText: "MATCH NEED" })
+      firstCard.locator("a", { hasText: "View Need" })
     ).toBeVisible();
   });
 
   test("clicking a need card navigates to detail page", async ({ page }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const count = await needCards.count();
 
@@ -113,6 +129,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
 
   test("need detail page shows expected content", async ({ page }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const count = await needCards.count();
 
@@ -169,29 +186,20 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     page,
   }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
 
-    // Desktop toggle — only present if there are needs with coordinates
-    const desktopToggle = page.locator("#desktop-tab-list");
-    const mobileToggle = page.locator("#tab-listings");
-
-    // These only exist if mapNeeds.length > 0, so we just check if they
-    // exist or not — both is valid
-    const hasDesktopToggle = (await desktopToggle.count()) > 0;
-    const hasMobileToggle = (await mobileToggle.count()) > 0;
-
-    // If one exists, the other should too
-    if (hasDesktopToggle) {
-      expect(await page.locator("#desktop-tab-map").count()).toBe(1);
-    }
-    if (hasMobileToggle) {
-      expect(await page.locator("#tab-map").count()).toBe(1);
-    }
+    // Desktop and mobile toggles are always present now (map self-fetches)
+    await expect(page.locator("#desktop-tab-list")).toBeAttached();
+    await expect(page.locator("#desktop-tab-map")).toBeAttached();
+    await expect(page.locator("#tab-listings")).toBeAttached();
+    await expect(page.locator("#tab-map")).toBeAttached();
   });
 
   test("empty state renders when no results match filter", async ({
     page,
   }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const count = await needCards.count();
 
@@ -219,6 +227,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     await context.clearPermissions();
 
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const locationBtn = page.locator("#location-btn");
     await expect(locationBtn).toBeVisible();
     await expect(locationBtn).toHaveAttribute(
@@ -246,6 +255,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     page,
   }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const filterContainer = page.locator("#category-filters");
     await expect(filterContainer).toBeVisible();
 
@@ -278,6 +288,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     page,
   }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const initialCount = await needCards.count();
 
@@ -316,6 +327,7 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
 
   test("search input filters displayed cards", async ({ page }) => {
     await page.goto("/");
+    await waitForNeedsGrid(page);
     const needCards = page.locator(".need-card");
     const initialCount = await needCards.count();
 
