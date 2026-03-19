@@ -12,7 +12,7 @@ import {
   sendFulfillmentReminderEmail,
 } from "../../../lib/email";
 
-export const GET: APIRoute = async ({ request }) => {
+const handler: APIRoute = async ({ request }) => {
   const cronSecret = getEnv("CRON_SECRET");
   if (!cronSecret) {
     return json(500, { error: "CRON_SECRET not configured" });
@@ -244,6 +244,9 @@ async function processFulfillmentReminders(results: {
     }
   }
 }
+
+export const GET: APIRoute = handler;
+export const POST: APIRoute = handler;
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
