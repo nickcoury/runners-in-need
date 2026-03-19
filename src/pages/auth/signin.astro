@@ -88,14 +88,6 @@ const callbackContext = getCallbackContext(callbackUrl);
   </div>
 
   <script>
-    // Fetch CSRF token client-side so the browser receives the cookie
-    fetch('/api/auth/csrf')
-      .then(r => r.json())
-      .then(data => {
-        document.querySelectorAll<HTMLInputElement>('.signin-form input[name="csrfToken"]')
-          .forEach(input => { input.value = data.csrfToken; });
-        document.querySelectorAll<HTMLButtonElement>('.signin-submit')
-          .forEach(btn => { btn.disabled = false; });
-      });
+    import '../../scripts/signin-csrf';
   </script>
 </Layout>

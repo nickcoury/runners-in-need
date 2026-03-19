@@ -82,13 +82,17 @@ function addSecurityHeaders(response: Response): Response {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
-  // CSP and HSTS only in production — Vite dev server uses inline scripts
+  // CSP and HSTS only in production
+  // Note: 'unsafe-inline' is needed because Astro inlines scripts for prerendered
+  // static pages (/about, /terms, etc.). This is safe because Astro/React escape
+  // all user content by default. Future improvement: nonce-based CSP or disable
+  // prerendering for pages with interactive scripts.
   if (import.meta.env.PROD) {
     response.headers.set(
       "Content-Security-Policy",
       [
         "default-src 'self'",
-        "script-src 'self' https://challenges.cloudflare.com",
+        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
         "style-src 'self' 'unsafe-inline' https://unpkg.com",
         "img-src 'self' data: https:",
         "font-src 'self'",
