@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 import { categoryStyles, categoryLabels } from "../lib/constants";
 
 interface Need {
@@ -111,7 +112,7 @@ function NeedCard({ need }: { need: Need }) {
   );
 }
 
-export default function NeedsGrid() {
+function NeedsGridInner() {
   const [needs, setNeeds] = useState<Need[] | null>(null);
   const [error, setError] = useState(false);
 
@@ -209,5 +210,13 @@ export default function NeedsGrid() {
         </p>
       </div>
     </>
+  );
+}
+
+export default function NeedsGrid() {
+  return (
+    <ErrorBoundary>
+      <NeedsGridInner />
+    </ErrorBoundary>
   );
 }

@@ -89,9 +89,15 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
                   className="text-xs text-red-500 hover:underline"
                   onClick={async () => {
                     if (!confirm("Are you sure you want to remove this need? It will be marked as expired.")) return;
-                    const res = await fetch(`/api/needs/${need.id}`, { method: "DELETE" });
-                    if (res.ok || res.redirected) {
-                      window.location.reload();
+                    try {
+                      const res = await fetch(`/api/needs/${need.id}`, { method: "DELETE" });
+                      if (res.ok || res.redirected) {
+                        window.location.reload();
+                      } else {
+                        alert("Failed to delete need. Please try again.");
+                      }
+                    } catch {
+                      alert("Something went wrong. Please check your connection.");
                     }
                   }}
                 >
