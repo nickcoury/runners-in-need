@@ -52,7 +52,7 @@ const needsWithComputed = activeNeeds.map((n) => {
 const memberSince = org.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 ---
 
-<Layout title={org.name}>
+<Layout title={org.name} description={`${org.name} — Organization on Runners In Need`} ogType="profile">
   <div class="max-w-3xl mx-auto">
     <a href="/" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] mb-4">
       &larr; Back to browse

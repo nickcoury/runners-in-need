@@ -5,9 +5,12 @@ interface Props {
   title: string;
   description?: string;
   fullWidth?: boolean;
+  ogType?: string;
 }
 
-const { title, description = 'Connecting runners who have extra gear with organizations serving runners in need.', fullWidth = false } = Astro.props;
+const { title, description = 'Connecting runners who have extra gear with organizations serving runners in need.', fullWidth = false, ogType = 'website' } = Astro.props;
+const fullTitle = `${title} | Runners In Need`;
+const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').href;
 ---
 
 <!doctype html>
@@ -18,15 +21,18 @@ const { title, description = 'Connecting runners who have extra gear with organi
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#2D4A2D" />
-    <meta property="og:title" content={`${title} | Runners In Need`} />
+    <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="Runners In Need" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
-    <link rel="canonical" href={Astro.url.href} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | Runners In Need</title>
+    <title>{fullTitle}</title>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
