@@ -159,9 +159,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/auth/") ||
     pathname === "/api/health" ||
-    pathname.startsWith("/api/cron/") ||
-    pathname === "/api/debug-orgs" ||
-    pathname === "/api/reseed"
+    pathname.startsWith("/api/cron/")
   ) {
     return addSecurityHeaders(await next());
   }
