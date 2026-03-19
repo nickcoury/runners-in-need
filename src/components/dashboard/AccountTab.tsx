@@ -46,7 +46,7 @@ export default function AccountTab({
             disabled
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500"
           />
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             Managed by your sign-in provider
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function AccountTab({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Location <span className="text-gray-400 font-normal">(City, State)</span>
+              Location <span className="text-gray-500 font-normal">(City, State)</span>
             </label>
             <input
               type="text"
@@ -208,7 +208,7 @@ export default function AccountTab({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Attention Line <span className="text-gray-400 font-normal">(optional, e.g. "Attn: Coach Smith")</span>
+              Attention Line <span className="text-gray-500 font-normal">(optional, e.g. "Attn: Coach Smith")</span>
             </label>
             <input
               type="text"

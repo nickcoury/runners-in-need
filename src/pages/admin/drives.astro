@@ -46,7 +46,7 @@ const statusLabels: Record<string, string> = {
   </div>
 
   {drivesFormatted.length === 0 ? (
-    <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400">
+    <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
       <p>No pledge drives have been submitted yet.</p>
     </div>
   ) : (
@@ -74,7 +74,7 @@ const statusLabels: Record<string, string> = {
             )}
           </div>
           <p class="text-sm text-gray-600 mb-2">{drive.description}</p>
-          <p class="text-xs text-gray-400">Submitted {drive.createdAtStr}</p>
+          <p class="text-xs text-gray-500">Submitted {drive.createdAtStr}</p>
         </div>
       ))}
     </div>

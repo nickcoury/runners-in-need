@@ -61,7 +61,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
       )}
 
       {needIdsWithPledges.length === 0 && (
-        <div className="border rounded-lg p-8 text-center text-gray-400">
+        <div className="border rounded-lg p-8 text-center text-gray-500">
           <p>No pledges yet. They'll appear here when donors respond to your needs.</p>
         </div>
       )}
@@ -80,7 +80,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
                 >
                   {needTitle}
                 </a>
-                <span className="text-gray-400 font-normal ml-2">
+                <span className="text-gray-500 font-normal ml-2">
                   ({needPledges.length} pledge
                   {needPledges.length !== 1 ? "s" : ""})
                 </span>
@@ -97,7 +97,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
                         <p className="text-sm font-medium text-gray-900">
                           {pledge.donorName}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-500">
                           {pledge.donorEmail} &middot; {pledge.createdAt}
                         </p>
                       </div>

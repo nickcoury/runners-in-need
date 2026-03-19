@@ -46,7 +46,7 @@ const reviewed = requestsWithUsers.filter((r) => r.status !== 'pending');
   </div>
 
   {pending.length === 0 ? (
-    <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400 mb-8">
+    <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500 mb-8">
       <p>No pending requests.</p>
     </div>
   ) : (
@@ -96,7 +96,7 @@ const reviewed = requestsWithUsers.filter((r) => r.status !== 'pending');
           <div class="flex items-center justify-between">
             <div>
               <span class="font-medium text-gray-700">{req.orgName}</span>
-              <span class="text-xs text-gray-400 ml-2">{req.createdAtStr}</span>
+              <span class="text-xs text-gray-500 ml-2">{req.createdAtStr}</span>
             </div>
             <span class:list={[
               "text-xs font-medium px-2 py-0.5 rounded-full border",

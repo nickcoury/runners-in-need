@@ -104,7 +104,7 @@ export default function MapView({ needs, fullscreen }: MapViewProps) {
       />
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-sm text-gray-400">Loading map...</div>
+          <div className="text-sm text-gray-500">Loading map...</div>
         </div>
       )}
     </div>

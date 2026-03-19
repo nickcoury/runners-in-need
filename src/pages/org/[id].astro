@@ -88,7 +88,7 @@ const memberSince = org.createdAt.toLocaleDateString("en-US", { month: "long", y
     <h2 class="text-lg font-bold text-gray-900 mb-4">Active Needs ({needsWithComputed.length})</h2>
 
     {needsWithComputed.length === 0 && (
-      <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400">
+      <div class="border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
         <p>This organization has no active needs right now.</p>
       </div>
     )}
@@ -106,7 +106,7 @@ const memberSince = org.createdAt.toLocaleDateString("en-US", { month: "long", y
           </div>
           <h3 class="font-semibold text-gray-900 mb-1">{need.title}</h3>
           <p class="text-sm text-gray-600 line-clamp-2 mb-2">{need.body}</p>
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
             <span>{need.location}</span>
             <span>{need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`}</span>
             <span>Posted {need.createdAt}</span>

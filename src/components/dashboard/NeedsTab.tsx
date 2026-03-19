@@ -69,7 +69,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
                 className={`text-xs ${
                   need.daysLeft <= 14 && need.status === "active"
                     ? "text-amber-600 font-medium"
-                    : "text-gray-400"
+                    : "text-gray-500"
                 }`}
               >
                 {need.status === "expired"
@@ -104,7 +104,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
       </div>
 
       {needs.length === 0 && (
-        <div className="border rounded-lg p-8 text-center text-gray-400">
+        <div className="border rounded-lg p-8 text-center text-gray-500">
           <p>You haven't posted any needs yet.</p>
           <a
             href="/post"

@@ -108,7 +108,7 @@ export default function NeedForm({
           placeholder="Describe what your runners need. Click a category above for a template."
           className="w-full border rounded-lg px-3 py-2 text-sm font-mono"
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-gray-500 mt-1">
           Include sizes, quantities, and any condition preferences.
         </p>
       </div>
@@ -133,7 +133,7 @@ export default function NeedForm({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Delivery Methods
         </label>
-        <p className="text-xs text-gray-400 mb-2">
+        <p className="text-xs text-gray-500 mb-2">
           How can donors get gear to you? Pre-filled from your org preferences.
         </p>
         <div className="space-y-2">
@@ -165,7 +165,7 @@ export default function NeedForm({
           htmlFor="deliveryInstructions"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Delivery Instructions <span className="text-gray-400 font-normal">(optional)</span>
+          Delivery Instructions <span className="text-gray-500 font-normal">(optional)</span>
         </label>
         <textarea
           id="deliveryInstructions"

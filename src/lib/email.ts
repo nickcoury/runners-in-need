@@ -59,7 +59,7 @@ function emailLayout(title: string, body: string): string {
     <div style="padding:24px 32px;color:#333333;font-size:15px;line-height:1.6;">
       ${body}
     </div>
-    <div style="padding:16px 32px;border-top:1px solid #e5e5e5;color:#999999;font-size:12px;">
+    <div style="padding:16px 32px;border-top:1px solid #e5e5e5;color:#737373;font-size:12px;">
       <a href="${getSiteUrl()}" style="color:#2D4A2D;text-decoration:none;">Runners In Need</a> &mdash; connecting donors with teams that need gear.
       <br>This is an automated message. Please do not reply directly to this email.
     </div>
