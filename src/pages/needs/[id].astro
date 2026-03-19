@@ -259,7 +259,7 @@ const pledgesWithComputed = pledges.map((p) => {
                 {pledge.messagesWithDates.length > 0 && (
                   <Fragment>
                     <p class="text-xs font-medium text-gray-500 mb-2">Messages</p>
-                    <div class="space-y-2 mb-3">
+                    <div role="log" aria-label="Conversation messages" class="space-y-2 mb-3">
                       {pledge.messagesWithDates.map((msg) => (
                         <div class:list={[
                           "rounded-lg px-3 py-2 text-sm",
@@ -293,6 +293,7 @@ const pledgesWithComputed = pledges.map((p) => {
                       name="body"
                       required
                       maxlength="2000"
+                      aria-label="Message text"
                       placeholder="Send a message..."
                       class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
                     />

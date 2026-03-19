@@ -212,11 +212,11 @@ export default function PledgeForm({
       </div>
 
       {turnstileSiteKey && (
-        <div ref={turnstileRef} />
+        <div ref={turnstileRef} aria-label="Human verification" />
       )}
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p role="alert" className="text-sm text-red-600">{error}</p>
       )}
 
       <button
