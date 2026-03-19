@@ -222,7 +222,7 @@ export default function PledgeForm({
       <button
         type="submit"
         disabled={submitting}
-        className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg hover:bg-[#1F361F] text-sm disabled:opacity-50"
+        className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none text-sm disabled:opacity-50"
       >
         {submitting ? "Submitting..." : "Submit Pledge"}
       </button>
