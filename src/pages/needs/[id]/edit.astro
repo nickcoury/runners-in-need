@@ -56,7 +56,7 @@ const needDeliveryInstructions = need.deliveryInstructions || '';
 
 <Layout title={`Edit: ${need.title}`}>
   <div class="max-w-3xl">
-    <a href={`/needs/${need.id}`} class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] mb-4">
+    <a href={`/needs/${need.id}`} class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none mb-4">
       &larr; Back to need
     </a>
 
@@ -193,13 +193,13 @@ const needDeliveryInstructions = need.deliveryInstructions || '';
         <button
           id="edit-submit-btn"
           type="submit"
-          class="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] text-sm disabled:opacity-50"
+          class="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none text-sm disabled:opacity-50"
         >
           Save Changes
         </button>
         <a
           href={`/needs/${need.id}`}
-          class="px-6 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+          class="px-6 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           Cancel
         </a>

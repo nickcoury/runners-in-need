@@ -94,11 +94,11 @@ export default function PledgeForm({
         )}
         <div className="mt-3 flex flex-wrap gap-3">
           {userEmail && (
-            <a href="/dashboard" className="font-medium text-green-700 hover:text-green-900 underline">
+            <a href="/dashboard" className="font-medium text-green-700 hover:text-green-900 focus-visible:text-green-900 focus-visible:outline-none underline">
               View your pledges &rarr;
             </a>
           )}
-          <a href="/" className="font-medium text-green-700 hover:text-green-900 underline">
+          <a href="/" className="font-medium text-green-700 hover:text-green-900 focus-visible:text-green-900 focus-visible:outline-none underline">
             Browse more needs &rarr;
           </a>
         </div>

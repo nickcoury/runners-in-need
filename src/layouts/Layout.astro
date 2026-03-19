@@ -69,11 +69,11 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
           <a href="/about" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">About</a>
 
           {/* Signed-out state */}
-          <a id="auth-link" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Get Started</a>
+          <a id="auth-link" href="/auth/signin" class="bg-white/15 hover:bg-white/25 focus-visible:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none px-3 py-1 rounded-lg transition-colors">Get Started</a>
 
           {/* Signed-in state — hidden by default, shown by JS */}
           <div id="user-menu" class="relative hidden">
-            <button id="user-menu-btn" aria-label="User menu" aria-haspopup="true" aria-expanded="false" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 pl-1.5 pr-3 py-1 rounded-lg transition-colors">
+            <button id="user-menu-btn" aria-label="User menu" aria-haspopup="true" aria-expanded="false" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 focus-visible:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none pl-1.5 pr-3 py-1 rounded-lg transition-colors">
               <span id="user-avatar" class="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold overflow-hidden">
                 <span id="user-initials"></span>
               </span>
@@ -89,7 +89,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
               </div>
               <a href="/dashboard" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none transition-colors">Dashboard</a>
               <a href="/profile" role="menuitem" class="block px-4 py-2 text-sm hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none transition-colors">Profile</a>
-              <a id="admin-link" href="/admin" role="menuitem" class="hidden px-4 py-2 text-sm hover:bg-gray-50 transition-colors">Admin</a>
+              <a id="admin-link" href="/admin" role="menuitem" class="hidden px-4 py-2 text-sm hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none transition-colors">Admin</a>
               <div class="border-t border-gray-100 mt-1 pt-1">
                 <button id="sign-out-btn" role="menuitem" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 focus-visible:bg-red-50 focus-visible:outline-none transition-colors">Sign Out</button>
               </div>
@@ -112,7 +112,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
           <a href="/about" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">About</a>
 
           {/* Mobile: signed-out */}
-          <a id="auth-link-mobile" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Get Started</a>
+          <a id="auth-link-mobile" href="/auth/signin" class="bg-white/15 hover:bg-white/25 focus-visible:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none px-3 py-1 rounded-lg transition-colors inline-block w-fit">Get Started</a>
 
           {/* Mobile: signed-in — hidden by default */}
           <div id="mobile-user-section" class="hidden space-y-2 pt-1 border-t border-white/10">
@@ -122,10 +122,10 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
               </span>
               <span id="mobile-user-name" class="text-sm font-medium truncate"></span>
             </div>
-            <a href="/dashboard" class="block hover:text-green-200 transition-colors">Dashboard</a>
-            <a href="/profile" class="block hover:text-green-200 transition-colors">Profile</a>
-            <a id="mobile-admin-link" href="/admin" class="hidden hover:text-green-200 transition-colors">Admin</a>
-            <button id="mobile-sign-out-btn" class="text-red-300 hover:text-red-200 transition-colors text-left">Sign Out</button>
+            <a href="/dashboard" class="block hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Dashboard</a>
+            <a href="/profile" class="block hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Profile</a>
+            <a id="mobile-admin-link" href="/admin" class="hidden hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Admin</a>
+            <button id="mobile-sign-out-btn" class="text-red-300 hover:text-red-200 focus-visible:text-red-200 focus-visible:outline-none transition-colors text-left">Sign Out</button>
           </div>
         </div>
       </div>
@@ -143,12 +143,12 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
       <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
         <p>Runners In Need &mdash; Connecting gear with those who need it most.</p>
         <div class="flex flex-wrap gap-4 text-green-300">
-          <a href="/about" class="hover:text-white">About</a>
-          <a href="/why" class="hover:text-white">Why</a>
-          <a href="/terms" class="hover:text-white">Terms</a>
-          <a href="/privacy" class="hover:text-white">Privacy</a>
-          <a href="/contact" class="hover:text-white">Contact</a>
-          <a href="/become-organizer" class="hover:text-white">Become an Organizer</a>
+          <a href="/about" class="hover:text-white focus-visible:text-white focus-visible:outline-none">About</a>
+          <a href="/why" class="hover:text-white focus-visible:text-white focus-visible:outline-none">Why</a>
+          <a href="/terms" class="hover:text-white focus-visible:text-white focus-visible:outline-none">Terms</a>
+          <a href="/privacy" class="hover:text-white focus-visible:text-white focus-visible:outline-none">Privacy</a>
+          <a href="/contact" class="hover:text-white focus-visible:text-white focus-visible:outline-none">Contact</a>
+          <a href="/become-organizer" class="hover:text-white focus-visible:text-white focus-visible:outline-none">Become an Organizer</a>
         </div>
       </div>
     </footer>

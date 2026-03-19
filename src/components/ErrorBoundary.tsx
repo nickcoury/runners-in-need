@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p className="text-sm mb-3">Something went wrong loading this section.</p>
             <button
               onClick={() => this.setState({ hasError: false })}
-              className="text-sm text-[#2D4A2D] hover:underline"
+              className="text-sm text-[#2D4A2D] hover:underline focus-visible:underline focus-visible:outline-none"
             >
               Try again
             </button>

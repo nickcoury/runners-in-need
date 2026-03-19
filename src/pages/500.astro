@@ -13,19 +13,19 @@ import Layout from '../layouts/Layout.astro';
     <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
       <a
         href="/"
-        class="inline-block bg-[#2D4A2D] text-white px-6 py-2.5 rounded-lg hover:bg-[#1f351f] transition-colors text-sm font-medium"
+        class="inline-block bg-[#2D4A2D] text-white px-6 py-2.5 rounded-lg hover:bg-[#1f351f] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors text-sm font-medium"
       >
         Back to Home
       </a>
       <button
         onclick="location.reload()"
-        class="inline-block border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:border-[#2D4A2D] hover:text-[#2D4A2D] transition-colors text-sm font-medium cursor-pointer"
+        class="inline-block border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:border-[#2D4A2D] hover:text-[#2D4A2D] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors text-sm font-medium cursor-pointer"
       >
         Try Again
       </button>
     </div>
     <p class="text-sm text-gray-500 mt-8">
-      If this keeps happening, <a href="/contact" class="underline hover:text-[#2D4A2D]">let us know</a>.
+      If this keeps happening, <a href="/contact" class="underline hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none">let us know</a>.
     </p>
   </div>
 </Layout>

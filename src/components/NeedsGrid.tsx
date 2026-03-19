@@ -149,7 +149,7 @@ function NeedsGridInner() {
               .then(setNeeds)
               .catch(() => setError(true));
           }}
-          className="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+          className="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
         >
           Retry
         </button>
@@ -184,13 +184,13 @@ function NeedsGridInner() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href="/become-organizer"
-            className="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+            className="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
           >
             Become an Organizer
           </a>
           <a
             href="/about"
-            className="inline-block border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium hover:border-[#2D4A2D] hover:text-[#2D4A2D] transition-colors"
+            className="inline-block border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium hover:border-[#2D4A2D] hover:text-[#2D4A2D] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
           >
             Learn More
           </a>

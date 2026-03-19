@@ -54,7 +54,7 @@ const memberSince = org.createdAt.toLocaleDateString("en-US", { month: "long", y
 
 <Layout title={org.name} description={`${org.name} — Organization on Runners In Need`} ogType="profile">
   <div class="max-w-3xl mx-auto">
-    <a href="/" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] mb-4">
+    <a href="/" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none mb-4">
       &larr; Back to browse
     </a>
 
@@ -95,7 +95,7 @@ const memberSince = org.createdAt.toLocaleDateString("en-US", { month: "long", y
 
     <div class="space-y-4 mb-8">
       {needsWithComputed.map((need) => (
-        <a href={`/needs/${need.id}`} class="block bg-white border border-gray-200 rounded-lg p-4 hover:border-[#2D4A2D]/30 hover:shadow-sm transition-all">
+        <a href={`/needs/${need.id}`} class="block bg-white border border-gray-200 rounded-lg p-4 hover:border-[#2D4A2D]/30 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none transition-all">
           <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class:list={["text-xs font-medium px-2.5 py-1 rounded-full", need.categoryStyle]}>
               {need.categoryLabel}
