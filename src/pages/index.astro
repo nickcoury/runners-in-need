@@ -221,7 +221,7 @@ const categories = [
     {/* Fullscreen map — hidden by default on mobile, toggled by bottom nav */}
     {mapNeeds.length > 0 && (
       <div id="map-view" class="hidden lg:hidden fixed inset-0 top-[52px] bottom-[56px] z-40 bg-white">
-        <MapView client:visible needs={mapNeeds} fullscreen />
+        <MapView client:only="react" needs={mapNeeds} fullscreen />
       </div>
     )}
 
@@ -276,7 +276,7 @@ const categories = [
   {/* Desktop expanded map view — hidden by default, shown when Map tab clicked */}
   {mapNeeds.length > 0 && (
     <div id="desktop-map-view" class="hidden rounded-lg overflow-hidden" style="height: calc(100vh - 240px); min-height: 400px;">
-      <MapView client:visible needs={mapNeeds} fullscreen />
+      <MapView client:only="react" needs={mapNeeds} fullscreen />
     </div>
   )}
 
