@@ -1,58 +1,19 @@
 # Nick's TODOs
 
-Action items that require your manual intervention (dashboard clicks, account setup, product decisions). Everything else is handled by the dev team.
+Action items that require your manual intervention.
 
 ---
 
-## Critical Bugs — All Fixed (2026-03-14)
-
-- [x] **GAP-1**: `donorId` now set from session in pledge API
-- [x] **GAP-2**: Need status transitions to `fulfilled` when all pledges are delivered
-- [x] **GAP-7**: `reviewedBy` set on approve/deny
-
----
-
-## Product Decisions — All Resolved (2026-03-14)
-
-- [x] **GAP-5 (Reapplication)**: Denied applicants can reapply after 12-month cooldown
-- [x] **GAP-6 (Org onboarding)**: Dashboard banner shown when org location is "TBD"
-- [x] **GAP-9 (Account deletion)**: Full delete account flow with double-confirm UI
-- [x] **GAP-12 (Org profile)**: Public org profile page at `/org/[id]`
-- **Anonymous donors**: Acceptable as-is — contact via `donorEmail` in organizer dashboard
-
----
-
-## Implementation TODO — All Complete (2026-03-14)
-
-### High Priority
-- [x] Fix GAP-1: Set donorId from session in pledge API
-- [x] Fix GAP-2: Transition need status when pledges deliver
-- [x] Fix GAP-7: Set reviewedBy on approve/deny
-- [x] Fix GAP-8: Re-geocode lat/lng when org location is updated
-- [x] Add pledge description length validation
-- [x] Add notification email when organizer request is approved/denied (GAP-13)
-- [x] Add dashboard banner when org location is "TBD" (GAP-6)
-
-### Medium Priority
-- [x] Expiration reminder emails (1 month, 2 weeks, day-of)
-- [x] One-click refresh to extend need expiration
-- [x] Stale pledge auto-expiration (30 days no update)
-- [x] Shipping address management UI
-- [x] Honeypot fields on forms
-- [x] Rate limiting on API endpoints
-
-### Low Priority / Post-Launch
-- [x] LLM-assisted partial fulfillment
-- [x] Account deletion flow
-- [x] Org public profile page (`/org/[id]`)
-- [x] Allow organizer reapplication after denial (12-month cooldown)
-
----
-
-## When Ready
+## Pending
 
 ### Add Anthropic API Key
 For the LLM-assisted partial fulfillment feature. Add `ANTHROPIC_API_KEY` to Cloudflare Workers env vars and `.env` when you want this feature enabled.
+
+### Add CRON_SECRET to GitHub Secrets
+Needed for the daily cron workflow to authenticate against the production endpoint.
+
+### Pre-Launch Checklist
+See [docs/INCIDENT-PLAYBOOK.md](docs/INCIDENT-PLAYBOOK.md) — Annual Checklist section. Review legal pages, Cloudflare dashboard, and insurance before launch.
 
 ---
 
