@@ -75,7 +75,7 @@ const categories = [
           data-testid="search-clear"
           type="button"
           aria-label="Clear search"
-          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 p-0.5"
+          class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 focus-visible:text-gray-700 focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/30 focus-visible:outline-none rounded p-0.5"
         >
           <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
@@ -102,13 +102,14 @@ const categories = [
       <span id="location-indicator-text">Sorted by distance</span>
       <button id="location-clear" class="ml-1 text-gray-500 hover:text-gray-600" aria-label="Clear location sort">&times;</button>
     </div>
-    <div id="category-filters" class="flex gap-2 overflow-x-auto pb-1">
+    <div id="category-filters" role="group" aria-label="Filter by category" class="flex gap-2 overflow-x-auto pb-1">
       {categories.map((cat, i) => (
         <button
           data-testid="category-btn"
           data-category={cat.tag}
+          aria-pressed={i === 0 ? "true" : "false"}
           class:list={[
-            "category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+            "category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none",
             i === 0
               ? "bg-[#2D4A2D] text-white"
               : "bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]"
@@ -194,18 +195,22 @@ const categories = [
   <nav id="mobile-bottom-nav" aria-label="View toggle" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
     <button
       id="tab-listings"
+      aria-label="Switch to listings view"
+      aria-pressed="true"
       class="flex-1 py-3 text-center text-sm font-medium text-[#2D4A2D] border-t-2 border-[#2D4A2D]"
     >
-      <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mx-auto mb-0.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
       </svg>
       Listings
     </button>
     <button
       id="tab-map"
+      aria-label="Switch to map view"
+      aria-pressed="false"
       class="flex-1 py-3 text-center text-sm font-medium text-gray-500 border-t-2 border-transparent"
     >
-      <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mx-auto mb-0.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
       </svg>
       Map

@@ -56,8 +56,10 @@ function showListings() {
   mapView?.classList.remove('block');
   tabListings?.classList.replace('text-gray-400', 'text-[#2D4A2D]');
   tabListings?.classList.replace('border-transparent', 'border-[#2D4A2D]');
+  tabListings?.setAttribute('aria-pressed', 'true');
   tabMap?.classList.replace('text-[#2D4A2D]', 'text-gray-400');
   tabMap?.classList.replace('border-[#2D4A2D]', 'border-transparent');
+  tabMap?.setAttribute('aria-pressed', 'false');
 }
 
 function showMap() {
@@ -66,8 +68,10 @@ function showMap() {
   mapView?.classList.add('block');
   tabMap?.classList.replace('text-gray-400', 'text-[#2D4A2D]');
   tabMap?.classList.replace('border-transparent', 'border-[#2D4A2D]');
+  tabMap?.setAttribute('aria-pressed', 'true');
   tabListings?.classList.replace('text-[#2D4A2D]', 'text-gray-400');
   tabListings?.classList.replace('border-[#2D4A2D]', 'border-transparent');
+  tabListings?.setAttribute('aria-pressed', 'false');
 }
 
 tabListings?.addEventListener('click', () => {
@@ -210,10 +214,12 @@ searchClear?.addEventListener('click', () => {
 function selectCategory(cat: string) {
   activeCategory = cat;
   categoryBtns.forEach((b) => {
-    if (b.dataset.category === cat) {
-      b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-[#2D4A2D] text-white';
+    const active = b.dataset.category === cat;
+    b.setAttribute('aria-pressed', String(active));
+    if (active) {
+      b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none bg-[#2D4A2D] text-white';
     } else {
-      b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]';
+      b.className = 'category-btn px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none bg-white text-gray-700 border border-gray-300 hover:border-[#2D4A2D] hover:text-[#2D4A2D]';
     }
   });
   filterCards();

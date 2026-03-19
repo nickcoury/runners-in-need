@@ -16,6 +16,15 @@ menu?.querySelectorAll('a').forEach(link => {
   });
 });
 
+// Close mobile menu on Escape
+menu?.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    menu.classList.add('hidden');
+    btn?.setAttribute('aria-expanded', 'false');
+    btn?.focus();
+  }
+});
+
 // Check for session cookie and fetch user info
 const hasSession = document.cookie.includes('authjs.session-token') || document.cookie.includes('__Secure-authjs.session-token');
 if (hasSession) {
@@ -104,10 +113,32 @@ function toggleDropdown() {
 userMenuBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
   toggleDropdown();
+  // Focus first menu item when opening
+  if (!userDropdown?.classList.contains('hidden')) {
+    const firstItem = userDropdown.querySelector<HTMLElement>('[role="menuitem"]');
+    firstItem?.focus();
+  }
 });
 document.addEventListener('click', closeDropdown);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !userDropdown?.classList.contains('hidden')) {
+    closeDropdown();
+    userMenuBtn?.focus();
+  }
+});
+
+// Arrow key navigation and focus trap within dropdown
+userDropdown?.addEventListener('keydown', (e) => {
+  const items = Array.from(userDropdown.querySelectorAll<HTMLElement>('[role="menuitem"]:not(.hidden)'));
+  const idx = items.indexOf(document.activeElement as HTMLElement);
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    items[(idx + 1) % items.length]?.focus();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    items[(idx - 1 + items.length) % items.length]?.focus();
+  } else if (e.key === 'Tab') {
+    // Trap focus within dropdown
     closeDropdown();
     userMenuBtn?.focus();
   }

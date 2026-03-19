@@ -18,7 +18,7 @@ interface Need {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col animate-pulse">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col animate-pulse" aria-hidden="true">
       <div className="flex items-center gap-2 mb-2">
         <div className="h-5 w-16 bg-gray-200 rounded-full" />
       </div>
@@ -159,10 +159,13 @@ function NeedsGridInner() {
 
   if (!needs) {
     return (
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <SkeletonCard key={i} />
-        ))}
+      <div aria-busy="true" role="status">
+        <span className="sr-only">Loading needs...</span>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }

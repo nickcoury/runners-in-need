@@ -118,8 +118,8 @@ export default function MapView({ needs: propNeeds, fullscreen }: MapViewProps) 
     <div className="relative">
       <div
         ref={containerRef}
-        role="application"
-        aria-label="Map showing locations of gear needs"
+        role="region"
+        aria-label="Interactive map showing locations of gear needs. Use arrow keys to pan, plus and minus to zoom."
         className={fullscreen ? "w-full h-full" : "rounded-lg h-56 w-full"}
         style={{ background: "#e5e7eb" }}
       />
