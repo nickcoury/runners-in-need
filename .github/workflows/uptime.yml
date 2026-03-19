@@ -1,0 +1,43 @@
+name: Uptime check
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check site availability
+        run: |
+          # Check main page
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://runnersinneed.com/")
+          echo "Home page: $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Home page returned $status"
+            failed=1
+          fi
+
+          # Check health endpoint (includes DB connectivity)
+          health=$(curl -s --max-time 10 "https://runnersinneed.com/api/health")
+          health_status=$(echo "$health" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+          echo "Health: $health"
+          if [ "$health_status" != "ok" ]; then
+            echo "::error::Health check failed: $health"
+            failed=1
+          fi
+
+          # Check a static page (CDN)
+          about_status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "https://runnersinneed.com/about")
+          echo "About page: $about_status"
+          if [ "$about_status" != "200" ]; then
+            echo "::error::About page returned $about_status"
+            failed=1
+          fi
+
+          if [ "${failed:-0}" = "1" ]; then
+            exit 1
+          fi
+          echo "All checks passed"
