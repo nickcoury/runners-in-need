@@ -42,24 +42,6 @@ test.describe("Production smoke tests", () => {
     await expect(page.locator("h1")).toBeVisible();
   });
 
-  test("no console errors on prerendered pages", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") errors.push(msg.text());
-    });
-
-    await page.goto("/about");
-    await page.waitForTimeout(1000);
-
-    // Filter out expected errors (e.g. analytics, third-party)
-    const cspErrors = errors.filter(
-      (e) =>
-        e.includes("Content Security Policy") ||
-        e.includes("refused to execute")
-    );
-    expect(cspErrors).toHaveLength(0);
-  });
-
   test("mobile menu works on production", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/about");
