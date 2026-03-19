@@ -22,21 +22,14 @@ Focus: usability bugs, missing functionality, UX friction points.
 
 ## Critical Findings
 
-### ~~C1. Dashboard React island fails to hydrate (BUG)~~ [FIXED]
-**Personas:** Priya, Coach Maria, James | **Severity:** Critical
-
-~~The DashboardTabs React component (`client:load`) fails to mount in the dev server.~~
-
-**Fix applied:** Guarded `window.location.hash` access in `useState` initializer with `typeof window !== 'undefined'` check for SSR safety.
-
-### C2. "Sign In" shows in nav even when authenticated — PARTIALLY FIXED
+### C1. "Sign In" shows in nav even when authenticated — PARTIALLY FIXED
 **Personas:** Priya, Coach Maria | **Severity:** Critical
 
 **What was fixed:** Redesigned sign-in as combined sign-up/sign-in flow ("Welcome to Runners In Need"), nav link changed to "Get Started", contextual subheading based on callbackUrl. Research confirmed combined flow is best practice for magic link + OAuth auth.
 
 **Still open:** The nav still shows "Get Started" when authenticated via Playwright session cookies. This may be a test-only issue (Auth.js cookie format mismatch) or a real production bug. Needs verification with real Auth.js sessions in production.
 
-### C3. Donor has no way to see or manage their pledges
+### C2. Donor has no way to see or manage their pledges
 **Personas:** Sarah, Priya | **Severity:** Critical
 
 The donor dashboard renders blank (see C1), but even if it worked, there's no visible way for a donor to: see pledge status, withdraw a pledge, or track their donation. The pledge status labels ("Collecting", "Ready to Deliver") are organizer-centric and wouldn't make sense to donors.
@@ -45,7 +38,7 @@ The donor dashboard renders blank (see C1), but even if it worked, there's no vi
 
 Nick - Agreed. On the statuses, let's make sure they're simple but comprehensive. You mentioned ready to ship but it could also be an in-person hand off or a drop off e.g. to a schoo. I don't know if we want to bloat out the responses with too many options so we should consider something that covers the bases clearly without being overwhelming.
 
-### C5. Sign-in buttons stay disabled when CSRF fetch fails
+### C3. Sign-in buttons stay disabled when CSRF fetch fails
 **Personas:** All | **Severity:** Critical
 
 When the CSRF token fetch (`/api/auth/csrf`) fails (returns 500 in certain conditions), the sign-in buttons remain permanently disabled with no error message. Users see grayed-out buttons with no explanation. This was observed in the dev environment but the UX flaw is real — there's no error handling for CSRF fetch failure.
@@ -54,7 +47,7 @@ When the CSRF token fetch (`/api/auth/csrf`) fails (returns 500 in certain condi
 
 Nick - Agreed on graceful handling. Is there a better option than that error message? Wondering because if it doesn't work, will trying again make it work? If so that's fine but if this is more likely systemic we'll want to make sure we get alerted to fix it. Speaking of that, what's our monitoring, alerting, and observability plan for this site? How will I get notified if something major happens while not getting overwhelmed with minor issues? Let's add a separate project to dive into that, specifically looking for prior art on small sites and how that's best maintained.
 
-### C6. Pledge is fire-and-forget for unauthenticated users
+### C4. Pledge is fire-and-forget for unauthenticated users
 **Personas:** Sarah | **Severity:** Critical
 
 After an unauthenticated user submits a pledge, they get a success message but have zero way to track, edit, or cancel their pledge. No confirmation email is sent. No dashboard link (they're not signed in). The pledge is effectively a one-way drop with no follow-up possible.
@@ -63,29 +56,19 @@ After an unauthenticated user submits a pledge, they get a success message but h
 
 Nick - I think we'll want everyone that pledges to have an account. To lower friction perhaps we make it in-situ when they're creating the pledge? E.g. we will create an account using your email when you submit your pledge. Set your password now or we'll send you a link to create it later. What do you think? Anonymous pledges might bring problems even though we want to keep friction low.
 
-### ~~C7. Double-escaping bug causes garbled text display (BUG)~~ [FIXED]
-**Personas:** All | **Severity:** Critical bug
-
-~~`sanitize()` called `escapeHtml()` at write time, then Astro/React escaped again at render time, causing `&amp;` display.~~
-
-**Fix applied:** Changed `sanitize()` to only trim whitespace. `escapeHtml` remains available for email templates where it's needed.
-
-### C8. Duplicate pledges possible — no guard
+### C5. Duplicate pledges possible — no guard
 **Personas:** Sarah | **Severity:** High bug
 
 No unique constraint on `(needId, donorId)` or `(needId, donorEmail)`. A donor can pledge the same need multiple times. The client-side guard resets on page reload.
 
 Nick - Thinking through why someone might need this. Could be they just need the ability to update a pledge? That should fix half of this problem. The other half goes back to a previous decision to make partial pledges close a need and re-open it with a new needID. But what if there are multiple pledges at a time? We might want to re-think that. Perhaps its fine to have multiple pledges and just add pledgeId in as a third key? Then we can close pledges, and perhaps keep an edit history of needs? Or have two sections, one with the need and a second with fulfilled needs to show history of what has been pledged for it? What do you think? I'm ok with any variant of these ideas, let's pick one and implement it.
 
-### C9. Orphaned org on account deletion
+### C6. Orphaned org on account deletion
 **Personas:** Coach Maria | **Severity:** High bug
 
 When an organizer deletes their account, the organization record is orphaned (never deleted). Active pledges from OTHER donors on the org's needs are not withdrawn. No notification sent to affected donors.
 
 Nick - Do we have or do we need a one to many relationship between organizations and accounts? So humans have accounts, and they can always be donors. They can also be linked to an organization and then that lets them manage it. Perhaps we should keep it max one person per org to keep it simple for now, and keep emails and communication straightforward. But then an org can still exist without a human if the human deletes their account, and we can swap humans if they need to be handed over. We can also indicate if an org is "inactive" via having no human. Then we can label offers accordingly so people know there's no contacts for the org without losing the org history or deleting things that peolpe might expect to find still.
-
-### ~~C4. No post-pledge next steps~~ [FIXED]
-Added 3-step "what happens next" timeline, "View your pledges" link (authenticated), and "Browse more needs" link.
 
 ---
 
@@ -100,83 +83,74 @@ The site supports anonymous pledges (donorEmail from form), but clicking "Pledge
 
 Nick - mentioned this above but probably don't want fully anonymous pledges. Even something like Craigslist requires an account. Let's keep it low friction but make this required.
 
-### ~~2. No shipping/logistics info on need detail pages~~ [FIXED]
-Added first-class delivery methods (shipping, drop off, meet up, other) with org defaults, per-need override, instructions field, and post-pledge display.
-
-### ~~3. "Become an Organizer" is not discoverable~~ [FIXED]
-Added to footer and homepage CTA section.
-
-### ~~4. No admin link in navigation~~ [FIXED]
-Admin link now appears in user dropdown for admin-role users.
-
 ---
 
 ## Medium Priority Findings
 
-### 5. Homepage doesn't promote Pledge Drives
+### 2. Homepage doesn't promote Pledge Drives
 **Personas:** Marcus | **Severity:** Medium
 
 The homepage hero and CTAs focus on "Post a Need" and "Learn More." There's no mention of pledge drives on the homepage body — Marcus would only discover the feature via the nav link. This is a missed cross-promotion opportunity.
 
 **Recommendation:** Add a secondary section on the homepage: "Want to make a bigger impact? Organize a Pledge Drive" with a CTA.
 
-### 6. About page is a dead end
+### 3. About page is a dead end
 **Personas:** Sarah, Marcus | **Severity:** Medium
 
 The About page has no CTAs or links in its body content. After reading about the mission, users have no clear next step. No mention of how to donate, become an organizer, or contact the team.
 
 **Recommendation:** Add CTAs at the bottom: "Browse gear needs," "Become an organizer," "Contact us."
 
-### 7. Why page doesn't mention Pledge Drives
+### 4. Why page doesn't mention Pledge Drives
 **Personas:** Marcus | **Severity:** Medium
 
 The `/why` page has compelling stats but its bottom CTAs are "Browse Needs" and "Post a Need" — no "Organize a Drive" option. Marcus's primary action is not represented.
 
 **Recommendation:** Add "Organize a Pledge Drive" as a third CTA.
 
-### 8. Contact page is email-only
+### 5. Contact page is email-only
 **Personas:** Marcus, Aisha | **Severity:** Medium
 
 The contact page shows email addresses but no contact form. For less tech-savvy users or those who don't want to open their email client, this adds friction.
 
 **Recommendation:** Consider adding a simple contact form that sends via the existing email infrastructure.
 
-### 9. Sign-in page lacks context
+### 6. Sign-in page lacks context
 **Personas:** Marcus, Aisha | **Severity:** Medium
 
 When redirected to sign-in from a specific page (e.g., /drives, /become-organizer), the sign-in page is generic — it doesn't explain why the user needs to sign in or what they'll get access to. A contextual message would reduce drop-off.
 
 **Recommendation:** Show a brief message based on the callbackUrl: "Sign in to organize your pledge drive" or "Sign in to apply as an organizer."
 
-### 10. Small touch targets on mobile
+### 7. Small touch targets on mobile
 **Personas:** Priya | **Severity:** Medium
 
 14-30 interactive elements across the site have touch targets smaller than the recommended 44x44px minimum. Category filter pills, footer links, and some navigation items are affected.
 
 **Recommendation:** Increase padding on category pills and footer links. Use `min-h-[44px] min-w-[44px]` on interactive elements.
 
-### 11. Map component not loading in some contexts
+### 8. Map component not loading in some contexts
 **Personas:** Sarah | **Severity:** Medium
 
 The Leaflet map on the browse page was not detected during automated testing. This may be a Playwright/headless rendering issue, but worth verifying in a real browser that the map loads reliably.
 
 **Recommendation:** Verify map loading in production. Consider adding a fallback message if the map fails to load.
 
-### 12. "Become Organizer" language is running-specific
+### 9. "Become Organizer" language is running-specific
 **Personas:** Aisha | **Severity:** Medium
 
 The requirements page and site copy mention "running program" extensively. A youth shelter coordinator like Aisha might not identify with "running program" terminology, even though her organization serves runners.
 
 **Recommendation:** Broaden language to "organizations serving runners" or "programs that provide gear to runners in need." Make it clear that shelters, community centers, and schools are welcome.
 
-### 13. Dashboard has no search/filter for needs at scale
+### 10. Dashboard has no search/filter for needs at scale
 **Personas:** James | **Severity:** Medium
 
 The organizer dashboard shows all needs in a simple list with no search, filter, or sort. An organizer managing 20+ needs would struggle to find specific ones.
 
 **Recommendation:** Add at minimum a search filter and status filter (active/expired/fulfilled) to the needs tab.
 
-### 14. No form validation feedback beyond HTML5 defaults
+### 11. No form validation feedback beyond HTML5 defaults
 **Personas:** Coach Maria | **Severity:** Medium
 
 The need creation form relies solely on browser HTML5 validation (red borders, tooltips). No custom inline error messages are shown. Different browsers show these differently, and they're not always clear.
@@ -187,65 +161,60 @@ The need creation form relies solely on browser HTML5 validation (red borders, t
 
 ## Low Priority Findings
 
-### 15. Donor pledge form doesn't pre-fill email/name for authenticated users
+### 12. Donor pledge form doesn't pre-fill email/name for authenticated users
 **Personas:** Priya | **Severity:** Low
 
 When Priya is logged in and visits a need detail page, the pledge form should pre-fill her email and name from her session. The `userEmail` and `userName` props are passed, but the form may not always show them pre-filled (could be a rendering timing issue).
 
 **Recommendation:** Verify pre-fill works and consider making the email field read-only for authenticated users.
 
-### 16. No images anywhere on the site
+### 13. No images anywhere on the site
 **Personas:** All | **Severity:** Low
 
 The entire site has no images — no hero image, no org logos, no need photos. While the text content is good, images would make the site feel more trustworthy and engaging.
 
 **Recommendation:** Add hero images, consider allowing orgs to upload logos, and consider photo uploads for needs.
 
-### 17. Footer doesn't include "Pledge Drives" or "Become Organizer"
+### 14. Footer doesn't include "Pledge Drives" or "Become Organizer"
 **Personas:** Marcus, Aisha | **Severity:** Low
 
 The footer has About, Why, Terms, Privacy, Contact — but not the two key action pages. Users who scroll to the bottom looking for navigation options miss these.
 
 **Recommendation:** Add "Pledge Drives" and "Become an Organizer" to the footer.
 
-### 18. No breadcrumbs on need detail or org profile pages
+### 15. No breadcrumbs on need detail or org profile pages
 **Personas:** All | **Severity:** Low
 
 When deep-linking to a need or org profile, there's a "Back to browse" link but no breadcrumb trail. For context and orientation, breadcrumbs would help.
 
-### 19. "Extras Welcome" badge purpose unclear
+### 16. "Extras Welcome" badge purpose unclear
 **Personas:** Sarah | **Severity:** Low
 
 The green "Extras Welcome" badge on need cards and detail pages is not self-explanatory. Sarah might not understand what it means.
 
 **Recommendation:** Add a tooltip or help text: "This organization welcomes additional gear beyond what's listed."
 
-### 20. Dead-end pages with no onward navigation
+### 17. Dead-end pages with no onward navigation
 **Personas:** All | **Severity:** Low
 
 The /about, /contact, and /privacy pages have no links in their body content — they're dead ends. Users who read the content have no clear next step.
 
-### 21. Site name capitalization inconsistent
-**Personas:** All | **Severity:** Low
-
-Five variations found: "Runners In Need" (correct), "Runners in Need" (lowercase "in"), "runners-in-need" (hyphenated), "runnersinneed" (domain). Should standardize.
-
-### 22. Become-organizer page has very thin content (31 words)
+### 18. Become-organizer page has very thin content (31 words)
 **Personas:** Aisha | **Severity:** Low
 
 The become-organizer page has minimal explanatory content. A first-time visitor doesn't get enough information about what being an organizer means, what the requirements are, or what happens after approval.
 
-### 23. Pledge status labels are organizer-centric
+### 19. Pledge status labels are organizer-centric
 **Personas:** Sarah, Priya | **Severity:** Low
 
 Status labels like "Collecting" and "Ready to Deliver" make sense to organizers but are confusing to donors. Donors would better understand "Waiting for response," "Accepted — arrange shipping," "Delivered."
 
-### 24. No character counter on text fields
+### 20. No character counter on text fields
 **Personas:** Coach Maria | **Severity:** Low
 
 The need body field has a 5000 char max but no visible counter. Users don't know how much space they have.
 
-### 25. Duplicate org settings in dashboard and profile
+### 21. Duplicate org settings in dashboard and profile
 **Personas:** Coach Maria | **Severity:** Low
 
 Organization details (name, location, description) are editable in both `/profile#organization` AND `/dashboard#account`. This is confusing — which is the "right" place? Shipping address and pledge drive opt-in are only in dashboard.
@@ -273,14 +242,7 @@ Contains "fellow runner" language — not inclusive of non-runner organizers/don
 
 ## Accessibility Findings
 
-### ~~A1. Search input has no accessible label~~ [FIXED]
-**Severity:** Critical a11y
-
-~~Search input had no accessible label.~~
-
-**Fix applied:** Added `aria-label="Search needs"` to the search input.
-
-### A2. Color contrast failures
+### A1. Color contrast failures
 **Severity:** Serious a11y
 
 - `text-gray-400` used for visible text (signin legal text, date stamps) — fails WCAG AA
@@ -288,22 +250,7 @@ Contains "fellow runner" language — not inclusive of non-runner organizers/don
 - "29 days left" amber text on white — borderline
 - "No upcoming drives" paragraph text — insufficient contrast
 
-### A3. Header button without accessible name
-**Severity:** Serious a11y
-
-A button in the header (likely the user menu toggle) has no text, `aria-label`, or `title`.
-
-### A4. Heading hierarchy skips h2 on homepage
-**Severity:** Moderate a11y
-
-Homepage jumps from h1 to h3 ("URGENT NEEDS"), missing h2.
-
-### A5. Multiple nav elements without labels
-**Severity:** Moderate a11y
-
-Two `<nav>` elements on the homepage — neither has `aria-label` to distinguish desktop nav from mobile bottom nav.
-
-### A6. Dropdown menu not keyboard operable
+### A2. Dropdown menu not keyboard operable
 **Severity:** Serious a11y
 
 The user dropdown menu doesn't respond to Enter key. Has `aria-expanded` but keyboard users can't toggle it.
@@ -312,19 +259,12 @@ The user dropdown menu doesn't respond to Enter key. Has `aria-expanded` but key
 
 ## Bug Findings
 
-### ~~B1. POST /api/pledges returns 500 on empty/partial body~~ [FIXED]
-**Severity:** High bug
-
-~~Sending empty or partial form data caused an unhandled 500.~~
-
-**Fix applied:** Wrapped `request.formData()` in try/catch in both `pledges.ts` and `needs.ts`, returning 400 on malformed input.
-
-### B2. JS error on sign-in page
+### B1. JS error on sign-in page
 **Severity:** Medium bug
 
 The auth sign-in page throws `Unexpected token '<'... is not valid JSON` on every load. Something is trying to parse an HTML response as JSON (likely the CSRF token fetch returning HTML in certain dev conditions).
 
-### B3. GET /api/cron/daily returns 500 instead of 405
+### B2. GET /api/cron/daily returns 500 instead of 405
 **Severity:** Low bug
 
 The cron endpoint only handles GET with a token, but requests without proper method handling return 500 instead of 405.
@@ -358,22 +298,12 @@ The map button exists in the DOM but is hidden or non-interactive during Playwri
 
 ## Form UX Findings
 
-### F1. No autocomplete attributes on email/name fields
-**Severity:** Medium
-
-No form field has `autocomplete` attributes (e.g., `autocomplete="email"`, `autocomplete="name"`). Mobile keyboards won't suggest saved values.
-
-### F2. No character count indicators
+### F1. No character count indicators
 **Severity:** Low
 
 Fields with maxLength constraints (need body 5000, pledge description 2000) show no visible counter. Users don't know how much space they have.
 
-### F3. Required fields not visually marked
-**Severity:** Low
-
-Required fields only use the HTML `required` attribute with no visual asterisk or "(required)" text. Users don't know which fields are mandatory until they try to submit.
-
-### F4. Inconsistent loading states
+### F2. Inconsistent loading states
 **Severity:** Medium
 
 Only the need creation form (/post) has a loading state on submit. Pledge, drives, and profile forms have no loading indicator, risking double submission.
@@ -456,62 +386,52 @@ Map marker popups are intercepted by the hero section div overlapping the map ar
 
 Default sort is newest first. "Near me" provides proximity sorting. But there's no sort dropdown for urgency, pledge count, or alphabetical. Users with specific needs can't prioritize effectively.
 
-### D3. "Status: active" is developer terminology
-**Severity:** Low
-
-Need detail pages show "Status: active" — this is internal terminology. Users would better understand "Open" or "Accepting pledges."
-
-### D4. Mobile hero takes too much vertical space
+### D3. Mobile hero takes too much vertical space
 **Severity:** Medium
 
 On mobile (375x667), only 1 need card is fully visible above the fold. Hero + search + category pills consume significant vertical space. Consider collapsing the hero on mobile.
 
-### D-HERO. Homepage hero has no donor-facing CTA
+### D4. Homepage hero has no donor-facing CTA
 **Severity:** High
 
 Both hero buttons ("Post a Need", "Learn More") target organizers. Donors have no "I want to help" or "Browse needs" entry point. They must scroll past the hero to discover they can donate.
 
-### D-FORM. Pledge form buried below pledge list on need detail
+### D5. Pledge form buried below pledge list on need detail
 **Severity:** High
 
 The pledge form renders BELOW the existing pledges list on the need detail page. If a need has several pledges with message threads, the form could be 3+ screens down on mobile. Many donors will never find it.
 
 **Recommendation:** Move the pledge form above the pledges list, or add a sticky "Pledge Gear" CTA button that scrolls to the form.
 
-### D-HOW. "How It Works" sidebar is hidden on mobile
+### D6. "How It Works" sidebar is hidden on mobile
 **Severity:** Medium
 
 The "How It Works" section is `hidden lg:block` — invisible on mobile where first-time donors need it most.
 
-### D5. NeedCard body is not fully clickable
+### D7. NeedCard body is not fully clickable
 **Severity:** Medium
 
 Only the title link and "MATCH NEED" button are clickable. The card body, org name, metadata, and description are not clickable. Users expect to click anywhere on a card to navigate.
 
-### D6. "MATCH NEED" CTA is aggressive and unclear
-**Severity:** Low
-
-All-caps "MATCH NEED" feels aggressive. "Match" is ambiguous — the link goes to a detail page, not a pledge form. "View Need" or "See Details" would be clearer.
-
-### D7. No share buttons on need detail pages
+### D8. No share buttons on need detail pages
 **Severity:** Medium
 
 Zero affordance to share needs on social media, email, or copy a link. Sharing is the primary growth vector for a donation platform.
 
-### D8. No organizer controls on need detail page
+### D9. No organizer controls on need detail page
 **Severity:** Medium
 
 Organizers viewing their own need have no way to edit, change status, or manage pledges from this page. They must go to the dashboard and navigate back. An "Edit" button for the need owner would be natural.
 
-### D9. Expired/fulfilled needs lack prominent banner
+### D10. Expired/fulfilled needs lack prominent banner
 **Severity:** Medium
 
 Need status is buried in the small metadata bar. Donors could read the entire description before realizing the need is closed. A prominent banner at the top would prevent wasted effort.
 
-### D10. Only 1 card visible above fold on mobile
+### D11. Only 1 card visible above fold on mobile
 **Severity:** Medium
 
-Related to D4. Users must scroll significantly before seeing any needs. First-time mobile visitors may not realize there's content below.
+Related to D3. Users must scroll significantly before seeing any needs. First-time mobile visitors may not realize there's content below.
 
 ## Privacy & Security UX Findings
 
@@ -641,12 +561,6 @@ When an organizer marks pledges as "not fulfilled" (rejecting delivered items), 
 
 All emails are fire-and-forget with zero retry logic. Failed emails are permanently lost with no queue, alerting, or retry mechanism.
 
-### ~~SYS5. Dashboard hydration bug — window access during SSR (BUG)~~ [FIXED]
-**Severity:** Critical bug (root cause of C1) — See C1 fix.
-
-### ~~SYS6. formData() called outside try/catch in API routes (BUG)~~ [FIXED]
-**Severity:** High bug (root cause of B1) — See B1 fix.
-
 ---
 
 ## Onboarding Findings
@@ -671,11 +585,6 @@ The application form collects org name, URL, and description — but NOT locatio
 
 Admins can't provide a reason for denial. The denial email is generic. Applicants don't know what to change before reapplying.
 
-### ~~O5. `reviewedBy` not set on approve/deny (BUG)~~ [FIXED]
-**Severity:** Low bug
-
-**Fix applied:** Re-added `reviewedBy: session.user.id` to both approve and deny handlers.
-
 ## Admin Findings
 
 ### AD1. No admin link in navigation
@@ -688,10 +597,7 @@ Admin pages are only accessible by typing the URL. No link in nav, user menu, or
 
 Admin can see pledge drives but can't approve, deny, cancel, or edit them. No management actions available.
 
-### ~~AD3. reviewedBy not set on approve/deny (BUG regression)~~ [FIXED]
-**Severity:** Medium bug — See O5 fix.
-
-### AD4. No denial confirmation dialog
+### AD3. No denial confirmation dialog
 **Severity:** Low
 
 The "Deny" button on admin requests page has no confirmation dialog — accidental clicks could deny legitimate applications.
@@ -766,39 +672,24 @@ All emails are HTML-only. Some email clients and accessibility tools need plain-
 
 ## Visual Design Findings
 
-### V1. PledgeForm button uses wrong brand green
-**Severity:** Medium
-
-PledgeForm submit button uses `bg-green-700` instead of `bg-[#2D4A2D]`. Visually close but inconsistent with the rest of the site.
-
-### V2. PledgeForm inputs missing focus ring styles
-**Severity:** Medium
-
-PledgeForm inputs lack `focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]` that every other form on the site uses.
-
-### V3. Primary button padding inconsistent
+### V1. Primary button padding inconsistent
 **Severity:** Low
 
 Primary buttons use `px-6 py-3` in some places, `px-6 py-2` in others, and `px-4 py-2` in others.
 
-### V4. Delete Account button styled differently in two places
+### V2. Delete Account button styled differently in two places
 **Severity:** Low
 
 Filled red (`bg-red-600`) in AccountTab but outline red (`border-red-300`) on the profile page.
 
-### V5. No og:image on any page
+### V3. No og:image on any page
 **Severity:** Medium
 
 Open Graph `og:image` is null on all pages. Social shares show no preview image. A default brand image would significantly improve sharing.
 
 ## SEO Findings
 
-### S1. Heading hierarchy skip (h1 → h3)
-**Severity:** Medium
-
-Homepage jumps from h1 to h3 ("URGENT NEEDS"), skipping h2.
-
-### S2. Generic meta descriptions on multiple pages
+### S1. Generic meta descriptions on multiple pages
 **Severity:** Low
 
 Contact, become-organizer, privacy, terms, and signin all share the generic "Connecting runners..." description. Unique descriptions per page would improve search CTR.
@@ -875,24 +766,20 @@ The site's core functionality works well. The main gaps are around **discoverabi
 
 ### Total Findings by Severity
 
-| Severity | Count | Fixed |
-|----------|-------|-------|
-| Critical | 8 | 3 |
-| High | 12 | 1 |
-| Medium | 33 | 1 |
-| Low | 18 | 0 |
-| **Total** | **71** | **5** |
-| **Remaining** | **66** | |
+| Severity | Count |
+|----------|-------|
+| Critical | 5 |
+| High | 11 |
+| Medium | 28 |
+| Low | 14 |
+| **Total** | **58** |
 
 ---
 
 ### Fix Before Launch (launch blockers)
 
 **Bugs that break core functionality:**
-- ~~C1: Dashboard React island fails to hydrate~~ [FIXED]
-- ~~C7: Double-escaping bug causes garbled text display~~ [FIXED]
-- C5: Sign-in buttons permanently disabled when CSRF fetch fails
-- ~~B1: POST /api/pledges returns 500 on empty/partial body~~ [FIXED]
+- C3: Sign-in buttons permanently disabled when CSRF fetch fails
 - D1: Map markers not clickable due to z-index/CSS stacking bug
 
 **Privacy/security issues:**
@@ -910,22 +797,18 @@ The site's core functionality works well. The main gaps are around **discoverabi
 ### Fix Soon After Launch (high priority)
 
 **Major UX friction points:**
-- C3: Donor has no way to see or manage their pledges (no donor-facing status labels or withdraw button)
-- C4: No post-pledge next steps — user is stuck on the page after pledging
-- C6: Pledge is fire-and-forget for unauthenticated users — no confirmation email, no tracking
+- C2: Donor has no way to see or manage their pledges (no donor-facing status labels or withdraw button)
+- C4: Pledge is fire-and-forget for unauthenticated users — no confirmation email, no tracking
 - N1: No donor confirmation email on pledge — zero acknowledgment of donation
 - MSG1: No messaging hub in dashboard — users must navigate to each need separately
 - MSG5: Anonymous pledges can never have messages — donors cut off from communication
 - PL1: Orphaned pledges on need expiry — donors not notified when need closes
-- C2: "Sign In" shows in nav even when authenticated — users can't tell they're logged in
+- C1: "Sign In" shows in nav even when authenticated — users can't tell they're logged in
 
 **Missing key features:**
-- H3/IA1: "Become an Organizer" page is not discoverable — no inbound links anywhere
-- H4/AD1: No admin link in navigation — admin pages only accessible by URL
-- H2: No shipping/logistics info on need detail pages — donors don't know how to deliver gear
-- C8: Duplicate pledges possible — no unique constraint guard
-- ~~A1: Search input has no accessible label~~ [FIXED]
-- A6: Dropdown menu not keyboard operable (serious a11y)
+- AD1: No admin link in navigation — admin pages only accessible by URL
+- C5: Duplicate pledges possible — no unique constraint guard
+- A2: Dropdown menu not keyboard operable (serious a11y)
 
 **Trust issues:**
 - T3: About page doesn't mention founder or team — critical for trust
@@ -937,32 +820,25 @@ The site's core functionality works well. The main gaps are around **discoverabi
 ### Improve Over Time (medium priority)
 
 **Polish and consistency:**
-- V1: PledgeForm button uses wrong brand green (`bg-green-700` vs `bg-[#2D4A2D]`)
-- V2: PledgeForm inputs missing focus ring styles
-- V5: No og:image on any page — social shares show no preview
-- S1/A4: Heading hierarchy skips h2 on homepage
-- A2: Color contrast failures on gray text, amber badges
-- A3: Header button without accessible name
-- A5: Multiple nav elements without aria-labels
-- D3: "Status: active" is developer terminology — should say "Open" or "Accepting pledges"
+- V3: No og:image on any page — social shares show no preview
+- A1: Color contrast failures on gray text, amber badges
 
 **Nice-to-have features:**
-- M9/H9: Sign-in page lacks context about why sign-in is needed
-- H5/IA4: Homepage doesn't promote Pledge Drives or become-organizer
-- H7/IA3: Why page doesn't mention Pledge Drives
+- M6/H6: Sign-in page lacks context about why sign-in is needed
+- H2/IA4: Homepage doesn't promote Pledge Drives or become-organizer
+- H4/IA3: Why page doesn't mention Pledge Drives
 - D2: No sort options beyond location (urgency, pledge count, alphabetical)
-- D5: NeedCard body is not fully clickable — only title and button
-- D7: No share buttons on need detail pages — critical growth vector
-- D8: No organizer controls on need detail page (edit, manage pledges)
-- D9: Expired/fulfilled needs lack prominent banner
-- D4/D10: Mobile hero takes too much space — only 1 card visible above fold
-- H13: Dashboard has no search/filter for needs at scale
+- D7: NeedCard body is not fully clickable — only title and button
+- D8: No share buttons on need detail pages — critical growth vector
+- D9: No organizer controls on need detail page (edit, manage pledges)
+- D10: Expired/fulfilled needs lack prominent banner
+- D3/D11: Mobile hero takes too much space — only 1 card visible above fold
+- H10: Dashboard has no search/filter for needs at scale
 - PL2: Same PledgesTab renders for both donors and organizers — donors see wrong controls
 - AD2: Drives admin page is read-only — no management actions
 - O3: Location not collected during organizer application — hardcoded to "TBD"
 - O4: No denial reason captured for organizer applications
-- F1: No autocomplete attributes on email/name fields
-- F4: Inconsistent loading states — only need creation form has one
+- F2: Inconsistent loading states — only need creation form has one
 - MSG3: Message form is single-line input with full-page reload
 - N3: No notification preferences — every message triggers immediate email
 - N4: No pre-expiry warning for stale pledges before auto-expiration
@@ -971,20 +847,19 @@ The site's core functionality works well. The main gaps are around **discoverabi
 - O2: No onboarding flow after organizer approval
 - P2: Donor email survives account deletion (privacy bug)
 - T1: No physical address or phone number on contact page
-- H8: Contact page is email-only — no contact form
-- H6: About page is a dead end with no CTAs
-- H12: "Become Organizer" language is running-specific — not inclusive
+- H5: Contact page is email-only — no contact form
+- H3: About page is a dead end with no CTAs
+- H9: "Become Organizer" language is running-specific — not inclusive
 - M1: Touch targets too small across the site (81-100% under 44x44px)
 - M2: Small font sizes on card metadata (12px)
 - M3: Map toggle button not visible/clickable on mobile
-- H14: No form validation feedback beyond HTML5 defaults
-- B2: JS error on sign-in page — "Unexpected token" parsing HTML as JSON
-- ~~AD3/O5: `reviewedBy` not set on approve/deny~~ [FIXED]
+- H11: No form validation feedback beyond HTML5 defaults
+- B1: JS error on sign-in page — "Unexpected token" parsing HTML as JSON
 - CQ2: Privacy policy missing data disclosures for messages and third parties
 
 **Content improvements:**
-- H12/IA5: Broaden language beyond "running program" for shelters and community centers
-- H22: Become-organizer page has very thin content (31 words)
+- H9/IA5: Broaden language beyond "running program" for shelters and community centers
+- H18: Become-organizer page has very thin content (31 words)
 - T4: Become-organizer page lacks process transparency
 
 ---
@@ -992,31 +867,28 @@ The site's core functionality works well. The main gaps are around **discoverabi
 ### Backlog (low priority)
 
 **Minor polish:**
-- V3: Primary button padding inconsistent across the site
-- V4: Delete Account button styled differently in two places
-- H21: Site name capitalization inconsistent (5 variations)
-- D6: "MATCH NEED" CTA is aggressive and unclear — "View Need" better
-- H23: Pledge status labels are organizer-centric — confusing to donors
-- S2: Generic meta descriptions shared across multiple pages
-- H18: No breadcrumbs on need detail or org profile pages
-- H19: "Extras Welcome" badge purpose unclear — needs tooltip
-- H20: Dead-end pages with no onward navigation (/about, /contact, /privacy)
+- V1: Primary button padding inconsistent across the site
+- V2: Delete Account button styled differently in two places
+- H19: Pledge status labels are organizer-centric — confusing to donors
+- S1: Generic meta descriptions shared across multiple pages
+- H15: No breadcrumbs on need detail or org profile pages
+- H16: "Extras Welcome" badge purpose unclear — needs tooltip
+- H17: Dead-end pages with no onward navigation (/about, /contact, /privacy)
 - MSG4: Email notification says "Reply" but footer says "do not reply"
-- F2/H24: No character counter on text fields with maxLength constraints
-- F3: Required fields not visually marked with asterisk
-- H25: Duplicate org settings in dashboard and profile — confusing
-- AD4: No denial confirmation dialog on admin requests page
-- B3: GET /api/cron/daily returns 500 instead of 405
+- F1/H20: No character counter on text fields with maxLength constraints
+- H21: Duplicate org settings in dashboard and profile — confusing
+- AD3: No denial confirmation dialog on admin requests page
+- B2: GET /api/cron/daily returns 500 instead of 405
 
 **Future feature ideas:**
-- H16: No images anywhere on the site — hero images, org logos, need photos
+- H13: No images anywhere on the site — hero images, org logos, need photos
 - PL3: No pledge progress indicator ("3 of 5 pairs pledged")
-- H15: Donor pledge form doesn't pre-fill email/name for authenticated users
+- H12: Donor pledge form doesn't pre-fill email/name for authenticated users
 - N6: No notification history or in-app notifications
 - P5: No self-service data export mechanism
 - CQ1: About and Why pages overlap significantly — consider merging
 - CQ4: No source citations for statistics on /why page
-- H17: Footer doesn't include "Pledge Drives" or "Become Organizer"
+- H14: Footer doesn't include "Pledge Drives" or "Become Organizer"
 - T5: No legal entity information visible anywhere
 
 **Optimization opportunities:**
