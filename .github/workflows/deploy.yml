@@ -25,6 +25,13 @@ jobs:
 
       - run: npm run build
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run CI smoke tests against preview
+        run: npx playwright test --config playwright.ci.config.ts
+        timeout-minutes: 3
+
       - name: Deploy to Cloudflare Workers (production)
         if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
