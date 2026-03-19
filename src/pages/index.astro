@@ -2,56 +2,14 @@
 export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
-import NeedCard from '../components/NeedCard.astro';
+import NeedsGrid from '../components/NeedsGrid';
 import MapView from '../components/MapView';
-import { getDb, schema } from '../db';
-import { inArray, desc } from 'drizzle-orm';
 
 // Extract approximate user location from Cloudflare geolocation headers
 const cfLat = Astro.request.headers.get('cf-iplatitude');
 const cfLng = Astro.request.headers.get('cf-iplongitude');
 const userLat = cfLat ? parseFloat(cfLat) : null;
 const userLng = cfLng ? parseFloat(cfLng) : null;
-
-const db = getDb();
-const needsWithOrg = await db.query.needs.findMany({
-  where: inArray(schema.needs.status, ['active', 'partially_fulfilled']),
-  with: {
-    organization: { columns: { name: true } },
-    pledges: { columns: { id: true } },
-  },
-  orderBy: [desc(schema.needs.createdAt)],
-});
-
-const allNeeds = needsWithOrg.map((n) => ({
-  id: n.id,
-  title: n.title,
-  categoryTag: n.categoryTag,
-  body: n.body,
-  orgName: n.organization?.name ?? "Unknown Organization",
-  location: n.location,
-  lat: n.latitude,
-  lng: n.longitude,
-  extrasWelcome: n.extrasWelcome,
-  expiresAt: n.expiresAt,
-  pledgeCount: n.pledges.length,
-}));
-
-const urgentNeeds = allNeeds
-  .filter((n) => {
-    const days = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return days <= 30;
-  })
-  .slice(0, 3);
-
-const mapNeeds = allNeeds
-  .filter((n) => n.lat != null && n.lng != null)
-  .map((n) => ({
-    id: n.id,
-    title: n.title,
-    lat: n.lat!,
-    lng: n.lng!,
-  }));
 
 const errorParam = Astro.url.searchParams.get('error');
 const deletedParam = Astro.url.searchParams.get('deleted');
@@ -163,87 +121,41 @@ const categories = [
   </div>
 
   {/* Desktop view toggle — list/map */}
-  {mapNeeds.length > 0 && (
-    <div class="hidden lg:flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
-      <button
-        id="desktop-tab-list"
-        class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-        </svg>
-        List
-      </button>
-      <button
-        id="desktop-tab-map"
-        class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
-        Map
-      </button>
-    </div>
-  )}
+  <div class="hidden lg:flex gap-1 mb-4 bg-gray-100 rounded-lg p-1 w-fit">
+    <button
+      id="desktop-tab-list"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+      </svg>
+      List
+    </button>
+    <button
+      id="desktop-tab-map"
+      class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+      Map
+    </button>
+  </div>
 
   {/* Main content: cards + sidebar */}
   <div id="desktop-list-view" class="flex gap-6 pb-16 lg:pb-0">
     {/* Card grid — hidden on mobile when map tab active */}
     <div id="listings-view" class="flex-1 min-w-0">
-      {allNeeds.length === 0 ? (
-        <div class="text-center py-16 text-gray-500">
-          <p class="text-lg font-medium mb-2 text-gray-700">No needs posted yet</p>
-          <p class="text-sm mb-6 max-w-md mx-auto">
-            When running organizations post gear needs, they'll appear here. If you run a program that serves runners, you can post what your athletes need.
-          </p>
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="/become-organizer" class="inline-block bg-[#2D4A2D] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors">
-              Become an Organizer
-            </a>
-            <a href="/about" class="inline-block border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium hover:border-[#2D4A2D] hover:text-[#2D4A2D] transition-colors">
-              Learn More
-            </a>
-          </div>
-        </div>
-      ) : (
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allNeeds.map((need) => (
-            <NeedCard {...need} />
-          ))}
-        </div>
-        <div id="no-results" class="hidden text-center py-12 text-gray-500">
-          <p class="text-lg font-medium mb-1">No results found</p>
-          <p class="text-sm">Try adjusting your search or category filter.</p>
-        </div>
-      )}
+      <NeedsGrid client:only="react" />
     </div>
 
     {/* Fullscreen map — hidden by default on mobile, toggled by bottom nav */}
-    {mapNeeds.length > 0 && (
-      <div id="map-view" class="hidden lg:hidden fixed inset-0 top-[52px] bottom-[56px] z-40 bg-white">
-        <MapView client:only="react" needs={mapNeeds} fullscreen />
-      </div>
-    )}
+    <div id="map-view" class="hidden lg:hidden fixed inset-0 top-[52px] bottom-[56px] z-40 bg-white">
+      <MapView client:only="react" fullscreen />
+    </div>
 
     {/* Sidebar — desktop only */}
     <aside class="hidden lg:block w-72 shrink-0 space-y-6">
-      {urgentNeeds.length > 0 && (
-        <div>
-          <h2 class="font-semibold text-sm text-gray-900 mb-2">URGENT NEEDS</h2>
-          <div class="space-y-2">
-            {urgentNeeds.map((n) => {
-              const daysLeft = Math.ceil((n.expiresAt.getTime() - Date.now()) / (1000*60*60*24));
-              return (
-                <a href={`/needs/${n.id}`} class="block text-sm hover:text-[#2D4A2D]">
-                  <p class="font-medium text-gray-900 truncate">{n.title}</p>
-                  <p class="text-xs text-amber-600">{daysLeft} days left</p>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       <div>
         <h2 class="font-semibold text-sm text-gray-900 mb-2">HOW IT WORKS</h2>
         <ol class="text-sm text-gray-600 space-y-2">
@@ -274,35 +186,31 @@ const categories = [
   </div>
 
   {/* Desktop expanded map view — hidden by default, shown when Map tab clicked */}
-  {mapNeeds.length > 0 && (
-    <div id="desktop-map-view" class="hidden rounded-lg overflow-hidden" style="height: calc(100vh - 240px); min-height: 400px;">
-      <MapView client:only="react" needs={mapNeeds} fullscreen />
-    </div>
-  )}
+  <div id="desktop-map-view" class="hidden rounded-lg overflow-hidden" style="height: calc(100vh - 240px); min-height: 400px;">
+    <MapView client:only="react" fullscreen />
+  </div>
 
   {/* Mobile bottom nav — toggle between listings and map */}
-  {mapNeeds.length > 0 && (
-    <nav id="mobile-bottom-nav" aria-label="View toggle" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
-      <button
-        id="tab-listings"
-        class="flex-1 py-3 text-center text-sm font-medium text-[#2D4A2D] border-t-2 border-[#2D4A2D]"
-      >
-        <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-        </svg>
-        Listings
-      </button>
-      <button
-        id="tab-map"
-        class="flex-1 py-3 text-center text-sm font-medium text-gray-500 border-t-2 border-transparent"
-      >
-        <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
-        Map
-      </button>
-    </nav>
-  )}
+  <nav id="mobile-bottom-nav" aria-label="View toggle" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
+    <button
+      id="tab-listings"
+      class="flex-1 py-3 text-center text-sm font-medium text-[#2D4A2D] border-t-2 border-[#2D4A2D]"
+    >
+      <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+      </svg>
+      Listings
+    </button>
+    <button
+      id="tab-map"
+      class="flex-1 py-3 text-center text-sm font-medium text-gray-500 border-t-2 border-transparent"
+    >
+      <svg class="w-5 h-5 mx-auto mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+      </svg>
+      Map
+    </button>
+  </nav>
 
   <div id="cf-location" class="hidden" data-lat={userLat ?? ''} data-lng={userLng ?? ''}></div>
 

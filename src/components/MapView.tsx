@@ -10,14 +10,35 @@ interface MapNeed {
 }
 
 interface MapViewProps {
-  needs: MapNeed[];
+  needs?: MapNeed[];
   fullscreen?: boolean;
 }
 
-export default function MapView({ needs, fullscreen }: MapViewProps) {
+export default function MapView({ needs: propNeeds, fullscreen }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchedNeeds, setFetchedNeeds] = useState<MapNeed[] | null>(null);
+
+  // Fetch needs if not provided as props
+  useEffect(() => {
+    if (propNeeds) return;
+    fetch("/api/needs")
+      .then((r) => {
+        if (!r.ok) throw new Error("fetch failed");
+        return r.json();
+      })
+      .then((data: Array<{ id: string; title: string; lat?: number | null; lng?: number | null }>) => {
+        setFetchedNeeds(
+          data
+            .filter((n) => n.lat != null && n.lng != null)
+            .map((n) => ({ id: n.id, title: n.title, lat: n.lat!, lng: n.lng! }))
+        );
+      })
+      .catch(() => setFetchedNeeds([]));
+  }, [propNeeds]);
+
+  const needs = propNeeds ?? fetchedNeeds ?? [];
 
   // Stabilize the dependency — only re-run when the actual data changes,
   // not when the parent passes a new array reference with the same contents.

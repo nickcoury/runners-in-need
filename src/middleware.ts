@@ -164,6 +164,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return addSecurityHeaders(await next());
   }
 
+  // Public GET-only endpoints
+  if (pathname === "/api/needs" && method === "GET") {
+    return addSecurityHeaders(await next());
+  }
+
   // Public endpoints/pages that benefit from session but don't require it
   if (pathname === "/api/pledges" || pathname === "/drives") {
     const session = await getSession(context.request);

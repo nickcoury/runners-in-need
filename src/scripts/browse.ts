@@ -125,10 +125,14 @@ desktopTabMap?.addEventListener('click', () => {
 // Search + category filtering
 const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
 const categoryBtns = document.querySelectorAll<HTMLButtonElement>('.category-btn');
-const needCards = document.querySelectorAll<HTMLElement>('.need-card');
+let needCards: NodeListOf<HTMLElement> = document.querySelectorAll<HTMLElement>('.need-card');
 let activeCategory = 'all';
 
 const noResults = document.getElementById('no-results');
+
+function refreshCardRefs() {
+  needCards = document.querySelectorAll<HTMLElement>('.need-card');
+}
 
 function filterCards() {
   const query = searchInput?.value.toLowerCase().trim() || '';
@@ -144,6 +148,24 @@ function filterCards() {
     noResults.classList.toggle('hidden', visibleCount > 0);
   }
 }
+
+// Re-initialize when React NeedsGrid finishes rendering
+window.addEventListener('needs-loaded', () => {
+  refreshCardRefs();
+  // Re-capture original order for location sorting
+  const grid = document.querySelector('.grid.sm\\:grid-cols-2') as HTMLElement | null;
+  if (grid) {
+    originalOrder = Array.from(grid.querySelectorAll<HTMLElement>('.need-card'));
+    cardGrid = grid;
+  }
+  // Re-apply current filters
+  filterCards();
+  // Re-apply location sort if active
+  if (sortLat !== null && sortLng !== null) {
+    const label = locationIndicatorText?.textContent || 'Sorted by distance';
+    sortByDistance(sortLat, sortLng, label);
+  }
+});
 
 const searchClear = document.getElementById('search-clear');
 
@@ -222,7 +244,7 @@ const locationBtnText = document.getElementById('location-btn-text');
 const locationIndicator = document.getElementById('location-indicator');
 const locationIndicatorText = document.getElementById('location-indicator-text');
 const locationClear = document.getElementById('location-clear');
-const cardGrid = document.querySelector('.grid.sm\\:grid-cols-2') as HTMLElement | null;
+let cardGrid = document.querySelector('.grid.sm\\:grid-cols-2') as HTMLElement | null;
 
 let sortLat: number | null = null;
 let sortLng: number | null = null;
