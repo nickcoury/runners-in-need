@@ -39,3 +39,12 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config dist/server/wrangler.json --keep-vars
+
+      - name: Wait for deploy propagation
+        if: github.event_name != 'pull_request'
+        run: sleep 15
+
+      - name: Production smoke tests
+        if: github.event_name != 'pull_request'
+        run: npx playwright test --config playwright.prod.config.ts
+        timeout-minutes: 3
