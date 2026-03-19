@@ -63,10 +63,10 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
         <a href="/" class="text-xl font-bold shrink-0">Runners In Need</a>
 
         <div class="hidden md:flex items-center gap-5 text-sm ml-auto">
-          <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
-          <a href="/drives" class="hover:text-green-200 transition-colors">Pledge Drives</a>
-          <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
-          <a href="/about" class="hover:text-green-200 transition-colors">About</a>
+          <a href="/post" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Post a Need</a>
+          <a href="/drives" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Pledge Drives</a>
+          <a href="/why" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Why</a>
+          <a href="/about" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">About</a>
 
           {/* Signed-out state */}
           <a id="auth-link" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors">Get Started</a>
@@ -106,10 +106,10 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
 
       <div id="mobile-menu" class="hidden md:hidden bg-[#2D4A2D] border-t border-white/10 px-4 pb-4">
         <div class="flex flex-col gap-3 text-sm pt-3">
-          <a href="/post" class="hover:text-green-200 transition-colors">Post a Need</a>
-          <a href="/drives" class="hover:text-green-200 transition-colors">Pledge Drives</a>
-          <a href="/why" class="hover:text-green-200 transition-colors">Why</a>
-          <a href="/about" class="hover:text-green-200 transition-colors">About</a>
+          <a href="/post" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Post a Need</a>
+          <a href="/drives" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Pledge Drives</a>
+          <a href="/why" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">Why</a>
+          <a href="/about" class="hover:text-green-200 focus-visible:text-green-200 focus-visible:outline-none transition-colors">About</a>
 
           {/* Mobile: signed-out */}
           <a id="auth-link-mobile" href="/auth/signin" class="bg-white/15 hover:bg-white/25 px-3 py-1 rounded-lg transition-colors inline-block w-fit">Get Started</a>
@@ -158,7 +158,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://runnersinneed.com').hr
       id="back-to-top"
       type="button"
       aria-label="Back to top"
-      class="fixed bottom-6 right-6 z-40 hidden w-10 h-10 rounded-full bg-[#2D4A2D] text-white shadow-lg hover:bg-[#1F361F] transition-all items-center justify-center"
+      class="fixed bottom-6 right-6 z-40 hidden w-10 h-10 rounded-full bg-[#2D4A2D] text-white shadow-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-all items-center justify-center"
     >
       <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" /></svg>
     </button>

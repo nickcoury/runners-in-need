@@ -95,10 +95,12 @@ function showDesktopList() {
   desktopMapView?.classList.add('hidden');
   desktopMapView?.classList.remove('block');
   if (desktopTabList) {
-    desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all';
+    desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none';
+    desktopTabList.setAttribute('aria-pressed', 'true');
   }
   if (desktopTabMap) {
-    desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all';
+    desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none';
+    desktopTabMap.setAttribute('aria-pressed', 'false');
   }
 }
 
@@ -108,10 +110,12 @@ function showDesktopMap() {
   desktopMapView?.classList.remove('hidden');
   desktopMapView?.classList.add('block');
   if (desktopTabMap) {
-    desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all';
+    desktopTabMap.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium bg-white text-[#2D4A2D] shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none';
+    desktopTabMap.setAttribute('aria-pressed', 'true');
   }
   if (desktopTabList) {
-    desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all';
+    desktopTabList.className = 'flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 transition-all focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none';
+    desktopTabList.setAttribute('aria-pressed', 'false');
   }
   // Trigger Leaflet resize so it renders correctly
   window.dispatchEvent(new Event('resize'));
