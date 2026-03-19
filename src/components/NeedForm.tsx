@@ -205,7 +205,7 @@ export default function NeedForm({
         <button
           type="submit"
           disabled={submitting}
-          className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
+          className="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] text-sm disabled:opacity-50"
         >
           {submitting ? "Posting..." : continuedFromId ? "Post Remaining Need" : "Post Need"}
         </button>

@@ -167,7 +167,8 @@ export default function PledgeForm({
               name="donorName"
               type="text"
               defaultValue={userName}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              autoComplete="name"
             />
           </div>
           <div>
@@ -175,14 +176,15 @@ export default function PledgeForm({
               htmlFor="donorEmail"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Your email
+              Your email <span className="text-red-500">*</span>
             </label>
             <input
               id="donorEmail"
               name="donorEmail"
               type="email"
               required
-              className="w-full border rounded-lg px-3 py-2 text-sm"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
+              autoComplete="email"
               placeholder="you@example.com"
             />
           </div>
@@ -195,7 +197,7 @@ export default function PledgeForm({
           htmlFor="description"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          What can you provide?
+          What can you provide? <span className="text-red-500">*</span>
         </label>
         <textarea
           id="description"
@@ -204,7 +206,7 @@ export default function PledgeForm({
           minLength={5}
           maxLength={2000}
           rows={4}
-          className="w-full border rounded-lg px-3 py-2 text-sm"
+          className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
           placeholder="e.g., I have 3 pairs of men's running shoes (sizes 9, 9.5, 10), lightly used Nike and Brooks. Happy to ship or drop off."
         />
       </div>
@@ -220,7 +222,7 @@ export default function PledgeForm({
       <button
         type="submit"
         disabled={submitting}
-        className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 text-sm disabled:opacity-50"
+        className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg hover:bg-[#1F361F] text-sm disabled:opacity-50"
       >
         {submitting ? "Submitting..." : "Submit Pledge"}
       </button>

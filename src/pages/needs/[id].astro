@@ -186,7 +186,7 @@ const pledgesWithComputed = pledges.map((p) => {
         </span>
         <span class="capitalize flex items-center gap-1">
           <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" /></svg>
-          Status: {need.status.replace('_', ' ')}
+          {need.status === 'active' ? 'Accepting pledges' : need.status === 'fulfilled' ? 'Fulfilled' : need.status === 'partially_fulfilled' ? 'Partially fulfilled' : need.status.replace('_', ' ')}
         </span>
       </div>
 
