@@ -170,7 +170,7 @@ export default function AccountTab({
 
           <button
             type="submit"
-            className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+            className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
           >
             Save Changes
           </button>
@@ -248,7 +248,7 @@ export default function AccountTab({
 
           <button
             type="submit"
-            className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] transition-colors"
+            className="bg-[#2D4A2D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
           >
             Save Shipping Address
           </button>
@@ -300,7 +300,7 @@ export default function AccountTab({
       <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4 max-w-lg">
         <button
           onClick={() => (window as any).signOut?.()}
-          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
         >
           Sign Out
         </button>
@@ -324,7 +324,7 @@ export default function AccountTab({
               alert("Failed to delete account. Please try again.");
             }
           }}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-600/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
         >
           Delete Account
         </button>

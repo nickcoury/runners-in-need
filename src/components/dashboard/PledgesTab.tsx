@@ -54,7 +54,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 ml-4">
+          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 focus-visible:text-red-600 focus-visible:outline-none ml-4" aria-label="Dismiss error">
             &times;
           </button>
         </div>
@@ -76,7 +76,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
               <h3 className="text-sm font-medium text-gray-700 mb-2">
                 <a
                   href={`/needs/${needId}`}
-                  className="hover:text-[#2D4A2D] hover:underline"
+                  className="hover:text-[#2D4A2D] hover:underline focus-visible:text-[#2D4A2D] focus-visible:underline focus-visible:outline-none"
                 >
                   {needTitle}
                 </a>
@@ -120,14 +120,14 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
                         <button
                           disabled={updating === pledge.id}
                           onClick={() => updatePledgeStatus(pledge.id, "ready_to_deliver")}
-                          className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] transition-colors disabled:opacity-50"
+                          className="text-xs font-medium bg-[#2D4A2D] text-white px-3 py-1.5 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none transition-colors disabled:opacity-50"
                         >
                           {updating === pledge.id ? "Updating..." : "Mark Ready to Deliver"}
                         </button>
                         <button
                           disabled={updating === pledge.id}
                           onClick={() => updatePledgeStatus(pledge.id, "withdrawn")}
-                          className="text-xs font-medium border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          className="text-xs font-medium border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:outline-none transition-colors disabled:opacity-50"
                         >
                           Withdraw
                         </button>
@@ -139,7 +139,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
                         <button
                           disabled={updating === pledge.id}
                           onClick={() => updatePledgeStatus(pledge.id, "delivered")}
-                          className="text-xs font-medium bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          className="text-xs font-medium bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:outline-none transition-colors disabled:opacity-50"
                         >
                           {updating === pledge.id ? "Updating..." : "Mark Delivered"}
                         </button>

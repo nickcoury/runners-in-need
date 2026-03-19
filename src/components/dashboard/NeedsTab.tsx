@@ -19,7 +19,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
         </h2>
         <a
           href="/post"
-          className="bg-[#2D4A2D] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#1F361F] transition-colors"
+          className="bg-[#2D4A2D] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors"
         >
           + Post New Need
         </a>
@@ -52,7 +52,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
             {/* Title */}
             <a
               href={`/needs/${need.id}`}
-              className="font-semibold text-gray-900 hover:text-[#2D4A2D] mb-1 line-clamp-2"
+              className="font-semibold text-gray-900 hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none mb-1 line-clamp-2"
             >
               {need.title}
             </a>
@@ -81,12 +81,12 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
               <div className="flex gap-2">
                 <a
                   href={`/needs/${need.id}/edit`}
-                  className="text-xs text-[#2D4A2D] hover:underline"
+                  className="text-xs text-[#2D4A2D] hover:underline focus-visible:underline focus-visible:outline-none"
                 >
                   Edit
                 </a>
                 <button
-                  className="text-xs text-red-500 hover:underline"
+                  className="text-xs text-red-500 hover:underline focus-visible:underline focus-visible:outline-none"
                   onClick={async () => {
                     if (!confirm("Are you sure you want to remove this need? It will be marked as expired.")) return;
                     try {
@@ -114,7 +114,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
           <p>You haven't posted any needs yet.</p>
           <a
             href="/post"
-            className="inline-block mt-3 text-sm text-[#2D4A2D] hover:underline"
+            className="inline-block mt-3 text-sm text-[#2D4A2D] hover:underline focus-visible:underline focus-visible:outline-none"
           >
             Post your first need
           </a>

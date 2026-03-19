@@ -52,7 +52,7 @@ export default function NeedForm({
                 key={tag}
                 type="button"
                 onClick={() => insertTemplate(tag)}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors focus-visible:ring-2 focus-visible:ring-green-700/50 focus-visible:outline-none ${
                   categoryTag === tag
                     ? "bg-green-700 text-white border-green-700"
                     : "bg-white text-gray-700 border-gray-300 hover:border-green-700"
@@ -205,13 +205,13 @@ export default function NeedForm({
         <button
           type="submit"
           disabled={submitting}
-          className="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] text-sm disabled:opacity-50"
+          className="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none text-sm disabled:opacity-50"
         >
           {submitting ? "Posting..." : continuedFromId ? "Post Remaining Need" : "Post Need"}
         </button>
         <a
           href="/dashboard"
-          className="px-6 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+          className="px-6 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           Cancel
         </a>

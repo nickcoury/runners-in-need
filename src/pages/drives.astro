@@ -59,11 +59,11 @@ const driveStatusLabels: Record<string, string> = {
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         {isSignedIn ? (
-          <a href="#organize-form" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 transition-colors">
+          <a href="#organize-form" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D4A2D] focus-visible:outline-none transition-colors">
             Organize a Pledge Drive
           </a>
         ) : (
-          <a href="/auth/signin?callbackUrl=/drives" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 transition-colors">
+          <a href="/auth/signin?callbackUrl=/drives" class="bg-white text-[#2D4A2D] font-semibold px-6 py-3 rounded-lg hover:bg-green-50 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D4A2D] focus-visible:outline-none transition-colors">
             Sign In to Organize a Drive
           </a>
         )}
@@ -303,7 +303,7 @@ const driveStatusLabels: Record<string, string> = {
         <button
           id="drive-submit-btn"
           type="submit"
-          class="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] text-sm font-medium transition-colors disabled:opacity-50"
+          class="bg-[#2D4A2D] text-white px-6 py-2 rounded-lg hover:bg-[#1F361F] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none text-sm font-medium transition-colors disabled:opacity-50"
         >
           Submit Pledge Drive
         </button>
