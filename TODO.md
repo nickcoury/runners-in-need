@@ -4,7 +4,7 @@ Prioritized task list. Check items off as you complete them. See [NICK-TODOS.md]
 
 ---
 
-## Remaining Work
+## Completed Work
 
 - [x] **Full codebase audit and quality pass (3+ hours)** — Completed 2026-03-14, 50+ commits
   - 4 audit passes (security, performance, architecture, final sweep)

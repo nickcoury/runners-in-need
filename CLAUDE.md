@@ -84,10 +84,6 @@ The app is **functional and feature-complete for launch**. All core features are
 - `src/lib/html.ts` — HTML email templating
 - `src/lib/constants.ts` — App-wide constants
 
-### What's NOT Built Yet
-
-- Full codebase audit and quality pass (see TODO.md)
-
 ## Key Documentation
 
 - [Product Requirements (PRD)](docs/PRODUCT.md) — Full spec with CUJs and known gaps

@@ -189,9 +189,7 @@ A reference guide for Nick. Covers the realistic scenarios and what to do for ea
 
 ---
 
-## Annual Checklist
-
-Things to review once a year:
+## Annual Checklist (Pre-Launch / Yearly)
 
 - [ ] Read through Terms of Service — still accurate?
 - [ ] Read through Privacy Policy — still accurate?

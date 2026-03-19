@@ -106,7 +106,7 @@ active → expired (soft-delete by organizer)
 2. Email verification built into auth flow (magic links are inherently verified)
 3. Organizer approval queue (manual admin review)
 4. CSRF token validation on auth endpoints
-5. Honeypot fields + rate limiting on forms (planned)
+5. Honeypot fields + rate limiting on forms
 
 ### Roles
 Simple enum: `donor | organizer | admin`
@@ -152,18 +152,18 @@ Simple enum: `donor | organizer | admin`
 - [x] Cloudflare Turnstile integration (pledge forms)
 - [x] Organizer request approval creates org + promotes user
 
-### Not Yet Built
-- [ ] LLM-generated partial fulfillment (remaining need auto-text)
-- [ ] Email reminder system (1 month, 2 weeks, expiration day)
-- [ ] Stale pledge auto-expiration (30-day no-update rule)
-- [ ] Honeypot fields on forms
-- [ ] Rate limiting on form submissions
-- [ ] Shipping address management UI
-- [ ] Account deletion (GDPR/CCPA requirement)
-- [ ] Need status transition on pledge delivery (active → fulfilled)
-- [ ] Notification email on organizer request decision
-- [ ] Org public profile page
-- [ ] Re-application for denied organizer applicants
+### Also Built (completed 2026-03-14)
+- [x] LLM-generated partial fulfillment (remaining need auto-text)
+- [x] Email reminder system (1 month, 2 weeks, expiration day)
+- [x] Stale pledge auto-expiration (30-day no-update rule)
+- [x] Honeypot fields on forms
+- [x] Rate limiting on form submissions
+- [x] Shipping address management UI
+- [x] Account deletion (GDPR/CCPA requirement)
+- [x] Need status transition on pledge delivery (active → fulfilled)
+- [x] Notification email on organizer request decision
+- [x] Org public profile page
+- [x] Re-application for denied organizer applicants
 
 ## Critical User Journeys (CUJs)
 
@@ -188,22 +188,22 @@ Simple enum: `donor | organizer | admin`
 
 ### CUJ-4: Authenticated Donor Makes a Pledge
 1. Same flow as CUJ-2, but the pledge form pre-fills email and name from the user's session.
-2. **KNOWN GAP (GAP-1):** The `donorId` field is not set from the session, so the pledge appears orphaned — it won't show up in the donor's dashboard.
+2. `donorId` is set from the session so pledges appear in the donor's dashboard.
 
 ### CUJ-5: Become an Organizer
 1. Authenticated user navigates to /become-organizer.
 2. Fills out application form: organization name, description, and optional website URL.
 3. A pending `organizerRequest` record is created.
 4. User sees confirmation that their application is under review.
-5. **KNOWN GAP (GAP-5):** If the request is denied, the applicant cannot submit a new application.
+5. If denied, the applicant can reapply after a 12-month cooldown period.
 
 ### CUJ-6: Admin Reviews Organizer Requests
 1. Admin navigates to /admin/requests — sees a list of pending organizer applications.
 2. Reviews each request and chooses to approve or deny.
 3. On approval: an organization record is created, and the applicant's role is promoted to `organizer`.
-4. **KNOWN GAP (GAP-6):** The newly created org gets a location of "TBD" with no onboarding prompt to set a real location.
-5. **KNOWN GAP (GAP-7):** The `reviewedBy` field is never set on the request record.
-6. **KNOWN GAP (GAP-13):** No notification email is sent to the applicant about the decision.
+4. Newly created orgs get location "TBD" with a dashboard banner prompting the organizer to update it.
+5. `reviewedBy` is set on the request record for audit trail.
+6. Notification email is sent to the applicant about the decision.
 
 ### CUJ-7: Organizer Posts a Need
 1. Organizer navigates to /post.
@@ -219,7 +219,7 @@ Simple enum: `donor | organizer | admin`
 ### CUJ-9: Organizer Manages Pledges
 1. Organizer navigates to /dashboard — Incoming Pledges tab shows pledges against their needs.
 2. Updates pledge status through the lifecycle: `collecting` → `ready_to_deliver` → `delivered`.
-3. **KNOWN GAP (GAP-2):** Delivering a pledge does not update the parent need's status (e.g., to `fulfilled`).
+3. When all pledges are delivered, the parent need's status transitions to `fulfilled`.
 
 ### CUJ-10: In-Pledge Messaging
 1. On /needs/[id], a message form appears for org members or the pledge donor.
@@ -231,22 +231,24 @@ Simple enum: `donor | organizer | admin`
 1. User navigates to /profile — sees their info and activity stats.
 2. Can edit their display name.
 3. Organizers can also edit their organization's details.
-4. **KNOWN GAP (GAP-8):** Updating an org's location text does not re-geocode coordinates.
+4. Updating an org's location text automatically re-geocodes coordinates.
 
 ## Known Gaps
 
-| ID | Description | Impact |
+All gaps identified during initial development have been resolved as of 2026-03-14.
+
+| ID | Description | Status |
 |----|-------------|--------|
-| GAP-1 | `donorId` never set on authenticated pledges | Donor dashboard shows no pledges; pledges appear orphaned |
-| GAP-2 | Need status doesn't transition on pledge delivery | Needs stay `active` even when all pledges are delivered |
-| GAP-3 | No expiration refresh/reminder emails | Organizers aren't warned before needs expire |
-| GAP-4 | No stale pledge auto-expiration | Abandoned pledges linger indefinitely |
-| GAP-5 | Denied organizer applicants can't reapply | Blocks legitimate re-applications after improvements |
-| GAP-6 | Approved orgs get location "TBD" with no onboarding | Needs inherit a meaningless location; map shows wrong position |
-| GAP-7 | `reviewedBy` never set on approve/deny | No audit trail of which admin handled the request |
-| GAP-8 | Org location update doesn't re-geocode | Map coordinates stay stale after location text change |
-| GAP-9 | No account deletion | GDPR/CCPA compliance concern |
-| GAP-10 | No shipping address management UI | Feature described in spec but not built |
-| GAP-11 | No pledge description length validation | Donors can submit empty or excessively long descriptions |
-| GAP-12 | No org public profile page | No way for donors to learn about an organization |
-| GAP-13 | No notification email on organizer request decision | Applicants must check back manually |
+| GAP-1 | `donorId` never set on authenticated pledges | **Fixed** |
+| GAP-2 | Need status doesn't transition on pledge delivery | **Fixed** |
+| GAP-3 | No expiration refresh/reminder emails | **Fixed** |
+| GAP-4 | No stale pledge auto-expiration | **Fixed** |
+| GAP-5 | Denied organizer applicants can't reapply | **Fixed** (12-month cooldown) |
+| GAP-6 | Approved orgs get location "TBD" with no onboarding | **Fixed** (dashboard banner) |
+| GAP-7 | `reviewedBy` never set on approve/deny | **Fixed** |
+| GAP-8 | Org location update doesn't re-geocode | **Fixed** |
+| GAP-9 | No account deletion | **Fixed** |
+| GAP-10 | No shipping address management UI | **Fixed** |
+| GAP-11 | No pledge description length validation | **Fixed** |
+| GAP-12 | No org public profile page | **Fixed** |
+| GAP-13 | No notification email on organizer request decision | **Fixed** |
