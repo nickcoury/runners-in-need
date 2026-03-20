@@ -118,7 +118,7 @@ export const needs = sqliteTable("needs", {
     .notNull()
     .default("active"),
   suggestedText: text("suggested_text"), // LLM-generated remaining need text for organizer review
-  continuedFromId: text("continued_from_id").references((): any => needs.id),
+  continuedFromId: text("continued_from_id").unique().references((): any => needs.id),
   deliveryMethods: text("delivery_methods"), // JSON array override, null = use org defaults
   deliveryInstructions: text("delivery_instructions"), // Per-need override, null = use org defaults
   allDeliveredAt: integer("all_delivered_at", { mode: "timestamp" }),

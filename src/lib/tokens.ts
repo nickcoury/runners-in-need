@@ -1,6 +1,6 @@
 import { getEnv } from "./env";
 
-const TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 async function hmac(data: string): Promise<string> {
   const secret = getEnv("AUTH_SECRET");
