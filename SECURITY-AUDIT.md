@@ -11,7 +11,19 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 49 areas verified secure. 100 black-box production tests. 51 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 49+ areas verified secure. 110+ black-box production tests. 58 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+
+### Phase 5 (final hour): Additional attack surface testing
+- Open redirect via callbackUrl (external, javascript:, protocol-relative) — **safe**, Auth.js rejects cross-origin redirects
+- HTTP verb tampering (DELETE/PUT/PATCH on GET/POST-only routes) — **safe**, CSRF + auth middleware blocks
+- Source map exposure — **safe**, not served
+- Host header injection (X-Forwarded-Host) — **safe**, Cloudflare strips/ignores
+- Path traversal in API routes (direct + URL-encoded) — **safe**, Cloudflare normalizes
+- Self-pledging (organizer pledges on own org's need) — possible but low risk (no monetary impact)
+- Authenticated pledge/message flood (bypass Turnstile via session, trigger unlimited org email notifications) — mitigated by Cloudflare rate limiting (S2)
+- Parameter pollution (?status=active&status=expired) — **safe**, Astro takes last value
+- Cache poisoning via X-Forwarded-Proto — **safe**, Cloudflare handles
+- Debug/GraphQL endpoints — **safe**, 404
 
 ### Realistic Threat Assessment
 
