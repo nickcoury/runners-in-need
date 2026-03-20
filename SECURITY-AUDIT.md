@@ -11,7 +11,31 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-16 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+17 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+
+### Realistic Threat Assessment
+
+Given that runnersinneed.com is a free donation platform with no payment processing, the realistic threat landscape is:
+
+**Most likely attacks (opportunistic):**
+- **Spam/abuse** — bots creating fake pledges or spamming magic link emails. **Mitigated** by Turnstile on pledge forms and signin (added in this audit). Cloudflare rate limiting would complete the defense.
+- **SEO spam** — pledge descriptions or organizer requests containing spam links. **Mitigated** by HTML auto-escaping (links aren't clickable) and admin approval for organizers.
+
+**Moderate likelihood (targeted):**
+- **Phishing via public messages (S16)** — attacker registers, pledges, then sends a message with a phishing URL visible to all need page visitors. This is the highest-impact unfixed issue. Fix requires product decision: make messages private or add moderation.
+- **Email abuse via forwarded action tokens (S3)** — if an organizer forwards an expiry reminder email, anyone with the link can extend/fulfill/reopen needs for 30 days. Realistic in orgs that share email threads.
+
+**Low likelihood (sophisticated):**
+- **Account takeover** — requires compromising the user's email (magic link) or Google account (OAuth). Not a vulnerability in this app.
+- **Data scraping** — org names, locations, and need descriptions are intentionally public. No private data is exposed through public endpoints.
+- **Admin compromise** — admin check is defense-in-depth (middleware + handler). Attacker would need to compromise an admin's email or Google account first.
+
+**Not a realistic threat:**
+- SQL injection (Drizzle ORM, zero raw SQL)
+- XSS (Astro/React auto-escape throughout)
+- CSRF (Origin header validation + Auth.js double-submit cookies)
+- Session hijacking (__Host- cookie prefix, HttpOnly, Secure, SameSite=Lax)
+- SSRF (hardcoded Nominatim URL only)
 
 ---
 
@@ -303,6 +327,16 @@ DB → needRow.pledges[*].messages → rendered in page HTML (public)
 
 ---
 
+### S17: HTTP not redirecting to HTTPS [LOW]
+
+HTTP requests to `http://runnersinneed.com` return `200 OK` with content instead of redirecting to HTTPS. While HSTS is set (`max-age=31536000; includeSubDomains`), first-time visitors or automated tools accessing via HTTP receive the response over an unencrypted connection.
+
+**Risk:** LOW — HSTS ensures browsers remember to use HTTPS after first visit. Session cookies use `__Host-` prefix (requires HTTPS), so session hijacking via HTTP is not possible. The main risk is first-visit content interception, which is minimal for a public donation platform.
+
+**Fix:** Enable "Always Use HTTPS" in Cloudflare dashboard (SSL/TLS → Edge Certificates → Always Use HTTPS). This adds a 301 redirect from HTTP to HTTPS at the Cloudflare edge. No code change needed.
+
+---
+
 ## Verified Secure
 
 These areas were specifically tested and found to be properly secured:
@@ -448,6 +482,11 @@ These areas were specifically tested and found to be properly secured:
 | LLM prompt injection via pledge desc | Not exploitable — output reviewed by human, no data exfiltration path |
 | Astro Action enumeration (415 vs 404) | Actions return 415, non-existent 404 — names are in client bundle anyway |
 | Admin email discoverable from site | No — contact and about pages have no email addresses |
+| `http://runnersinneed.com` HTTP access | 200 — content served over HTTP (S17), HSTS set but no redirect |
+| Dev environment headers | Same CSP, HSTS, X-Frame-Options as production |
+| Dev environment auth | Protected routes redirect to signin (302), same as production |
+| Subdomain variations (api/admin/dev/staging) | Connection refused — no subdomain takeover risk |
+| `www.runnersinneed.com` | 200 — resolves to same site |
 
 ---
 
@@ -460,8 +499,9 @@ These areas were specifically tested and found to be properly secured:
 
 **P1 — This sprint:**
 4. **S2:** Configure Cloudflare rate limiting rules (no code change needed)
-5. ~~**S5:** Use timing-safe comparison for CRON_SECRET~~ ✅ Fixed (d56e099)
-6. ~~**S8:** Add uniqueness check for pending organizer requests~~ ✅ Fixed (d56e099)
+5. **S17:** Enable "Always Use HTTPS" in Cloudflare dashboard (SSL/TLS → Edge Certificates)
+6. ~~**S5:** Use timing-safe comparison for CRON_SECRET~~ ✅ Fixed (d56e099)
+7. ~~**S8:** Add uniqueness check for pending organizer requests~~ ✅ Fixed (d56e099)
 
 **P2 — Backlog:**
 7. **S3:** Consider single-use tokens or shorter TTL
