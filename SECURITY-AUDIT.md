@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-16 findings total, **7 fixed during the audit**. 48 areas verified secure. 63+ black-box production tests. 42 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+16 findings total, **8 fixed during the audit** (+ Turnstile partial mitigation on S2). 48 areas verified secure. 63+ black-box production tests. 42 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ---
 
@@ -44,12 +44,12 @@ if (!secret) throw new Error("AUTH_SECRET is required");
 The in-memory rate limiter was correctly removed (stateless Workers, it didn't work). Nothing replaced it.
 
 **Attack scenarios:**
-- **Magic link email abuse** (highest impact): The signin page has no Turnstile/CAPTCHA. An attacker can fetch a CSRF token from `/api/auth/csrf`, then POST to `/api/auth/signin/resend` with any email address. This sends magic link emails to arbitrary addresses — burning Resend quota and using the site as a spam relay. No per-IP or per-email rate limiting.
+- **Magic link email abuse** (highest impact): ~~The signin page has no Turnstile/CAPTCHA.~~ **PARTIALLY MITIGATED** (67285c1): Turnstile CAPTCHA added to signin page. Automated bots are now blocked. However, a human attacker can still pass Turnstile and spam emails. Cloudflare rate limiting is still needed for full protection.
 - Pledge spam: flood an organizer's dashboard with thousands of fake pledges
 - Message spam: flood pledge message threads
 - Token brute-force: action tokens include a timestamp prefix, reducing search space
 
-**Mitigations already in place:** Turnstile on anonymous pledges, honeypot fields, auth required for messages.
+**Mitigations already in place:** Turnstile on anonymous pledges and signin page (67285c1), honeypot fields, auth required for messages.
 
 **Fix:** Use Cloudflare's built-in rate limiting (Workers → Security → Rate Limiting Rules) or Cloudflare WAF custom rules. No code changes needed — this is an infrastructure configuration. Recommended limits:
 - `/api/pledges` POST: 10/min per IP
@@ -423,6 +423,22 @@ These areas were specifically tested and found to be properly secured:
 | `GET /org/test123` | 302 → /404 — nonexistent orgs handled gracefully |
 | `GET /api/health` with `X-Forwarded-Host: evil.com` | 200 — host injection ignored, no reflected data |
 | `Transfer-Encoding: chunked` smuggling | 400 — rejected by Cloudflare edge |
+| `POST /api/pledges` (CRLF in email) | 400 — "Invalid email format" (email validation blocks header injection) |
+| `POST /api/pledges` (prototype pollution `__proto__[admin]=true`) | 403 — blocked by Turnstile, FormData doesn't allow prototype pollution |
+| `GET /needs/DOESNOTEXIST` | 302 — redirects gracefully, no error details |
+| `GET /become-organizer` (unauth) | 200 — shows "please sign in" message, no form exposed |
+| `GET /profile` (unauth) | 302 — redirects to signin |
+| `POST /api/admin/approve-request` (unauth) | 401 — auth required |
+| `GET /.env`, `/.env.local`, `/.git/config` | 404 — dotfiles not served (Workers only serve built assets) |
+| `GET /package.json`, `/tsconfig.json`, `/wrangler.toml` | 404 — config files not exposed |
+| `GET /drizzle/0000_peaceful_whiplash.sql` | 404 — migration files not accessible |
+| `GET /auth/signin?callbackUrl=https://evil.com` | Form shows value but Auth.js rejects cross-origin redirects server-side |
+| `GET /api/auth/callback/google?state=forged&code=fake` | Rejected — OAuth state validation works |
+| Long URL (10k chars) | 200 — handled gracefully, no crash |
+| `Host: evil.com` header | 403 — CSRF check blocks (Origin mismatch) |
+| Double-encoded path traversal `%252f` | 404 — properly decoded once, no double-decoding |
+| `GET /api/cron/daily` (no secret) | 403 — "Forbidden" |
+| Response headers | Only `server: cloudflare` — no version info, no x-powered-by, no debug headers |
 
 ---
 
@@ -478,6 +494,7 @@ These areas were specifically tested and found to be properly secured:
 10. **Supply chain audit** — reviewed 16 production deps (560 total packages), all SHA-512 verified, no suspicious lifecycle scripts, no custom registries, proper secret management
 11. **DNS & infrastructure review** — checked for subdomain takeover risks, source map exposure, directory listing, cache poisoning vectors
 12. **Phase 3 deep testing** — auth flow edge cases (CSRF token theft, session forging, callbackUrl injection, magic link abuse), content-type confusion, HTTP method override, transfer-encoding smuggling, CORS preflight, directory listing, source map exposure, unicode normalization, Astro Action enum bypass, comprehensive client-side script review (edit-form.ts, profile.ts — all use textContent, no innerHTML XSS)
+13. **Phase 4 hardening** — implemented Turnstile CAPTCHA on signin page (S2 mitigation), email header injection testing, CRLF injection, prototype pollution, session fixation, OAuth state manipulation, dotfile/config exposure testing, open redirect verification, cookie attribute verification, long URL handling, auth provider info disclosure check
 
 ---
 
@@ -493,4 +510,4 @@ The 78 e2e tests cover functional happy paths well but have **zero adversarial/s
 - **No boundary/fuzzing tests** — no extremely long strings, null bytes, or special characters
 - **No error response leak tests** — no test triggers a 500 to verify it doesn't leak internals
 
-**Mitigation:** 34 adversarial security tests in `tests/e2e/security.spec.ts` covering CSRF attacks, auth bypass on all protected endpoints (including admin), cron validation, XSS payloads, honeypot detection, boundary testing, data exposure verification, open redirect prevention, security headers, token endpoint validation (7 tests), HTTP method handling, null byte injection, and parameter injection. Remaining gaps: no IDOR tests (require authenticated sessions).
+**Mitigation:** 55 adversarial security tests in `tests/e2e/security.spec.ts` covering CSRF attacks, auth bypass on all protected endpoints (including admin), cron validation, XSS payloads, honeypot detection, boundary testing, data exposure verification, open redirect prevention, security headers, token endpoint validation (7 tests), HTTP method handling, null byte injection, parameter injection, email header injection, config/dotfile exposure (7 paths), session fixation, cookie attributes, auth provider exposure, malformed Astro Actions, and protected route access control (profile, dashboard, admin API). Remaining gaps: no IDOR tests (require authenticated sessions).

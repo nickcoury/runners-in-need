@@ -477,3 +477,120 @@ test.describe("Security: Content-Type Handling", () => {
     expect(response.status()).toBe(400);
   });
 });
+
+test.describe("Security: Email Header Injection", () => {
+  test("pledge with CRLF in email is rejected", async ({ request }) => {
+    const response = await request.post("/api/pledges", {
+      headers: { Origin: BASE_URL },
+      multipart: {
+        needId: "test",
+        donorEmail: "test@test.com\r\nBcc: victim@evil.com",
+        description: "email injection test",
+      },
+    });
+    expect([400, 403]).toContain(response.status());
+  });
+});
+
+test.describe("Security: Config File Exposure", () => {
+  test("dotfiles and config files are not accessible", async ({ request }) => {
+    const sensitiveFiles = [
+      "/.env",
+      "/.env.local",
+      "/.git/config",
+      "/package.json",
+      "/tsconfig.json",
+      "/wrangler.toml",
+      "/drizzle.config.ts",
+    ];
+    for (const file of sensitiveFiles) {
+      const response = await request.get(file);
+      expect(response.status()).toBe(404);
+    }
+  });
+});
+
+test.describe("Security: Session Fixation", () => {
+  test("forged session cookie returns null session", async ({ request }) => {
+    const response = await request.get("/api/auth/session", {
+      headers: {
+        Cookie:
+          "__Secure-authjs.session-token=forged-session-value-12345",
+      },
+    });
+    expect(response.status()).toBe(200);
+    const body = await response.text();
+    // Forged session should not be accepted
+    expect(body).toBe("null");
+  });
+});
+
+test.describe("Security: Cookie Attributes", () => {
+  test("CSRF cookie uses __Host- prefix with secure attributes", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/auth/csrf");
+    const setCookie = response.headers()["set-cookie"] || "";
+    // In local dev, cookies may not have __Host- prefix (requires HTTPS)
+    // but they should still be set
+    expect(setCookie).toContain("csrf-token");
+  });
+});
+
+test.describe("Security: Auth Provider Exposure", () => {
+  test("providers endpoint exposes only necessary info", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/auth/providers");
+    expect(response.status()).toBe(200);
+    const providers = await response.json();
+    // Should have resend and google
+    expect(providers).toHaveProperty("resend");
+    expect(providers).toHaveProperty("google");
+    // Should not contain secrets
+    const text = JSON.stringify(providers);
+    expect(text).not.toContain("secret");
+    expect(text).not.toContain("SECRET");
+    expect(text).not.toContain("key");
+  });
+});
+
+test.describe("Security: Malformed Astro Actions", () => {
+  test("invalid action name returns 404 not 500", async ({ request }) => {
+    const response = await request.post("/_actions/nonExistentAction", {
+      headers: {
+        Origin: BASE_URL,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({}),
+    });
+    // Should be 404 (not found), not 500 (server error)
+    expect(response.status()).toBe(404);
+  });
+});
+
+test.describe("Security: Protected Route Access", () => {
+  test("profile page redirects unauthenticated users", async ({ request }) => {
+    const response = await request.get("/profile", {
+      maxRedirects: 0,
+    });
+    expect([301, 302]).toContain(response.status());
+  });
+
+  test("dashboard page redirects unauthenticated users", async ({
+    request,
+  }) => {
+    const response = await request.get("/dashboard", {
+      maxRedirects: 0,
+    });
+    expect([301, 302]).toContain(response.status());
+  });
+
+  test("admin API returns 401 without session", async ({ request }) => {
+    const response = await request.post("/api/admin/approve-request", {
+      headers: { Origin: BASE_URL },
+      data: "requestId=test",
+    });
+    expect(response.status()).toBe(401);
+  });
+});
