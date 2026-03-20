@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-16 findings total, **8 fixed during the audit** (+ Turnstile partial mitigation on S2). 48 areas verified secure. 63+ black-box production tests. 42 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+16 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ---
 
@@ -439,6 +439,15 @@ These areas were specifically tested and found to be properly secured:
 | Double-encoded path traversal `%252f` | 404 — properly decoded once, no double-decoding |
 | `GET /api/cron/daily` (no secret) | 403 — "Forbidden" |
 | Response headers | Only `server: cloudflare` — no version info, no x-powered-by, no debug headers |
+| `POST /api/needs` (empty body, unauth) | 401 — "Unauthorized", no schema leak |
+| 100 query params on `/api/needs` | 200 — handled gracefully, no crash |
+| `GET /.well-known/security.txt` | 200 — security.txt now deployed (22e947c) |
+| Pledge creation email behavior | Only notifies org members, NOT the donorEmail — can't be used as spam relay |
+| International email domain (xn-- punycode) | 403 — rejected by Turnstile (would pass validation if authenticated) |
+| Pledge description minimum length | 400 — "Description must be between 5 and 2000 characters" |
+| LLM prompt injection via pledge desc | Not exploitable — output reviewed by human, no data exfiltration path |
+| Astro Action enumeration (415 vs 404) | Actions return 415, non-existent 404 — names are in client bundle anyway |
+| Admin email discoverable from site | No — contact and about pages have no email addresses |
 
 ---
 
@@ -467,7 +476,7 @@ These areas were specifically tested and found to be properly secured:
 **P3 — Nice to have:**
 14. ~~Add `.github/dependabot.yml` for automated dependency security patches~~ ✅ Added (b1d8bbe)
 15. **S11:** LLM prompt injection — won't fix (human review mitigates, no data exfiltration risk)
-16. Add `/.well-known/security.txt` for responsible disclosure contact info
+16. ~~Add `/.well-known/security.txt` for responsible disclosure contact info~~ ✅ Added (22e947c)
 
 **Already fixed in this audit:**
 - ~~**S1:** Remove dev-secret fallback~~ ✅ (78f6c61)
@@ -476,7 +485,11 @@ These areas were specifically tested and found to be properly secured:
 - ~~**S8:** Duplicate organizer request prevention~~ ✅ (d56e099)
 - ~~**S12:** Deny-request pending check~~ ✅ (d56e099)
 - ~~**S13:** Middleware whitelist for token endpoints~~ ✅ (7fa4f69)
-- ~~**S14:** Cooldown bypass in action handler~~ ✅ (this commit)
+- ~~**S14:** Cooldown bypass in action handler~~ ✅ (c4116d2)
+- ~~**S2 partial:** Turnstile on signin page~~ ✅ (67285c1)
+- ~~**Dependabot:** Automated dependency security patches~~ ✅ (b1d8bbe)
+- ~~**security.txt:** Responsible disclosure contact~~ ✅ (22e947c)
+- ~~**npm audit fix:** 4 high-severity undici vulnerabilities in dev deps~~ ✅ (7572824)
 
 ---
 
