@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 49 areas verified secure. 100 black-box production tests. 56 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 49 areas verified secure. 100 black-box production tests. 51 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ### Realistic Threat Assessment
 
@@ -155,6 +155,8 @@ Required because Astro inlines scripts for prerendered static pages. This weaken
 - No raw HTML injection points found in the entire codebase
 
 **Fix (future):** Nonce-based CSP or disable prerendering for pages with interactive scripts. Not urgent given the mitigations.
+
+**Partial fix applied (8971987):** Removed unused `https://unpkg.com` from `style-src` directive. Leaflet CSS is bundled by Vite, not loaded from unpkg.com. This reduces the attack surface without affecting functionality.
 
 ---
 
