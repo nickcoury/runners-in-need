@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-15 findings total, **7 fixed during the audit**. 48 areas verified secure. 63+ black-box production tests. 34 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+16 findings total, **7 fixed during the audit**. 48 areas verified secure. 63+ black-box production tests. 42 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ---
 
@@ -279,6 +279,30 @@ await db.insert(schema.needs).values({...});
 
 ---
 
+### S16: Pledge messages publicly visible on need detail page [MEDIUM]
+
+**File:** `src/pages/needs/[id].astro:58-64, 257-287`
+
+All messages between donors and organizers are rendered in the need detail page HTML, visible to any unauthenticated visitor. While message *sending* is properly restricted (only donor or org member can post), message *reading* has no access control.
+
+**Data flow:**
+```
+DB → needRow.pledges[*].messages → rendered in page HTML (public)
+```
+
+**Attack scenario:** A donor discusses shipping logistics in a message: "My phone is 555-1234, I can drop off at 123 Main St." This PII is now publicly visible on the need page to any visitor.
+
+**Risk:** MEDIUM — the platform's messaging is designed for coordinating gear donations, where users are likely to share personal details (addresses, phone numbers, schedules). Making these conversations public without clear notice creates a PII exposure risk.
+
+**Current behavior:** The message form only appears for authorized parties (`canMessage` check at line 126), so users may assume conversations are private. The contradiction between restricted sending and public reading creates a false sense of privacy.
+
+**Mitigation options:**
+1. **Filter messages server-side:** Only include messages in page data when `currentUserId` is the donor or an org member (recommended)
+2. **Add privacy notice:** Show a warning on the message form: "Messages are visible to anyone viewing this need"
+3. **Move messaging to dashboard:** Remove messages from the public need page entirely, show them only on the dashboard
+
+---
+
 ## Verified Secure
 
 These areas were specifically tested and found to be properly secured:
@@ -422,6 +446,7 @@ These areas were specifically tested and found to be properly secured:
 11. ~~**S12:** Add pending status check to deny-request.ts~~ ✅ Fixed (d56e099)
 12. **S6:** Investigate nonce-based CSP (Astro limitation)
 13. **S15:** Add UNIQUE constraint on `needs.continuedFromId` to prevent TOCTOU race
+14. **S16:** Make pledge messages private (only visible to donor/org member) or add privacy notice
 
 **P3 — Nice to have:**
 14. ~~Add `.github/dependabot.yml` for automated dependency security patches~~ ✅ Added (b1d8bbe)
