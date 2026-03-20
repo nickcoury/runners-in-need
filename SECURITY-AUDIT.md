@@ -9,9 +9,9 @@
 
 ## Executive Summary
 
-The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping, robust CSRF protection, and defense-in-depth authorization checks. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
+The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-15 findings total, **7 fixed during the audit**. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+15 findings total, **7 fixed during the audit**. 48 areas verified secure. 63+ black-box production tests. 34 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ---
 
@@ -321,6 +321,17 @@ These areas were specifically tested and found to be properly secured:
 | **Unicode Normalization** | No unicode-based bypass vectors found. Inputs are stored as-is, rendered via auto-escaping. |
 | **Account Deletion Cascade** | Messages deleted (senderId NOT NULL), pledges anonymized ("Deleted User"), sessions cascade-deleted via FK. |
 | **Cooldown Enforcement** | 12-month denial cooldown now enforced at both page and action level (S14 fix). |
+| **Auth.js CSRF** | Double-submit cookie pattern. Stolen CSRF tokens fail without matching Set-Cookie. Cross-origin use impossible. |
+| **Session Forging** | Fake `__Host-authjs.session-token` cookies rejected — DB session lookup fails. |
+| **callbackUrl Validation** | Auth.js validates same-origin. `javascript:` URLs cause 500 (no XSS). External URLs sanitized to same-origin. |
+| **Content-Type Confusion** | APIs expect specific content types. JSON bodies to multipart endpoints return 400. |
+| **HTTP Method Override** | `X-HTTP-Method-Override` header ignored. No method override support. |
+| **Directory Listing** | `/_astro/` returns 404. No directory traversal or file listing possible. |
+| **Source Maps** | Not exposed in production. `*.js.map` returns 404. |
+| **DNS/Subdomains** | No dangling CNAME records. `www`, `dev`, `api`, `mail` subdomains all unresolved. No takeover risk. |
+| **Zod Validation (Astro Actions)** | Invalid enum values in action inputs return 400. Status field restricted to valid enum. |
+| **Client Script Security** | All 6 scripts use `textContent` (never `innerHTML` for user data). Tab switching validates against whitelist array. |
+| **User Image Handling** | Profile images from Google OAuth only. `referrerPolicy="no-referrer"` prevents page URL leakage to Google CDN. |
 
 ---
 
@@ -364,6 +375,30 @@ These areas were specifically tested and found to be properly secured:
 | `GET /api/needs` with `Origin: evil.com` | 200, no CORS headers — API is same-origin only |
 | Need detail page (unauth) | No donor emails, no org IDs, no internal data. Pledge names + descriptions public by design |
 | Astro island props | Only public data serialized: needId, turnstileSiteKey (public), empty shipping fields |
+| `POST /api/pledges` (JSON Content-Type) | 400 — expects multipart form data, rejects application/json |
+| `POST /api/pledges` (double Content-Length) | 400 — Cloudflare rejects smuggling attempts |
+| `GET /api/auth/csrf` | Returns CSRF token (expected, tied to Set-Cookie) |
+| `GET /api/auth/providers` | Returns provider config (public, standard Auth.js behavior) |
+| `GET /api/auth/session` (unauth) | `null` — no session info leak |
+| `POST /api/auth/signin/resend` (no CSRF) | 403 — CSRF protection works |
+| `POST /api/auth/signin/resend` (stolen CSRF) | 403 — double-submit cookie mismatch blocks cross-origin use |
+| `GET /api/auth/signin?callbackUrl=javascript:alert(1)` | 500 — Auth.js fails, no XSS, no stack trace in body |
+| `GET /api/auth/callback/resend?token=fake` | 500 — invalid token rejected, no info leak |
+| `GET /cdn-cgi/trace` | Cloudflare trace (standard, non-sensitive) |
+| `GET /.well-known/security.txt` | 404 — not configured (recommend adding) |
+| `OPTIONS /api/needs` (cross-origin preflight) | 403 — no CORS headers, cross-origin blocked |
+| `GET /api/needs` with `Accept: text/html` | 200 — returns JSON regardless (no content-type confusion) |
+| Forged `__Host-authjs.session-token=fake` | 401 — fake session cookies rejected (DB lookup fails) |
+| `GET /needs/..%2F..%2Fetc%2Fpasswd` | 400 — encoded path traversal rejected |
+| `X-HTTP-Method-Override: POST` on GET | 401 — method override headers not honored |
+| `POST /api/pledges` (unicode email) | 403 — handled safely by validation |
+| `POST /_actions/updatePledgeStatus` (invalid enum) | 400 — Zod rejects invalid status values |
+| `POST /_actions/submitOrganizerRequest` (unauth) | 500 — throws Unauthorized (not exploitable) |
+| `GET /_astro/` | 404 — no directory listing |
+| `GET /_astro/client.js.map` | 404 — source maps not exposed |
+| `GET /org/test123` | 302 → /404 — nonexistent orgs handled gracefully |
+| `GET /api/health` with `X-Forwarded-Host: evil.com` | 200 — host injection ignored, no reflected data |
+| `Transfer-Encoding: chunked` smuggling | 400 — rejected by Cloudflare edge |
 
 ---
 
@@ -389,8 +424,9 @@ These areas were specifically tested and found to be properly secured:
 13. **S15:** Add UNIQUE constraint on `needs.continuedFromId` to prevent TOCTOU race
 
 **P3 — Nice to have:**
-14. Add `.github/dependabot.yml` for automated dependency security patches
+14. ~~Add `.github/dependabot.yml` for automated dependency security patches~~ ✅ Added (b1d8bbe)
 15. **S11:** LLM prompt injection — won't fix (human review mitigates, no data exfiltration risk)
+16. Add `/.well-known/security.txt` for responsible disclosure contact info
 
 **Already fixed in this audit:**
 - ~~**S1:** Remove dev-secret fallback~~ ✅ (78f6c61)
@@ -416,6 +452,7 @@ These areas were specifically tested and found to be properly secured:
 9. **Astro page review** — agent reviewed all 21 .astro files for auth gaps, data leakage, and parameter validation. All pages correctly enforce auth and scope data.
 10. **Supply chain audit** — reviewed 16 production deps (560 total packages), all SHA-512 verified, no suspicious lifecycle scripts, no custom registries, proper secret management
 11. **DNS & infrastructure review** — checked for subdomain takeover risks, source map exposure, directory listing, cache poisoning vectors
+12. **Phase 3 deep testing** — auth flow edge cases (CSRF token theft, session forging, callbackUrl injection, magic link abuse), content-type confusion, HTTP method override, transfer-encoding smuggling, CORS preflight, directory listing, source map exposure, unicode normalization, Astro Action enum bypass, comprehensive client-side script review (edit-form.ts, profile.ts — all use textContent, no innerHTML XSS)
 
 ---
 
@@ -431,4 +468,4 @@ The 78 e2e tests cover functional happy paths well but have **zero adversarial/s
 - **No boundary/fuzzing tests** — no extremely long strings, null bytes, or special characters
 - **No error response leak tests** — no test triggers a 500 to verify it doesn't leak internals
 
-**Mitigation:** 25 adversarial security tests were added in `tests/e2e/security.spec.ts` (commit a8da14c) covering CSRF, auth bypass on all protected endpoints, cron validation, XSS payloads, honeypot, data exposure, open redirect, and security headers. Remaining gaps: no IDOR tests (require authenticated sessions), no admin endpoint tests (require admin session).
+**Mitigation:** 34 adversarial security tests in `tests/e2e/security.spec.ts` covering CSRF attacks, auth bypass on all protected endpoints (including admin), cron validation, XSS payloads, honeypot detection, boundary testing, data exposure verification, open redirect prevention, security headers, token endpoint validation (7 tests), HTTP method handling, null byte injection, and parameter injection. Remaining gaps: no IDOR tests (require authenticated sessions).
