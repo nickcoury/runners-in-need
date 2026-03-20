@@ -3,7 +3,8 @@ import { getEnv } from "./env";
 const TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 async function hmac(data: string): Promise<string> {
-  const secret = getEnv("AUTH_SECRET") || "dev-secret";
+  const secret = getEnv("AUTH_SECRET");
+  if (!secret) throw new Error("AUTH_SECRET is required");
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",

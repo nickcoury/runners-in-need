@@ -14,15 +14,11 @@ import {
 
 const handler: APIRoute = async ({ request }) => {
   const cronSecret = getEnv("CRON_SECRET");
-  if (!cronSecret) {
-    return json(500, { error: "CRON_SECRET not configured" });
-  }
-
   const provided =
     new URL(request.url).searchParams.get("token") ||
     request.headers.get("x-cron-secret");
 
-  if (provided !== cronSecret) {
+  if (!cronSecret || !provided || provided !== cronSecret) {
     return json(403, { error: "Forbidden" });
   }
 
