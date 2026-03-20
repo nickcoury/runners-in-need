@@ -582,6 +582,83 @@ test.describe("Security: Caching", () => {
   });
 });
 
+test.describe("Security: Open Redirect", () => {
+  test("callbackUrl with external URL does not appear in page links", async ({
+    page,
+  }) => {
+    await page.goto("/auth/signin?callbackUrl=https://evil.com/steal");
+    // The callbackUrl is in a hidden input — verify it doesn't create clickable links
+    const links = await page.$$eval("a[href]", (els) =>
+      els.map((a) => a.getAttribute("href"))
+    );
+    expect(links.every((href) => !href?.includes("evil.com"))).toBe(true);
+  });
+
+  test("callbackUrl with javascript: URI is not rendered as executable", async ({
+    page,
+  }) => {
+    await page.goto(
+      "/auth/signin?callbackUrl=javascript:alert(document.cookie)"
+    );
+    // Should not have any javascript: hrefs
+    const jsLinks = await page.$$eval("a[href]", (els) =>
+      els.map((a) => a.getAttribute("href")).filter((h) => h?.startsWith("javascript:"))
+    );
+    expect(jsLinks).toHaveLength(0);
+  });
+
+  test("callbackUrl with protocol-relative URL does not redirect externally", async ({
+    page,
+  }) => {
+    await page.goto("/auth/signin?callbackUrl=//evil.com");
+    const content = await page.textContent("body");
+    expect(content).not.toContain("evil.com");
+  });
+});
+
+test.describe("Security: Path Traversal", () => {
+  test("path traversal in API route returns 404", async ({ request }) => {
+    const response = await request.get(
+      "/api/needs/../../../etc/passwd"
+    );
+    expect([400, 404]).toContain(response.status());
+  });
+
+  test("URL-encoded path traversal returns safe error", async ({ request }) => {
+    const response = await request.get(
+      "/api/needs/%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+    );
+    const status = response.status();
+    expect([400, 401, 404]).toContain(status);
+    const text = await response.text();
+    expect(text).not.toContain("root:");
+  });
+});
+
+test.describe("Security: Source Map Exposure", () => {
+  test("source maps are not accessible", async ({ request }) => {
+    const maps = ["/main.js.map", "/_worker.js.map", "/app.js.map"];
+    for (const map of maps) {
+      const response = await request.get(map);
+      expect(response.status()).toBe(404);
+    }
+  });
+});
+
+test.describe("Security: Host Header Injection", () => {
+  test("X-Forwarded-Host does not affect page content", async ({ request }) => {
+    const normal = await request.get("/about");
+    const injected = await request.get("/about", {
+      headers: { "X-Forwarded-Host": "evil.com" },
+    });
+    // Both should return 200 and not contain evil.com in body
+    expect(normal.status()).toBe(200);
+    expect(injected.status()).toBe(200);
+    const body = await injected.text();
+    expect(body).not.toContain("evil.com");
+  });
+});
+
 test.describe("Security: Protected Route Access", () => {
   test("profile page redirects unauthenticated users", async ({ request }) => {
     const response = await request.get("/profile", {
