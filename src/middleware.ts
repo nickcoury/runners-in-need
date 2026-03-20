@@ -91,11 +91,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Skip auth routes and public API endpoints
+  // Token-based endpoints (extend, status) use HMAC tokens instead of sessions
   if (
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/auth/") ||
     pathname === "/api/health" ||
-    pathname.startsWith("/api/cron/")
+    pathname.startsWith("/api/cron/") ||
+    /^\/api\/needs\/[^/]+\/(extend|status)$/.test(pathname)
   ) {
     return addSecurityHeaders(await next());
   }

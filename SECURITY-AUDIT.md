@@ -220,6 +220,26 @@ The deny handler updates any request to "denied" without verifying `orgRequest.s
 
 ---
 
+### S13: Email action links blocked by middleware for logged-out users [HIGH — BUG]
+
+**File:** `src/middleware.ts:93-101`
+
+**Black-box verified:** `GET /api/needs/test/extend?token=...` returns 401 in production.
+
+The middleware protects all `/api/` routes, requiring session auth. But the extend (`/api/needs/[id]/extend`) and status (`/api/needs/[id]/status`) endpoints are designed to work with HMAC tokens from email links — no session required. Organizers who aren't logged in can't use one-click email actions.
+
+**Impact:** HIGH — core email workflow is broken for logged-out users. Organizers must log in first, then click the email link, which defeats the one-click UX.
+
+**Fix:** Whitelist token-based endpoints in middleware, like cron:
+```typescript
+/^\/api\/needs\/[^/]+\/(extend|status)$/.test(pathname)
+```
+These endpoints have their own auth (HMAC token verification with timing-safe comparison).
+
+✅ **Fixed** in this audit session.
+
+---
+
 ## Verified Secure
 
 These areas were specifically tested and found to be properly secured:
