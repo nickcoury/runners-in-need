@@ -11,7 +11,7 @@ function getCallbackContext(url: string): string | null {
   if (url.startsWith('/dashboard')) return 'Sign in to access your dashboard';
   if (url.startsWith('/drives')) return 'Sign in to pledge gear';
   if (url.startsWith('/post')) return 'Sign in to post a need';
-  if (url.startsWith('/become-organizer')) return 'Sign in to organize a drive';
+  if (url.startsWith('/become-organizer')) return 'Sign in to become an organizer';
   if (url.startsWith('/pledge')) return 'Sign in to pledge gear';
   if (url.startsWith('/need')) return 'Sign in to pledge gear';
   return null;

@@ -50,7 +50,7 @@ export async function sendEmail(
 function emailLayout(title: string, body: string): string {
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f4f4;">
   <div style="max-width:560px;margin:24px auto;background:#ffffff;border-radius:8px;overflow:hidden;">
     <div style="background:#2D4A2D;padding:24px 32px;">

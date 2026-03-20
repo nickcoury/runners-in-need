@@ -8,7 +8,10 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
-/** Trim user input for safe storage/display. */
-export function sanitize(s: string): string {
+/** Trim user input. Named explicitly — this does NOT strip HTML or sanitize for XSS. */
+export function trimInput(s: string): string {
   return s.trim();
 }
+
+/** @deprecated Use trimInput() instead. */
+export const sanitize = trimInput;

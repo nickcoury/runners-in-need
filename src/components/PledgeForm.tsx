@@ -176,7 +176,7 @@ export default function PledgeForm({
               htmlFor="donorEmail"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Your email <span className="text-red-500">*</span>
+              Your email <span className="text-red-600">*</span>
             </label>
             <input
               id="donorEmail"
@@ -197,7 +197,7 @@ export default function PledgeForm({
           htmlFor="description"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          What can you provide? <span className="text-red-500">*</span>
+          What can you provide? <span className="text-red-600">*</span>
         </label>
         <textarea
           id="description"

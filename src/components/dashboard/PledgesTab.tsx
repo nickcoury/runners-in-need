@@ -54,7 +54,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4 flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 focus-visible:text-red-600 focus-visible:outline-none ml-4" aria-label="Dismiss error">
+          <button onClick={() => setError(null)} className="text-red-600 hover:text-red-700 focus-visible:text-red-700 focus-visible:outline-none ml-4" aria-label="Dismiss error">
             &times;
           </button>
         </div>

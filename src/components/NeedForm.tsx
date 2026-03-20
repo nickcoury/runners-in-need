@@ -106,7 +106,7 @@ export default function NeedForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Describe what your runners need. Click a category above for a template."
-          className="w-full border rounded-lg px-3 py-2 text-sm font-mono"
+          className="w-full border rounded-lg px-3 py-2 text-sm"
         />
         <p className="text-xs text-gray-500 mt-1">
           Include sizes, quantities, and any condition preferences.
