@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { getDb, schema } from "../db";
 import { createId } from "../lib/id";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { sendPledgeStatusEmail } from "../lib/email";
 import { generateRemainingNeedText } from "../lib/llm";
 import { sanitize } from "../lib/html";
@@ -140,6 +140,18 @@ export const server = {
       }
 
       const db = getDb();
+
+      // Prevent duplicate pending requests from the same user
+      const existing = await db.query.organizerRequests.findFirst({
+        where: and(
+          eq(schema.organizerRequests.userId, userId),
+          eq(schema.organizerRequests.status, "pending")
+        ),
+      });
+      if (existing) {
+        throw new Error("You already have a pending organizer request");
+      }
+
       const request = {
         id: createId(),
         userId,

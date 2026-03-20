@@ -23,6 +23,10 @@ export const POST: APIRoute = async ({ request, redirect, locals }) => {
     where: eq(schema.organizerRequests.id, requestId),
   });
 
+  if (!orgRequest || orgRequest.status !== "pending") {
+    return redirect("/admin/requests");
+  }
+
   await db
     .update(schema.organizerRequests)
     .set({ status: "denied", reviewedAt: new Date(), reviewedBy: session.user.id })

@@ -18,7 +18,14 @@ const handler: APIRoute = async ({ request }) => {
     new URL(request.url).searchParams.get("token") ||
     request.headers.get("x-cron-secret");
 
-  if (!cronSecret || !provided || provided !== cronSecret) {
+  if (!cronSecret || !provided) {
+    return json(403, { error: "Forbidden" });
+  }
+  // Timing-safe comparison to prevent timing attacks
+  const encoder = new TextEncoder();
+  const a = encoder.encode(provided);
+  const b = encoder.encode(cronSecret);
+  if (a.byteLength !== b.byteLength || !crypto.subtle.timingSafeEqual(a, b)) {
     return json(403, { error: "Forbidden" });
   }
 
