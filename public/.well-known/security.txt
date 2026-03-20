@@ -1,0 +1,6 @@
+# Security contact for Runners In Need
+# https://securitytxt.org/
+
+Contact: mailto:nickcoury@gmail.com
+Preferred-Languages: en
+Expires: 2027-03-20T00:00:00.000Z
