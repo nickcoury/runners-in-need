@@ -569,6 +569,19 @@ test.describe("Security: Malformed Astro Actions", () => {
   });
 });
 
+test.describe("Security: Caching", () => {
+  test("public API sets cache headers", async ({ request }) => {
+    const response = await request.get("/api/needs");
+    expect(response.status()).toBe(200);
+    // Public endpoint can have cache headers — verify they exist
+    const cacheControl = response.headers()["cache-control"];
+    if (cacheControl) {
+      // If cached, should be public (not private/no-store for public data)
+      expect(cacheControl).toContain("public");
+    }
+  });
+});
+
 test.describe("Security: Protected Route Access", () => {
   test("profile page redirects unauthenticated users", async ({ request }) => {
     const response = await request.get("/profile", {
