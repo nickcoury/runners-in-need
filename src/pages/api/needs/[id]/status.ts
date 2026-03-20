@@ -66,6 +66,17 @@ export const GET: APIRoute = async ({ params, url }) => {
   }
 
   if (action === "partially_fulfilled") {
+    // Check if a continuation already exists (idempotency guard)
+    const existing = await db.query.needs.findFirst({
+      where: eq(schema.needs.continuedFromId, needId),
+    });
+    if (existing) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/needs/${existing.id}/edit` },
+      });
+    }
+
     // Close the original need as fulfilled
     await db
       .update(schema.needs)
