@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-17 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ### Realistic Threat Assessment
 
@@ -337,6 +337,20 @@ HTTP requests to `http://runnersinneed.com` return `200 OK` with content instead
 
 ---
 
+### S18: Dev and production share the same database [HIGH]
+
+The dev environment (`runners-in-need-dev.nickcoury.workers.dev`) and production (`runnersinneed.com`) connect to the same Turso database. Verified by comparing all need IDs — identical across both environments.
+
+**Risk:** HIGH — any code deployed to the dev branch can read, modify, or delete production data. This includes:
+- Schema migrations on dev could break production
+- Seed scripts or test data on dev corrupt production state
+- Bugs in dev code could delete or modify production records
+- Dev environment has no auth isolation — any session created on dev works against production data
+
+**Fix:** Create a separate Turso database for dev. In the Cloudflare Workers dashboard, set `TURSO_DATABASE_URL` for the dev environment to a different database URL. Use `turso db create runners-in-need-dev` to create it.
+
+---
+
 ## Verified Secure
 
 These areas were specifically tested and found to be properly secured:
@@ -493,9 +507,10 @@ These areas were specifically tested and found to be properly secured:
 ## Priority Actions
 
 **P0 — Do now:**
-1. **S4:** Set `CRON_SECRET` in Cloudflare Workers dashboard (cron job is currently non-functional)
-2. ~~**S4:** Fix error response to not leak config state~~ ✅ Fixed (78f6c61)
-3. ~~**S1:** Remove `"dev-secret"` fallback in `tokens.ts`~~ ✅ Fixed (78f6c61)
+1. **S18:** Create separate Turso database for dev environment (dev currently shares prod DB!)
+2. **S4:** Set `CRON_SECRET` in Cloudflare Workers dashboard (cron job is currently non-functional)
+3. ~~**S4:** Fix error response to not leak config state~~ ✅ Fixed (78f6c61)
+4. ~~**S1:** Remove `"dev-secret"` fallback in `tokens.ts`~~ ✅ Fixed (78f6c61)
 
 **P1 — This sprint:**
 4. **S2:** Configure Cloudflare rate limiting rules (no code change needed)
