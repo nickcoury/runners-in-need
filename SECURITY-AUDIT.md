@@ -287,15 +287,15 @@ These areas were specifically tested and found to be properly secured:
 
 **P1 — This sprint:**
 4. **S2:** Configure Cloudflare rate limiting rules (no code change needed)
-5. **S5:** Use timing-safe comparison for CRON_SECRET
-6. **S8:** Add uniqueness check for pending organizer requests
+5. ~~**S5:** Use timing-safe comparison for CRON_SECRET~~ ✅ Fixed (d56e099)
+6. ~~**S8:** Add uniqueness check for pending organizer requests~~ ✅ Fixed (d56e099)
 
 **P2 — Backlog:**
 7. **S3:** Consider single-use tokens or shorter TTL
 8. **S7:** Decide if pledge drives should require organizer role
 9. **S9:** Add re-authentication before account deletion
 10. **S10:** Cap need extensions (e.g., max 3 or 1-year limit)
-11. **S12:** Add pending status check to deny-request.ts
+11. ~~**S12:** Add pending status check to deny-request.ts~~ ✅ Fixed (d56e099)
 12. **S6:** Investigate nonce-based CSP (Astro limitation)
 
 **P3 — Won't fix (accepted risk):**
