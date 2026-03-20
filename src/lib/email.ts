@@ -20,6 +20,25 @@ function getSiteUrl(): string {
 // Core send function
 // ============================================================
 
+/** Strip HTML to plain text for email fallback (Apple Watch, corp environments). */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<a[^>]+href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, "$2 ($1)")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&mdash;/g, "—")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
@@ -37,6 +56,7 @@ export async function sendEmail(
       to,
       subject,
       html,
+      text: htmlToText(html),
     });
   } catch (err) {
     console.error(`[email] Failed to send email to ${to}:`, err);
