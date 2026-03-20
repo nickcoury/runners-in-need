@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping, robust CSRF protection, and defense-in-depth authorization checks. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-The main gaps are around **defense-in-depth hardening**: rate limiting was removed during simplification, action tokens are replayable, and a dev fallback secret could theoretically be exploited if env vars are misconfigured.
+15 findings total, **7 fixed during the audit**. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ---
 
@@ -220,7 +220,7 @@ The deny handler updates any request to "denied" without verifying `orgRequest.s
 
 ---
 
-### S13: Email action links blocked by middleware for logged-out users [HIGH — BUG]
+### S13: Email action links blocked by middleware for logged-out users [HIGH — BUG] ✅ FIXED
 
 **File:** `src/middleware.ts:93-101`
 
@@ -236,7 +236,45 @@ The middleware protects all `/api/` routes, requiring session auth. But the exte
 ```
 These endpoints have their own auth (HMAC token verification with timing-safe comparison).
 
+✅ **Fixed** (7fa4f69) — added regex whitelist for token-based endpoints in middleware.
+
+---
+
+### S14: Organizer denial cooldown bypass via direct action POST [MEDIUM] ✅ FIXED
+
+**File:** `src/actions/index.ts` (submitOrganizerRequest handler)
+
+The 12-month cooldown after organizer request denial is enforced only at the **page level** (`become-organizer.astro:30-44`). The Astro Action `submitOrganizerRequest` only checked for existing **pending** requests (S8 fix), not for denied requests within cooldown.
+
+**Attack:** A denied user could bypass the cooldown by directly POSTing to `/_actions/submitOrganizerRequest`, submitting a new organizer request before the 12-month waiting period expires.
+
+**Impact:** LOW — admin still has to approve, so this doesn't grant privilege. But it defeats the cooldown intent.
+
+**Fix:** Added server-side cooldown enforcement in the action handler. Now checks for denied requests with `reviewedAt` within 12 months, and auto-deletes expired denials to allow reapplication.
+
 ✅ **Fixed** in this audit session.
+
+---
+
+### S15: TOCTOU race in partial fulfillment continuation [LOW]
+
+**File:** `src/pages/api/needs/[id]/status.ts:68-78`
+
+The `partially_fulfilled` action checks for an existing continuation need, then creates one if none exists. Between the check and the insert, a concurrent request could also pass the check, creating duplicate continuation needs.
+
+```typescript
+// Check → Insert has a race window
+const existing = await db.query.needs.findFirst({
+  where: eq(schema.needs.continuedFromId, needId),
+});
+if (existing) { return redirect... }
+// Another request could arrive here before insert
+await db.insert(schema.needs).values({...});
+```
+
+**Impact:** LOW — this endpoint uses HMAC tokens from email links, so concurrent use is unlikely (organizer would need to click the same link multiple times nearly simultaneously). Also, duplicate needs are merely inconvenient, not a security breach.
+
+**Mitigation:** Add a UNIQUE constraint on `needs.continuedFromId` in the schema. The DB would reject the duplicate insert, which the error handler would catch as a 500 — ugly but safe.
 
 ---
 
@@ -269,6 +307,19 @@ These areas were specifically tested and found to be properly secured:
 | **Sitemap/robots.txt** | Only public pages indexed. Admin, API, auth, profile, dashboard paths blocked in robots.txt. |
 | **Need Detail Data** | No donor emails or IDs in public template. Only donor names (voluntary) and message author names. |
 | **LLM Output** | Goes to `suggestedText` for organizer review, never auto-published. React-escaped on render. |
+| **React Components** | No `dangerouslySetInnerHTML` (one static `innerHTML = "View details →"` is hardcoded). No `eval()`. All user data rendered via JSX auto-escaping. |
+| **HTTP Method Handling** | DELETE/PUT/PATCH return 401/404 appropriately. TRACE returns 405. No method override headers honored. |
+| **Cache Poisoning** | `/api/needs` has `Cache-Control: public, max-age=60` but only returns public data. No user-specific data cached. No Vary header needed. |
+| **Config File Exposure** | `wrangler.toml`, `drizzle.config.ts`, `.wrangler/`, source maps — all return 404. Cloudflare Workers only serves compiled output. |
+| **CORS** | No `Access-Control-Allow-Origin` header set. API is same-origin only. Cross-origin requests blocked by CSRF middleware. |
+| **ID Enumeration** | IDs use `crypto.randomUUID()` (CSPRNG), sliced to 12 chars = 48 bits entropy. Not brute-forceable. |
+| **Request Smuggling** | Cloudflare edge handles HTTP parsing. Chunked encoding + content-type mismatches return 400. |
+| **Host Header Injection** | Cloudflare rejects requests with mismatched Host headers (403). X-Forwarded-Host has no effect on routing. |
+| **Parameter Pollution** | Duplicate form fields (e.g., two `needId` values) — `form.get()` returns first value. No exploitation vector. |
+| **Null Byte Injection** | Null bytes in URL parameters return 400. Drizzle parameterized queries handle safely. |
+| **Unicode Normalization** | No unicode-based bypass vectors found. Inputs are stored as-is, rendered via auto-escaping. |
+| **Account Deletion Cascade** | Messages deleted (senderId NOT NULL), pledges anonymized ("Deleted User"), sessions cascade-deleted via FK. |
+| **Cooldown Enforcement** | 12-month denial cooldown now enforced at both page and action level (S14 fix). |
 
 ---
 
@@ -295,6 +346,23 @@ These areas were specifically tested and found to be properly secured:
 | `GET /.git/config` | 404 — git directory not exposed |
 | `GET /sitemap.xml` | Only public pages listed, no admin/auth paths |
 | `GET /robots.txt` | Blocks /api/, /admin/, /dashboard, /auth/, /profile |
+| `GET /api/needs/../../etc/passwd` | 404 — path traversal handled by URL routing |
+| `GET /api/needs/%2e%2e%2f%2e%2e%2fetc%2fpasswd` | 401 — encoded traversal blocked |
+| `POST /api/pledges` (JSON body) | 400 — expects multipart form data |
+| `POST /api/pledges` (param pollution: 2× needId) | 403 — CSRF blocks, first value used |
+| `GET /api/needs/test%00admin` | 400 — null byte handled safely |
+| `DELETE /api/needs` (unauth) | 401 — proper method/auth handling |
+| `TRACE /` | 405 — TRACE method blocked |
+| `GET /` with `Host: evil.com` | 403 — Cloudflare rejects mismatched host |
+| `GET /wrangler.toml` | 404 — config files not exposed |
+| `GET /drizzle.config.ts` | 404 — build config not exposed |
+| `GET /admin/requests` (unauth) | 302 → signin — properly protected |
+| `GET /api/needs/1' OR '1'='1` | 302 — SQL injection attempt safely handled (parameterized queries) |
+| `POST /api/drives` (unauth) | 401 — auth required |
+| `POST /api/org/update` with SSRF location | 401 — auth blocks, geocoding uses hardcoded Nominatim URL |
+| `GET /api/needs` with `Origin: evil.com` | 200, no CORS headers — API is same-origin only |
+| Need detail page (unauth) | No donor emails, no org IDs, no internal data. Pledge names + descriptions public by design |
+| Astro island props | Only public data serialized: needId, turnstileSiteKey (public), empty shipping fields |
 
 ---
 
@@ -317,9 +385,19 @@ These areas were specifically tested and found to be properly secured:
 10. **S10:** Cap need extensions (e.g., max 3 or 1-year limit)
 11. ~~**S12:** Add pending status check to deny-request.ts~~ ✅ Fixed (d56e099)
 12. **S6:** Investigate nonce-based CSP (Astro limitation)
+13. **S15:** Add UNIQUE constraint on `needs.continuedFromId` to prevent TOCTOU race
 
 **P3 — Won't fix (accepted risk):**
-13. **S11:** LLM prompt injection — human review mitigates, no data exfiltration risk
+14. **S11:** LLM prompt injection — human review mitigates, no data exfiltration risk
+
+**Already fixed in this audit:**
+- ~~**S1:** Remove dev-secret fallback~~ ✅ (78f6c61)
+- ~~**S4:** Fix cron info leak~~ ✅ (78f6c61)
+- ~~**S5:** Timing-safe cron comparison~~ ✅ (d56e099)
+- ~~**S8:** Duplicate organizer request prevention~~ ✅ (d56e099)
+- ~~**S12:** Deny-request pending check~~ ✅ (d56e099)
+- ~~**S13:** Middleware whitelist for token endpoints~~ ✅ (7fa4f69)
+- ~~**S14:** Cooldown bypass in action handler~~ ✅ (this commit)
 
 ---
 
@@ -332,6 +410,7 @@ These areas were specifically tested and found to be properly secured:
 5. **Deep dive** — 2 additional agents examined data flow edge cases (status transitions, account deletion, organizer race conditions, extension limits) and client-side security (React components, scripts, DOM manipulation)
 6. **Dashboard & page review** — verified data scoping on dashboard, admin, org profile, and need detail pages
 7. **Test coverage gap analysis** — reviewed all 78 e2e tests for security coverage
+8. **Extended audit (phase 2)** — 3 parallel agents reviewed Astro Actions, React component XSS, and DB schema/data exposure. Additional manual black-box tests: path traversal, parameter pollution, null byte injection, HTTP verb tampering, cache poisoning, CORS, request smuggling, Host header injection, config file exposure, source map exposure, Astro island prop inspection
 
 ---
 
@@ -347,4 +426,4 @@ The 78 e2e tests cover functional happy paths well but have **zero adversarial/s
 - **No boundary/fuzzing tests** — no extremely long strings, null bytes, or special characters
 - **No error response leak tests** — no test triggers a 500 to verify it doesn't leak internals
 
-These gaps don't indicate vulnerabilities (code review confirms the protections exist), but adversarial tests would prevent regressions.
+**Mitigation:** 25 adversarial security tests were added in `tests/e2e/security.spec.ts` (commit a8da14c) covering CSRF, auth bypass on all protected endpoints, cron validation, XSS payloads, honeypot, data exposure, open redirect, and security headers. Remaining gaps: no IDOR tests (require authenticated sessions), no admin endpoint tests (require admin session).

@@ -143,13 +143,21 @@ export const server = {
 
       // Prevent duplicate pending requests from the same user
       const existing = await db.query.organizerRequests.findFirst({
-        where: and(
-          eq(schema.organizerRequests.userId, userId),
-          eq(schema.organizerRequests.status, "pending")
-        ),
+        where: eq(schema.organizerRequests.userId, userId),
       });
       if (existing) {
-        throw new Error("You already have a pending organizer request");
+        if (existing.status === "pending") {
+          throw new Error("You already have a pending organizer request");
+        }
+        if (existing.status === "denied" && existing.reviewedAt) {
+          const twelveMonthsLater = new Date(existing.reviewedAt);
+          twelveMonthsLater.setMonth(twelveMonthsLater.getMonth() + 12);
+          if (new Date() < twelveMonthsLater) {
+            throw new Error("You may reapply after the cooldown period");
+          }
+          // Cooldown expired — delete old request so they can reapply
+          await db.delete(schema.organizerRequests).where(eq(schema.organizerRequests.id, existing.id));
+        }
       }
 
       const request = {
