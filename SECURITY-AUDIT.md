@@ -149,6 +149,42 @@ Uses `requireAuth` (any authenticated user) instead of `requireOrganizer`. Any l
 
 ---
 
+### S8: Organizer requests allow duplicates + race condition [MEDIUM]
+
+**Files:** `src/actions/index.ts:152`, `src/pages/api/admin/approve-request.ts:21-26`
+
+`submitOrganizerRequest` has no check for existing pending requests. A user can submit multiple requests, cluttering the admin queue. Additionally, two admins clicking "approve" simultaneously could both pass the `status === "pending"` check — second transaction overwrites the first.
+
+**Risk:** Low-impact data integrity issue. Not exploitable for privilege escalation (both approvals would grant the same access), but creates duplicate orgs.
+
+**Fix:** Add a unique constraint on `(userId, status)` where status is `pending`, or check for existing pending request before insert.
+
+---
+
+### S9: Account deletion requires no re-authentication [MEDIUM]
+
+**File:** `src/pages/api/user/delete.ts`
+
+Deletion is a POST with session-only auth. CSRF middleware protects against cross-site attacks, and the frontend has a double-confirm UI. But if a session is hijacked, the attacker can delete the account without any additional verification.
+
+**Risk:** Low given CSRF protection, but industry best practice is to require re-authentication (password or email confirmation) before permanent account deletion.
+
+**Fix:** Add email confirmation step before deletion, or require the user to type "DELETE" on the server side (not just client-side).
+
+---
+
+### S10: Need extension has no limit [LOW]
+
+**File:** `src/pages/api/needs/[id]/extend.ts:37-40`
+
+Each extension adds 90 days from the current expiry (or now, if expired). There's no cap on total extensions or maximum expiry date. An organizer can keep extending indefinitely, letting stale needs persist.
+
+**Risk:** Not a security issue, but a fairness/data quality concern. Stale needs reduce trust in the platform.
+
+**Fix (if desired):** Add `extensionCount` column with a max (e.g., 3), or cap `expiresAt` at 1 year from creation.
+
+---
+
 ## Verified Secure
 
 These areas were specifically tested and found to be properly secured:
@@ -159,7 +195,7 @@ These areas were specifically tested and found to be properly secured:
 | **XSS (Stored)** | User content escaped via `escapeHtml()` in emails and `React.createElement` auto-escaping in components. |
 | **XSS (Reflected)** | `callbackUrl` param tested with `https://evil.com` — not rendered in page content. Astro auto-escapes template values. |
 | **CSRF** | Origin header validation + Sec-Fetch-Site fallback. Tested: cross-origin POST blocked. |
-| **IDOR** | All endpoints verify ownership: `pledge.donorId === user.id` or `need.orgId === user.orgId`. |
+| **IDOR** | All endpoints verify ownership: `pledge.donorId === user.id` or `need.orgId === user.orgId`. Cross-org editing impossible. |
 | **Auth Bypass** | Protected routes return 401/redirect. Admin routes check `role === "admin"` at middleware + handler level. |
 | **Open Redirect** | `callbackUrl` validated by Auth.js (same-origin only). Referer redirect in messages.ts extracts pathname only. |
 | **Session Security** | Database-backed sessions via Auth.js. Cookies are HttpOnly, Secure, SameSite=Lax (Auth.js defaults). |
@@ -169,6 +205,10 @@ These areas were specifically tested and found to be properly secured:
 | **Privilege Escalation** | Organizer approval requires admin action. Role field cannot be set via form submission. |
 | **Clickjacking** | `X-Frame-Options: DENY` set on all responses. |
 | **HSTS** | `Strict-Transport-Security: max-age=31536000; includeSubDomains` in production. |
+| **Pledge Status Transitions** | Zod schema restricts valid statuses. Donor/org ownership verified before state changes. |
+| **Profile Update** | Only `name` field is updatable. Role, orgId, email cannot be changed via form submission. |
+| **Client-Side XSS** | No `dangerouslySetInnerHTML`, no `eval()`, no prototype pollution. All forms POST to same-origin. |
+| **Shipping Address Scope** | Address access gated by orgId check. Only visible when org opts in (`showShippingAddress`). |
 
 ---
 
@@ -191,17 +231,20 @@ These areas were specifically tested and found to be properly secured:
 
 **P0 — Do now:**
 1. **S4:** Set `CRON_SECRET` in Cloudflare Workers dashboard (cron job is currently non-functional)
-2. **S4:** Fix error response to not leak config state
-3. **S1:** Remove `"dev-secret"` fallback in `tokens.ts`
+2. ~~**S4:** Fix error response to not leak config state~~ ✅ Fixed (78f6c61)
+3. ~~**S1:** Remove `"dev-secret"` fallback in `tokens.ts`~~ ✅ Fixed (78f6c61)
 
 **P1 — This sprint:**
 4. **S2:** Configure Cloudflare rate limiting rules (no code change needed)
 5. **S5:** Use timing-safe comparison for CRON_SECRET
+6. **S8:** Add uniqueness check for pending organizer requests
 
 **P2 — Backlog:**
-6. **S3:** Consider single-use tokens or shorter TTL
-7. **S7:** Decide if pledge drives should require organizer role
-8. **S6:** Investigate nonce-based CSP (Astro limitation)
+7. **S3:** Consider single-use tokens or shorter TTL
+8. **S7:** Decide if pledge drives should require organizer role
+9. **S9:** Add re-authentication before account deletion
+10. **S10:** Cap need extensions (e.g., max 3 or 1-year limit)
+11. **S6:** Investigate nonce-based CSP (Astro limitation)
 
 ---
 
@@ -211,3 +254,4 @@ These areas were specifically tested and found to be properly secured:
 2. **White-box code review** — read all 17 API endpoints, middleware, auth config, token system, email templates, database schema, and client-side scripts
 3. **Black-box production testing** — tested 8 endpoints/pages against live site for data exposure, auth bypass, and error handling
 4. **Agent-assisted deep analysis** — 3 specialized agents audited input validation, auth/session/access control, and email/infrastructure in parallel
+5. **Deep dive** — 2 additional agents examined data flow edge cases (status transitions, account deletion, organizer race conditions, extension limits) and client-side security (React components, scripts, DOM manipulation)
