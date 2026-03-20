@@ -403,3 +403,77 @@ test.describe("Security: Security Headers", () => {
     );
   });
 });
+
+test.describe("Security: Auth Flow Edge Cases", () => {
+  test("GET /api/auth/session returns null when unauthenticated", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/auth/session");
+    expect(response.status()).toBe(200);
+    const body = await response.text();
+    expect(body).toBe("null");
+  });
+
+  test("POST /api/auth/signin/resend without CSRF returns 403", async ({
+    request,
+  }) => {
+    const response = await request.post("/api/auth/signin/resend", {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      data: "email=test@test.com",
+    });
+    // Auth.js CSRF protection blocks requests without valid CSRF cookie
+    expect([403, 400]).toContain(response.status());
+  });
+
+  test("GET /api/auth/callback/resend with fake token returns error", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/api/auth/callback/resend?token=fake&email=test@test.com"
+    );
+    // Should not succeed — invalid magic link token
+    expect(response.status()).not.toBe(200);
+  });
+});
+
+test.describe("Security: Public API Scoping", () => {
+  test("GET /api/needs returns only public fields", async ({ request }) => {
+    const response = await request.get("/api/needs");
+    expect(response.status()).toBe(200);
+    const needs = await response.json();
+    if (needs.length > 0) {
+      const need = needs[0];
+      // Must have public fields
+      expect(need).toHaveProperty("id");
+      expect(need).toHaveProperty("title");
+      expect(need).toHaveProperty("orgName");
+      expect(need).toHaveProperty("categoryTag");
+      // Must NOT have private fields
+      expect(need).not.toHaveProperty("orgId");
+      expect(need).not.toHaveProperty("donorEmail");
+      expect(need).not.toHaveProperty("shippingAddress");
+      expect(need).not.toHaveProperty("continuedFromId");
+      expect(need).not.toHaveProperty("suggestedText");
+      expect(need).not.toHaveProperty("allDeliveredAt");
+    }
+  });
+});
+
+test.describe("Security: Content-Type Handling", () => {
+  test("POST /api/pledges with JSON content-type returns 400", async ({
+    request,
+  }) => {
+    const response = await request.post("/api/pledges", {
+      headers: {
+        Origin: BASE_URL,
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({
+        needId: "test",
+        donorEmail: "test@test.com",
+        description: "JSON confusion test",
+      }),
+    });
+    expect(response.status()).toBe(400);
+  });
+});
