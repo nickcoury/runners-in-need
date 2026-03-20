@@ -286,6 +286,112 @@ test.describe("Security: Open Redirect Prevention", () => {
   });
 });
 
+test.describe("Security: Token Endpoint Protection", () => {
+  test("GET /api/needs/fakeid/extend without token returns 400", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/needs/fakeid/extend");
+    expect(response.status()).toBe(400);
+  });
+
+  test("GET /api/needs/fakeid/extend with invalid token returns 403", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/api/needs/fakeid/extend?token=1234567890.deadbeef"
+    );
+    expect(response.status()).toBe(403);
+  });
+
+  test("GET /api/needs/fakeid/status without action or token returns 400", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/needs/fakeid/status");
+    expect(response.status()).toBe(400);
+  });
+
+  test("GET /api/needs/fakeid/status with invalid action returns 400", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/api/needs/fakeid/status?action=drop_tables&token=fake"
+    );
+    expect(response.status()).toBe(400);
+  });
+
+  test("GET /api/needs/fakeid/status with invalid token returns 403", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/api/needs/fakeid/status?action=fulfilled&token=1234567890.deadbeef"
+    );
+    expect(response.status()).toBe(403);
+  });
+
+  test("Token endpoints are not gated by session auth", async ({
+    request,
+  }) => {
+    // These should NOT return 401 (middleware blocks)
+    // They should return 400/403 (endpoint-level validation)
+    const extendResponse = await request.get("/api/needs/test/extend?token=x");
+    expect(extendResponse.status()).not.toBe(401);
+
+    const statusResponse = await request.get(
+      "/api/needs/test/status?action=fulfilled&token=x"
+    );
+    expect(statusResponse.status()).not.toBe(401);
+  });
+
+  test("Token endpoint regex does not match nested paths", async ({
+    request,
+  }) => {
+    // /api/needs/id/extend/extra should NOT be whitelisted
+    const response = await request.get(
+      "/api/needs/test/extend/extra?token=x"
+    );
+    // Should hit regular auth middleware → 401
+    expect(response.status()).toBe(401);
+  });
+});
+
+test.describe("Security: HTTP Methods", () => {
+  test("DELETE on GET-only endpoint returns appropriate error", async ({
+    request,
+  }) => {
+    const response = await request.delete("/api/needs", {
+      headers: { Origin: BASE_URL },
+    });
+    // Should be 401 (auth required) or 405 (method not allowed)
+    expect([401, 404, 405]).toContain(response.status());
+  });
+
+  test("PUT on POST-only endpoint returns appropriate error", async ({
+    request,
+  }) => {
+    const response = await request.put("/api/pledges", {
+      headers: { Origin: BASE_URL },
+    });
+    expect([401, 404, 405]).toContain(response.status());
+  });
+});
+
+test.describe("Security: Parameter Injection", () => {
+  test("POST /api/pledges with null bytes in needId is handled safely", async ({
+    request,
+  }) => {
+    const response = await request.post("/api/pledges", {
+      headers: { Origin: BASE_URL },
+      multipart: {
+        needId: "test\x00admin",
+        donorEmail: "test@example.com",
+        description: "Testing null byte injection",
+      },
+    });
+    // Should fail validation, not crash
+    expect([400, 403, 404]).toContain(response.status());
+  });
+});
+
 test.describe("Security: Security Headers", () => {
   test("responses include security headers", async ({ request }) => {
     const response = await request.get("/about");

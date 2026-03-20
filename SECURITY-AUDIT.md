@@ -44,6 +44,7 @@ if (!secret) throw new Error("AUTH_SECRET is required");
 The in-memory rate limiter was correctly removed (stateless Workers, it didn't work). Nothing replaced it.
 
 **Attack scenarios:**
+- **Magic link email abuse** (highest impact): The signin page has no Turnstile/CAPTCHA. An attacker can fetch a CSRF token from `/api/auth/csrf`, then POST to `/api/auth/signin/resend` with any email address. This sends magic link emails to arbitrary addresses — burning Resend quota and using the site as a spam relay. No per-IP or per-email rate limiting.
 - Pledge spam: flood an organizer's dashboard with thousands of fake pledges
 - Message spam: flood pledge message threads
 - Token brute-force: action tokens include a timestamp prefix, reducing search space
@@ -387,8 +388,9 @@ These areas were specifically tested and found to be properly secured:
 12. **S6:** Investigate nonce-based CSP (Astro limitation)
 13. **S15:** Add UNIQUE constraint on `needs.continuedFromId` to prevent TOCTOU race
 
-**P3 — Won't fix (accepted risk):**
-14. **S11:** LLM prompt injection — human review mitigates, no data exfiltration risk
+**P3 — Nice to have:**
+14. Add `.github/dependabot.yml` for automated dependency security patches
+15. **S11:** LLM prompt injection — won't fix (human review mitigates, no data exfiltration risk)
 
 **Already fixed in this audit:**
 - ~~**S1:** Remove dev-secret fallback~~ ✅ (78f6c61)
@@ -411,6 +413,9 @@ These areas were specifically tested and found to be properly secured:
 6. **Dashboard & page review** — verified data scoping on dashboard, admin, org profile, and need detail pages
 7. **Test coverage gap analysis** — reviewed all 78 e2e tests for security coverage
 8. **Extended audit (phase 2)** — 3 parallel agents reviewed Astro Actions, React component XSS, and DB schema/data exposure. Additional manual black-box tests: path traversal, parameter pollution, null byte injection, HTTP verb tampering, cache poisoning, CORS, request smuggling, Host header injection, config file exposure, source map exposure, Astro island prop inspection
+9. **Astro page review** — agent reviewed all 21 .astro files for auth gaps, data leakage, and parameter validation. All pages correctly enforce auth and scope data.
+10. **Supply chain audit** — reviewed 16 production deps (560 total packages), all SHA-512 verified, no suspicious lifecycle scripts, no custom registries, proper secret management
+11. **DNS & infrastructure review** — checked for subdomain takeover risks, source map exposure, directory listing, cache poisoning vectors
 
 ---
 
