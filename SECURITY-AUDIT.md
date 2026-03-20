@@ -11,7 +11,7 @@
 
 The application has **strong security fundamentals**: parameterized queries via Drizzle ORM (no SQL injection), consistent HTML escaping at the rendering layer (Astro auto-escape, React JSX, `escapeHtml()` in emails), robust CSRF protection (Origin header + Auth.js double-submit cookies), and defense-in-depth authorization checks at both middleware and handler levels. No critical vulnerabilities were found that would allow data theft, account takeover, or privilege escalation.
 
-18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 48+ areas verified secure. 80+ black-box production tests. 55 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
+18 findings total, **8 fixed during the audit** + Turnstile partial mitigation on S2, dependency vulnerabilities patched, security.txt added. 49 areas verified secure. 100 black-box production tests. 56 adversarial e2e tests added. The main remaining gaps are around **defense-in-depth hardening**: rate limiting (needs Cloudflare config), action token replayability, and optional hardening like re-auth before account deletion.
 
 ### Realistic Threat Assessment
 
@@ -501,6 +501,16 @@ These areas were specifically tested and found to be properly secured:
 | Dev environment auth | Protected routes redirect to signin (302), same as production |
 | Subdomain variations (api/admin/dev/staging) | Connection refused — no subdomain takeover risk |
 | `www.runnersinneed.com` | 200 — resolves to same site |
+| Turnstile on signin (deployed) | 403 "Verification required" when POST without cf-turnstile-response |
+| Google OAuth unaffected by Turnstile | Correctly redirects to Google, Turnstile only on magic link |
+| OAuth PKCE | `code_challenge` + `code_challenge_method=S256` present — prevents auth code interception |
+| OAuth error callback (invalid state) | 500 — Auth.js can't process without valid state cookie (expected) |
+| Cloudflare CDN caching | No `cf-cache-status` headers — Workers bypass CDN cache, no auth data leak risk |
+| Public API cache-control | `public, max-age=60` on /api/needs — appropriate for public data |
+| Protected endpoint caching | No explicit cache-control — default Cloudflare behavior (no caching for Workers) |
+| Cookie domain scope | `__Host-` prefix cookies have no Domain attribute (correct — bound to origin) |
+| Git history secret scan | No `.env`, API keys, or credentials ever committed to repo |
+| `.gitignore` coverage | Properly excludes `.env.*`, `*.pem`, node_modules |
 
 ---
 
@@ -578,4 +588,4 @@ The 78 e2e tests cover functional happy paths well but have **zero adversarial/s
 - **No boundary/fuzzing tests** — no extremely long strings, null bytes, or special characters
 - **No error response leak tests** — no test triggers a 500 to verify it doesn't leak internals
 
-**Mitigation:** 55 adversarial security tests in `tests/e2e/security.spec.ts` covering CSRF attacks, auth bypass on all protected endpoints (including admin), cron validation, XSS payloads, honeypot detection, boundary testing, data exposure verification, open redirect prevention, security headers, token endpoint validation (7 tests), HTTP method handling, null byte injection, parameter injection, email header injection, config/dotfile exposure (7 paths), session fixation, cookie attributes, auth provider exposure, malformed Astro Actions, and protected route access control (profile, dashboard, admin API). Remaining gaps: no IDOR tests (require authenticated sessions).
+**Mitigation:** 56 adversarial security tests in `tests/e2e/security.spec.ts` covering CSRF attacks, auth bypass on all protected endpoints (including admin), cron validation, XSS payloads, honeypot detection, boundary testing, data exposure verification, open redirect prevention, security headers, token endpoint validation (7 tests), HTTP method handling, null byte injection, parameter injection, email header injection, config/dotfile exposure (7 paths), session fixation, cookie attributes, auth provider exposure, malformed Astro Actions, and protected route access control (profile, dashboard, admin API). Remaining gaps: no IDOR tests (require authenticated sessions).
