@@ -310,3 +310,21 @@ These areas were specifically tested and found to be properly secured:
 3. **Black-box production testing** — tested 19 endpoints/pages against live site for data exposure, auth bypass, error handling, and sensitive file exposure
 4. **Agent-assisted deep analysis** — 3 specialized agents audited input validation, auth/session/access control, and email/infrastructure in parallel
 5. **Deep dive** — 2 additional agents examined data flow edge cases (status transitions, account deletion, organizer race conditions, extension limits) and client-side security (React components, scripts, DOM manipulation)
+6. **Dashboard & page review** — verified data scoping on dashboard, admin, org profile, and need detail pages
+7. **Test coverage gap analysis** — reviewed all 78 e2e tests for security coverage
+
+---
+
+## Test Coverage Gaps
+
+The 78 e2e tests cover functional happy paths well but have **zero adversarial/security tests**:
+
+- **No CSRF attack simulation** — CSRF tokens are checked for presence but no cross-origin POST is attempted
+- **No XSS payload tests** — no `<script>` tags, event handlers, or HTML injection in form inputs
+- **No IDOR tests** — no attempt to access another user's data by manipulating IDs
+- **No admin endpoint tests** — `/api/admin/approve-request` and `/api/admin/deny-request` have zero test coverage
+- **No cron endpoint tests** — `/api/cron/daily` with invalid/missing tokens never tested
+- **No boundary/fuzzing tests** — no extremely long strings, null bytes, or special characters
+- **No error response leak tests** — no test triggers a 500 to verify it doesn't leak internals
+
+These gaps don't indicate vulnerabilities (code review confirms the protections exist), but adversarial tests would prevent regressions.
