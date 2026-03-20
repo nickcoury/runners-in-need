@@ -1,4 +1,4 @@
-// Sign-in page: fetch CSRF token, populate hidden inputs, enable submit buttons
+// Sign-in page: fetch CSRF token, populate hidden inputs, enable submit buttons, init Turnstile
 
 fetch('/api/auth/csrf')
   .then(r => r.json())
@@ -8,3 +8,31 @@ fetch('/api/auth/csrf')
     document.querySelectorAll<HTMLButtonElement>('.signin-submit')
       .forEach(btn => { btn.disabled = false; });
   });
+
+// Turnstile bot prevention on magic link form
+const widget = document.getElementById('turnstile-widget');
+if (widget) {
+  const sitekey = widget.dataset.sitekey;
+  if (sitekey) {
+    const scriptId = 'cf-turnstile-script';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    const render = () => {
+      if (window.turnstile && widget) {
+        window.turnstile.render(widget, {
+          sitekey,
+          callback: (_token: string) => {
+            // Token is automatically added to form as cf-turnstile-response hidden input
+          },
+        });
+      }
+    };
+    window.onTurnstileLoad = render;
+    if (window.turnstile) render();
+  }
+}

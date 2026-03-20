@@ -2,8 +2,10 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+import { getEnv } from "../../lib/env";
 
 const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+const turnstileSiteKey = getEnv("TURNSTILE_SITE_KEY") || "";
 
 // Map callback URLs to contextual messages
 function getCallbackContext(url: string): string | null {
@@ -44,6 +46,9 @@ const callbackContext = getCallbackContext(callbackUrl);
           autocomplete="email"
           class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
         />
+        {turnstileSiteKey && (
+          <div id="turnstile-widget" data-sitekey={turnstileSiteKey} aria-label="Human verification"></div>
+        )}
         <button
           type="submit"
           disabled

@@ -90,6 +90,29 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
+  // Turnstile check on magic link signin (bot prevention for email spam)
+  if (pathname === "/api/auth/signin/resend" && method === "POST") {
+    const turnstileSecret = getEnv("TURNSTILE_SECRET_KEY");
+    if (turnstileSecret) {
+      const cloned = context.request.clone();
+      const body = await cloned.text();
+      const params = new URLSearchParams(body);
+      const token = params.get("cf-turnstile-response");
+      if (!token) {
+        return addSecurityHeaders(new Response("Verification required", { status: 403 }));
+      }
+      const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: turnstileSecret, response: token }),
+      });
+      const result = (await res.json()) as { success: boolean };
+      if (!result.success) {
+        return addSecurityHeaders(new Response("Verification failed", { status: 403 }));
+      }
+    }
+  }
+
   // Skip auth routes and public API endpoints
   // Token-based endpoints (extend, status) use HMAC tokens instead of sessions
   if (
