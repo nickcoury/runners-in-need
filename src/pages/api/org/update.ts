@@ -45,10 +45,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .set({
       name: sanitize(name),
       location: sanitizedLocation,
-      description: description ? sanitize(description) : null,
+      description: description ? sanitize(description) : "",
       latitude: coords?.latitude ?? null,
       longitude: coords?.longitude ?? null,
-      deliveryMethods: deliveryMethods.length > 0 ? JSON.stringify(deliveryMethods) : null,
+      deliveryMethods: deliveryMethods.length > 0 ? JSON.stringify(deliveryMethods) : '["shipping"]',
       deliveryInstructions: deliveryInstructions ? sanitize(deliveryInstructions) : null,
     })
     .where(eq(schema.organizations.id, orgId));

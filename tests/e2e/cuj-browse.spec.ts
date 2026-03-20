@@ -244,11 +244,9 @@ test.describe("CUJ-1: Anonymous Browsing", () => {
     await expect(locationBtn).toBeEnabled();
   });
 
-  test("/browse redirects to /", async ({ page }) => {
+  test("/browse returns 404 (merged into homepage)", async ({ page }) => {
     const response = await page.goto("/browse");
-    // After redirect, should be on the home page
-    expect(page.url()).not.toContain("/browse");
-    await expect(page.locator("h1").first()).toHaveText("Runners In Need");
+    expect(response?.status()).toBe(404);
   });
 
   test("clicking a category filter pill changes active state", async ({

@@ -7,10 +7,9 @@ test.describe("Smoke tests", () => {
     await expect(page.locator("body")).toBeVisible();
   });
 
-  test("/browse page renders", async ({ page }) => {
+  test("/browse returns 404 (merged into homepage)", async ({ page }) => {
     const response = await page.goto("/browse");
-    expect(response?.status()).toBe(200);
-    await expect(page.locator("body")).toBeVisible();
+    expect(response?.status()).toBe(404);
   });
 
   test("/about page renders", async ({ page }) => {

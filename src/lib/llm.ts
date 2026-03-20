@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { getEnv } from "./env";
 
 /**
@@ -17,20 +16,25 @@ export async function generateRemainingNeedText(
     return originalBody;
   }
 
-  const client = new Anthropic({ apiKey });
-
   const deliveredList = deliveredDescriptions
     .map((d, i) => `${i + 1}. ${d}`)
     .join("\n");
 
   try {
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: `You help manage a running gear donation platform. An organization posted a need for gear, and some pledges have been delivered. Generate updated text describing ONLY what is still needed.
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1024,
+        messages: [
+          {
+            role: "user",
+            content: `You help manage a running gear donation platform. An organization posted a need for gear, and some pledges have been delivered. Generate updated text describing ONLY what is still needed.
 
 Keep the same tone and format as the original. Do not add any commentary, preamble, or sign-off — just output the updated need text. If you can't determine what's remaining, return the original text unchanged.
 
@@ -41,12 +45,19 @@ DELIVERED PLEDGES:
 ${deliveredList}
 
 UPDATED NEED TEXT (what's still needed):`,
-        },
-      ],
+          },
+        ],
+      }),
     });
 
-    const block = message.content[0];
-    if (block.type === "text" && block.text.trim()) {
+    if (!res.ok) {
+      console.error("[llm] API returned", res.status, await res.text());
+      return originalBody;
+    }
+
+    const data = await res.json() as { content: Array<{ type: string; text: string }> };
+    const block = data.content[0];
+    if (block?.type === "text" && block.text.trim()) {
       return block.text.trim();
     }
 

@@ -13,7 +13,6 @@ export const GET: APIRoute = async () => {
   const baseUrl = "https://runnersinneed.com";
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "daily" },
-    { loc: "/browse", priority: "0.9", changefreq: "daily" },
     { loc: "/about", priority: "0.7", changefreq: "monthly" },
     { loc: "/why", priority: "0.7", changefreq: "monthly" },
     { loc: "/contact", priority: "0.5", changefreq: "monthly" },

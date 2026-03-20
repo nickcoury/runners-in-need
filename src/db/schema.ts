@@ -13,7 +13,7 @@ import { relations } from "drizzle-orm";
 // ============================================================
 
 export const users = sqliteTable("users", {
-  id: text("id").primaryKey(), // nanoid
+  id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
@@ -43,7 +43,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 export const organizations = sqliteTable("organizations", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"),
+  description: text("description").notNull().default(""),
   location: text("location").notNull(), // City, State (public)
   latitude: real("latitude"),
   longitude: real("longitude"),
@@ -52,7 +52,7 @@ export const organizations = sqliteTable("organizations", {
   showShippingAddress: integer("show_shipping_address", { mode: "boolean" })
     .notNull()
     .default(false),
-  deliveryMethods: text("delivery_methods"), // JSON array: ["shipping","drop_off","meetup","other"]
+  deliveryMethods: text("delivery_methods").notNull().default('["shipping"]'), // JSON array: ["shipping","drop_off","meetup","other"]
   deliveryInstructions: text("delivery_instructions"), // Free-form text
   verified: integer("verified", { mode: "boolean" }).notNull().default(false),
   pledgeDriveInterest: integer("pledge_drive_interest", { mode: "boolean" })

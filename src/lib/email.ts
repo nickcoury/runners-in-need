@@ -43,23 +43,29 @@ export async function sendEmail(
   to: string,
   subject: string,
   html: string
-): Promise<void> {
+): Promise<boolean> {
   const resend = getResend();
   if (!resend) {
     console.log(`[email] Resend not configured, skipping email to ${to}: ${subject}`);
-    return;
+    return false;
   }
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
       to,
       subject,
       html,
       text: htmlToText(html),
     });
+    if (error) {
+      console.error(`[email] FAILED to=${to} subject="${subject}" error=${JSON.stringify(error)}`);
+      return false;
+    }
+    return true;
   } catch (err) {
-    console.error(`[email] Failed to send email to ${to}:`, err);
+    console.error(`[email] FAILED to=${to} subject="${subject}"`, err);
+    return false;
   }
 }
 
