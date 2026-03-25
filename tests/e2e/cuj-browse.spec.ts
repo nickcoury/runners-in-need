@@ -13,7 +13,7 @@ async function waitForNeedsGrid(page: Page) {
 test.describe("CUJ-1: Anonymous Browsing", () => {
   test("home page loads with proper structure", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1").first()).toHaveText("Runners In Need");
+    await expect(page.locator("h1").first()).toHaveText("Give your extra running gear a second life.");
     await expect(page.locator("#search-input")).toBeVisible();
     await expect(page.locator("#category-filters")).toBeVisible();
 

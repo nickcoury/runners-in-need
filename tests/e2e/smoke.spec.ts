@@ -35,7 +35,7 @@ test.describe("Smoke tests", () => {
   });
 
   test("back-to-top button appears on scroll", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/terms");
     const btn = page.locator("#back-to-top");
     await expect(btn).toBeHidden();
     await page.evaluate(() => window.scrollTo(0, 500));

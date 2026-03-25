@@ -7,9 +7,10 @@ import type { DashboardPledge } from "./types";
 
 interface PledgesTabProps {
   pledges: DashboardPledge[];
+  userRole: string;
 }
 
-export default function PledgesTab({ pledges }: PledgesTabProps) {
+export default function PledgesTab({ pledges, userRole }: PledgesTabProps) {
   const [pledgeStatuses, setPledgeStatuses] = useState<Record<string, string>>(
     () => Object.fromEntries(pledges.map((p) => [p.id, p.status]))
   );
@@ -44,11 +45,16 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
   }
 
   const needIdsWithPledges = Object.keys(pledgesByNeed);
+  const isOrganizer = userRole === "organizer";
+  const heading = isOrganizer ? "Incoming Pledges" : "My Pledges";
+  const emptyText = isOrganizer
+    ? "No pledges yet. They'll appear here when donors respond to your needs."
+    : "You have not pledged any gear yet. Browse active needs to get started.";
 
   return (
     <div role="tabpanel" id="tabpanel-pledges" aria-labelledby="tab-pledges">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Incoming Pledges
+        {heading}
       </h2>
 
       {error && (
@@ -62,7 +68,7 @@ export default function PledgesTab({ pledges }: PledgesTabProps) {
 
       {needIdsWithPledges.length === 0 && (
         <div className="border rounded-lg p-8 text-center text-gray-500">
-          <p>No pledges yet. They'll appear here when donors respond to your needs.</p>
+          <p>{emptyText}</p>
         </div>
       )}
 

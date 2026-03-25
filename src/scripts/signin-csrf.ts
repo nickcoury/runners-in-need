@@ -1,12 +1,26 @@
 // Sign-in page: fetch CSRF token, populate hidden inputs, enable submit buttons, init Turnstile
 
+const signInButtons = () =>
+  document.querySelectorAll<HTMLButtonElement>('.signin-submit');
+
+function enableSignInButtons() {
+  signInButtons().forEach(btn => {
+    btn.disabled = false;
+  });
+}
+
 fetch('/api/auth/csrf')
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) throw new Error('csrf fetch failed');
+    return r.json();
+  })
   .then(data => {
     document.querySelectorAll<HTMLInputElement>('.signin-form input[name="csrfToken"]')
       .forEach(input => { input.value = data.csrfToken; });
-    document.querySelectorAll<HTMLButtonElement>('.signin-submit')
-      .forEach(btn => { btn.disabled = false; });
+    enableSignInButtons();
+  })
+  .catch(() => {
+    enableSignInButtons();
   });
 
 // Turnstile bot prevention on magic link form

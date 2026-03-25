@@ -113,7 +113,7 @@ export default function DashboardTabs({
       )}
 
       {active === "needs" && <NeedsTab needs={needs} />}
-      {active === "pledges" && <PledgesTab pledges={pledges} />}
+      {active === "pledges" && <PledgesTab pledges={pledges} userRole={userRole} />}
       {active === "account" && (
         <AccountTab
           orgEmail={orgEmail}

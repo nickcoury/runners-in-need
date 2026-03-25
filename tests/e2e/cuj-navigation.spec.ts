@@ -198,7 +198,7 @@ test.describe("Navigation & Layout", () => {
     // Click site name to go home
     await page.locator("header").first().locator("a[href='/']").click();
     await page.waitForURL(/\/$/);
-    await expect(page.locator("h1").first()).toHaveText("Runners In Need");
+    await expect(page.locator("h1").first()).toHaveText("Give your extra running gear a second life.");
   });
 
   test("footer is visible on all main pages", async ({ page }) => {

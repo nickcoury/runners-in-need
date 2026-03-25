@@ -15,7 +15,6 @@ export const GET: APIRoute = async () => {
     // DB unreachable
   }
 
-  const status = dbOk ? 200 : 503;
   return new Response(
     JSON.stringify({
       status: dbOk ? "ok" : "degraded",
@@ -24,7 +23,7 @@ export const GET: APIRoute = async () => {
       timestamp: new Date().toISOString(),
     }),
     {
-      status,
+      status: 200,
       headers: { "Content-Type": "application/json" },
     }
   );

@@ -1,208 +1,345 @@
-# Runners In Need - Product Requirements
+# Runners In Need - Simple PRD
 
-## Vision
+## Product Summary
 
-A two-sided platform connecting runners who have extra gear with organizations serving runners in need. Inspired by organizations that collect race medals for kids' exercise programs and by direct shoe donations to underprivileged schools.
+Runners In Need is a two-sided donation platform for running gear.
 
-## User Types
+It connects:
 
-### Organizers (Demand Side)
-- High school coaches, volunteer organizations, community running programs
-- Post specific gear needs on behalf of their runners
-- Manage incoming pledges, confirm deliveries
+- Donors who have usable shoes, apparel, and accessories
+- Verified organizations that support runners and need gear for their athletes or members
 
-### Donors (Supply Side)
-- Individual runners, run clubs, corporate groups
-- Browse needs by location and category
-- Pledge gear and coordinate delivery
-- Can pledge anonymously (no account required, just a contact email)
-- Authenticated donors get pledges pre-filled with their session info
+The product is built around direct matching. Organizations post specific needs. Donors browse those needs, pledge what they can provide, and coordinate delivery with the organization.
+
+## Problem
+
+Running is relatively low-cost compared with many sports, but gear is still a real barrier. Shoes, warm layers, sports bras, socks, spikes, and race gear are expensive. At the same time, many runners accumulate usable gear they no longer need.
+
+Today, those two sides are poorly connected:
+
+- Organizations usually ask for help through generic fundraising or offline outreach
+- Donors often have gear to give but do not know who needs it
+- Existing donation programs tend to be bulk, indirect, or not running-specific
+
+## Product Goal
+
+Make it easy to move usable running gear from people who have it to programs that need it, with enough trust, specificity, and communication to make fulfillment realistic.
+
+## Users
+
+### Donors
+
+- Anonymous donors can pledge with an email address only
+- Signed-in donors can manage pledges in a dashboard
+- Typical donors are individual runners, run clubs, stores, race communities, and supporters
+
+### Organizers
+
+- Verified organizers post and manage needs for a school, nonprofit, or community running program
+- Organizers manage delivery settings, shipping options, and incoming pledges
 
 ### Admins
-- Approve organizer applications via /admin/requests
-- Moderate content
-- Manage platform settings
 
-## Core Features
+- Review organizer applications
+- Review pledge drive submissions
+- Moderate access to the supply side of the marketplace
 
-### Need Posting
-- Free-form text body with template buttons (shoes, apparel, etc.) that inject example formatting
-- Category tag per entry: shoes, apparel, accessories, other
-- "Extras welcome" toggle (are additional items beyond the specific request useful?)
-- Multiple entries per organization, each with its own expiration
-- Location inherited from the organizer's organization record
-- Optional shipping address (only visible to donors with accepted pledges)
+## Core Product Principles
 
-### Need Editing & Deletion
-- Organizers can edit their needs at /needs/[id]/edit
-- Deletion is a soft-delete: sets the need status to `expired` rather than removing the record
+- Specific requests beat generic fundraising
+- Public browsing should be easy and fast
+- Donating should not require account creation
+- Trust is enforced on the organizer side, not the donor side
+- Coordination happens directly between donor and organizer
+- The UI should be simple, legible, and operationally clear
 
-### Expiration & Freshness
-- Maximum 6-month expiration on all needs
-- One-click refresh via email (extends by original duration, capped at 6 months from now)
-- Reminder emails at 1 month before expiry, 2 weeks before, and on expiration day
-- Expired needs auto-archive (not deleted)
+## Main User-Facing Areas
 
-### Fulfillment Flow
-1. Donor browses needs and makes a **Pledge** (what they plan to donate)
-2. Pledge lifecycle: `collecting` → `ready_to_deliver` → `delivered`
-3. Organizer confirms delivery to close a pledge
-4. **Partial fulfillment**: Original need is marked `partially_fulfilled`, and an LLM auto-generates a new "remaining need" for the organizer to approve with one click
-5. The original need, fulfillment pledge, and new remaining need are linked as a chain
-6. Stale pledges (no update in 30 days) can be auto-expired or withdrawn by the organizer
+### 1. Home / Browse
+
+The homepage is the browse experience.
+
+It supports:
+
+- Search by keyword
+- Category filtering
+- List and map views
+- Distance sorting using browser geolocation or Cloudflare location headers
+- Mobile and desktop browse toggles
+
+Each need card shows:
+
+- Category
+- Title
+- Organization
+- Location
+- Short description
+- Pledge count
+- Time remaining
+- Link to the need detail page
+
+### 2. Need Detail
+
+Each need detail page is the core conversion page for donors.
+
+It includes:
+
+- Full need description
+- Organization name and location
+- Delivery options and optional shipping instructions
+- Existing pledges
+- In-thread messages when the viewer is allowed to participate
+- Pledge form
+- Copy-link sharing action
+
+### 3. Authentication
+
+Users can sign in with:
+
+- Email magic link
+- Google OAuth
+
+Authentication is used to:
+
+- Access the dashboard and profile
+- Post needs
+- Apply to become an organizer
+- Participate in certain logged-in workflows
+
+Donors are not required to sign in before making a pledge.
+
+### 4. Become an Organizer
+
+Signed-in users can apply to become organizers.
+
+The form collects:
+
+- Organization name
+- Organization description
+- Optional public URL
+
+Applications are reviewed by admins. Approved users are promoted to organizer and receive an organization record.
+
+### 5. Post a Need
+
+Verified organizers can create needs.
+
+A need includes:
+
+- Category
+- Title
+- Description
+- Extras welcome toggle
+- Expiration window
+- Delivery methods and instructions
+
+Needs inherit the organization’s location and map coordinates.
+
+### 6. Dashboard
+
+The dashboard is role-aware.
+
+Organizer dashboard:
+
+- My Needs
+- Incoming Pledges
+- Account
+
+Donor dashboard:
+
+- My Pledges
+- Account
+
+Organizers use the dashboard to manage needs and pledge status.
+Donors use it to review the pledges associated with their account.
+
+### 7. Profile
+
+Signed-in users can:
+
+- Update their display name
+- View personal stats
+- Sign out
+- Delete their account
+
+Organizers can also manage public organization details from profile/account surfaces.
+
+### 8. Organization Profile
+
+Each organization has a public page showing:
+
+- Name
+- Verification state
+- Location
+- Description
+- Active needs
+
+This page exists to build donor trust and help repeat giving.
+
+### 9. Pledge Drives
+
+The product includes a pledge drive layer for larger collection events.
+
+Users can:
+
+- Browse upcoming and past pledge drives
+- Submit a pledge drive proposal when signed in
+
+Admins can review all submitted drives.
+Organizations can opt into receiving pledge-drive donations.
+
+### 10. About / Why / Contact / Legal / Error Pages
+
+These support trust and comprehension:
+
+- `/about` explains the product and routes users to their next action
+- `/why` explains the market need and product rationale
+- `/contact`, `/terms`, and `/privacy` support legitimacy and operations
+- `/404` and `/500` provide branded recovery states
+
+## Important Behaviors
 
 ### Need Lifecycle
-```
-active → partially_fulfilled → (new remaining need created) → fulfilled
-active → fulfilled (if fully delivered)
-active → expired (if not refreshed before expiration)
-active → expired (soft-delete by organizer)
-```
 
-### Browse & Search
-- The home page IS the browse page (no separate /browse route)
-- Map view with toggle to list/grid view (Leaflet + OpenStreetMap, free)
-- Text search by location and keyword
-- Filter by category tag
-- Sort by distance, recency, urgency
+Needs move through these states:
 
-### Communication
-- In-pledge messaging threads per need (via /api/messages)
-- Messages visible to org members and the pledge donor on the /needs/[id] page
-- Email notifications sent on new messages
-- Organizer contact info stays private
+- `active`
+- `partially_fulfilled`
+- `fulfilled`
+- `expired`
 
-### Address & Logistics
-- Location (required, public): City/state level for map and search
-- Shipping address (optional, opt-in): Full address revealed only to accepted pledges
-- Guidance text at appropriate flow points for best practices (shipping, drop-off, public meetups)
-- Platform does not handle shipping directly — parties coordinate themselves
+Important rules:
 
-## Authentication & Trust
+- Needs expire automatically
+- Organizers can edit needs
+- Soft deletion marks a need as expired instead of removing it
+- Expired or fulfilled needs no longer accept new pledges
 
-### Auth Implementation
-- Auth.js (NextAuth v5) with two providers:
-  - **Resend magic links** — passwordless email sign-in
-  - **Google OAuth** — one-click social sign-in
-- CSRF protection implemented (token fetched client-side before auth requests)
-- New users created with default role `donor`
-- Session-based auth with redirect to intended page after sign-in
+### Pledge Lifecycle
 
-### Organizer Signup
-- Become-organizer application flow at /become-organizer
-- Form collects: organization name, description, optional website URL
-- Creates a pending `organizerRequest` record for admin review
-- Admin reviews and approves at /admin/requests
-- On approval: org created, user promoted to `organizer` role
-- Email and validation info are private (admin-only)
-- No .edu email requirement (too restrictive for community orgs)
+Pledges move through these states:
 
-### Donor Signup
-- Lightweight: sign in via magic link or Google OAuth
-- Option for anonymous pledges with just a contact email (no account required)
+- `collecting`
+- `ready_to_deliver`
+- `delivered`
+- `withdrawn`
 
-### Spam Prevention (layered)
-1. Cloudflare Turnstile (invisible CAPTCHA) on pledge forms (when configured)
-2. Email verification built into auth flow (magic links are inherently verified)
-3. Organizer approval queue (manual admin review)
-4. CSRF token validation on auth endpoints
-5. Honeypot fields + rate limiting on forms
+Important rules:
+
+- Anonymous donors can create pledges
+- Signed-in donors attach a `donorId` to their pledge
+- Organizers manage operational status changes
+- Donors receive status emails when the pledge changes
+
+### Partial Fulfillment
+
+When a pledge is delivered but a need is not fully resolved:
+
+- The original need can move to `partially_fulfilled`
+- The system can generate suggested “remaining need” text
+- Organizers can continue the request instead of starting from scratch
+
+This is one of the product’s most important workflow details because it keeps real-world fulfillment messy but manageable.
+
+### Messaging
+
+Messaging is attached to pledges inside a need.
+
+Allowed participants:
+
+- Organization members for that need
+- The authenticated donor tied to the pledge
+
+Anonymous donors do not participate in in-app messaging threads. Their follow-up path is email-based.
+
+### Delivery and Shipping
+
+Organizations can configure how donations should be handed off:
+
+- Shipping
+- Drop-off
+- Meet-up
+- Other custom instructions
+
+Optional shipping addresses can be stored and shown where appropriate.
+
+### Geographic Relevance
+
+Location matters in browse and fulfillment.
+
+The product supports:
+
+- Public city/state display
+- Stored coordinates for map placement
+- Distance-based sorting
+- Automatic re-geocoding when organization location changes
+
+### Reminders and Automation
+
+A daily cron endpoint handles operational automation:
+
+- Need expiry reminders
+- Automatic expiration of overdue needs
+- Withdrawal of stale pledges
+- Fulfillment reminders
+- Auto-closing needs that remain fully delivered for a long period
+
+## Trust, Safety, and Access Rules
 
 ### Roles
-Simple enum: `donor | organizer | admin`
-- Enforced via middleware on API routes
-- No full RBAC needed for 3 roles
 
-## UI Philosophy
-- "Craigslist spirit": functional, minimal, fast, straightforward
-- No fancy animations or heavy UI components
-- Key pages: Home (browse + search + map), Dashboard, Profile, About
-- Dashboard has tabs: My Needs, Incoming Pledges, Account
-- Profile page with stats and edit capabilities
-- Mobile-friendly but not mobile-first
+- `donor`
+- `organizer`
+- `admin`
 
-## Hosting
-- Cloudflare Workers (via next-on-pages or OpenNext)
-- D1 database (SQLite-compatible)
-- Resend for transactional email
+### Access Model
 
-## LLM-Assisted Features
-- Auto-generate remaining need text after partial fulfillment
-- Claude API call on server side (negligible cost at low volume)
-- Fallback: copy original text for manual editing if pledge description is vague
+- Public users can browse public content
+- Auth is required for dashboard, profile, posting, admin, and organizer application flows
+- Admin-only pages are protected in middleware and again at page level
 
-## Implementation Status
+### Anti-Abuse
 
-All features described in this document are implemented and live as of 2026-03-14.
+The system uses multiple layers:
 
-## Critical User Journeys (CUJs)
+- Organizer approval queue
+- CSRF protection
+- Honeypot fields
+- Turnstile on anonymous pledge/auth flows when configured
+- Verified email identity for authenticated users
 
-### CUJ-1: Anonymous Visitor Browses Needs
-1. Visitor lands on the home page — sees search bar, category filters, and a grid of need cards.
-2. Searches by keyword or filters by category — cards update to match.
-3. Toggles between map view and list/grid view.
-4. Clicks a need card — navigates to /needs/[id] with full detail, existing pledges, and pledge form.
+## Non-Goals
 
-### CUJ-2: Anonymous Donor Makes a Pledge
-1. On /needs/[id], visitor fills out the pledge form: email (required), name (optional), description of what they will donate (required).
-2. Cloudflare Turnstile verification runs if configured.
-3. Pledge is created with status `collecting`.
-4. Org members are notified via email that a new pledge was made.
+The product does not:
 
-### CUJ-3: User Signs Up / Signs In
-1. User navigates to /auth/signin (or is redirected there when accessing a protected page).
-2. Chooses magic link (enters email, receives link via Resend) or Google OAuth.
-3. CSRF token is fetched client-side before the auth request is submitted.
-4. After authentication, user is redirected to their intended page (or home).
-5. New users are created with the default role `donor`.
+- Handle payments
+- Handle shipping transactions or labels
+- Run a generalized marketplace for all sports
+- Replace local organizer judgment about what is actually useful
 
-### CUJ-4: Authenticated Donor Makes a Pledge
-1. Same flow as CUJ-2, but the pledge form pre-fills email and name from the user's session.
-2. `donorId` is set from the session so pledges appear in the donor's dashboard.
+## Success Criteria
 
-### CUJ-5: Become an Organizer
-1. Authenticated user navigates to /become-organizer.
-2. Fills out application form: organization name, description, and optional website URL.
-3. A pending `organizerRequest` record is created.
-4. User sees confirmation that their application is under review.
-5. If denied, the applicant can reapply after a 12-month cooldown period.
+The product is successful when:
 
-### CUJ-6: Admin Reviews Organizer Requests
-1. Admin navigates to /admin/requests — sees a list of pending organizer applications.
-2. Reviews each request and chooses to approve or deny.
-3. On approval: an organization record is created, and the applicant's role is promoted to `organizer`.
-4. Newly created orgs get location "TBD" with a dashboard banner prompting the organizer to update it.
-5. `reviewedBy` is set on the request record for audit trail.
-6. Notification email is sent to the applicant about the decision.
+- Donors can understand the mission quickly
+- Public browsing feels active and trustworthy
+- Anonymous pledging is low-friction
+- Organizers can post specific needs and actually fulfill them
+- The system supports repeat use without creating operational chaos
 
-### CUJ-7: Organizer Posts a Need
-1. Organizer navigates to /post.
-2. Fills out the NeedForm: selects category, enters title, writes body text, sets "extras welcome" toggle, and chooses an expiration date.
-3. Need is created with the org's location and coordinates.
-4. Redirected to /needs/[newId] to see the published need.
+## Current Product Shape
 
-### CUJ-8: Organizer Manages Needs (Dashboard)
-1. Organizer navigates to /dashboard — My Needs tab shows a card grid of their needs.
-2. Clicks edit on a need — navigates to /needs/[id]/edit where they can update details.
-3. Clicks delete on a need — soft-delete sets the need status to `expired`.
+As implemented today, Runners In Need is a functioning operational marketplace with:
 
-### CUJ-9: Organizer Manages Pledges
-1. Organizer navigates to /dashboard — Incoming Pledges tab shows pledges against their needs.
-2. Updates pledge status through the lifecycle: `collecting` → `ready_to_deliver` → `delivered`.
-3. When all pledges are delivered, the parent need's status transitions to `fulfilled`.
+- Public browse, map, and search
+- Anonymous and authenticated pledging
+- Organizer verification
+- Need posting and editing
+- Pledge messaging and status tracking
+- Organizer and donor dashboards
+- Public organization profiles
+- Pledge drives
+- Admin review tools
+- Automated lifecycle reminders
 
-### CUJ-10: In-Pledge Messaging
-1. On /needs/[id], a message form appears for org members or the pledge donor.
-2. Messages are sent via /api/messages and stored as a thread.
-3. Email notifications are sent to the other party on new messages.
-4. Anonymous donors (no account) cannot participate in messaging threads — they coordinate via email.
-
-### CUJ-11: User Profile Management
-1. User navigates to /profile — sees their info and activity stats.
-2. Can edit their display name.
-3. Organizers can also edit their organization's details.
-4. Updating an org's location text automatically re-geocodes coordinates.
-
-## Known Gaps
-
-No open gaps. All 13 gaps identified during initial development (GAP-1 through GAP-13) were resolved as of 2026-03-14.
+This is not a concept doc. It describes the product that currently exists and the behaviors that matter most to preserve as it evolves.

@@ -8,37 +8,46 @@ import { jsonError, requireOrganizer } from "../../lib/api";
 import { VALID_CATEGORIES, VALID_DELIVERY_METHODS } from "../../lib/constants";
 
 export const GET: APIRoute = async () => {
-  const db = getDb();
-  const needsWithOrg = await db.query.needs.findMany({
-    where: inArray(schema.needs.status, ["active", "partially_fulfilled"]),
-    with: {
-      organization: { columns: { name: true } },
-      pledges: { columns: { id: true } },
-    },
-    orderBy: [desc(schema.needs.createdAt)],
-  });
+  try {
+    const db = getDb();
+    const needsWithOrg = await db.query.needs.findMany({
+      where: inArray(schema.needs.status, ["active", "partially_fulfilled"]),
+      with: {
+        organization: { columns: { name: true } },
+        pledges: { columns: { id: true } },
+      },
+      orderBy: [desc(schema.needs.createdAt)],
+    });
 
-  const allNeeds = needsWithOrg.map((n) => ({
-    id: n.id,
-    orgId: n.orgId,
-    title: n.title,
-    categoryTag: n.categoryTag,
-    body: n.body,
-    orgName: n.organization?.name ?? "Unknown Organization",
-    location: n.location,
-    lat: n.latitude,
-    lng: n.longitude,
-    extrasWelcome: n.extrasWelcome,
-    expiresAt: n.expiresAt.toISOString(),
-    pledgeCount: n.pledges.length,
-  }));
+    const allNeeds = needsWithOrg.map((n) => ({
+      id: n.id,
+      orgId: n.orgId,
+      title: n.title,
+      categoryTag: n.categoryTag,
+      body: n.body,
+      orgName: n.organization?.name ?? "Unknown Organization",
+      location: n.location,
+      lat: n.latitude,
+      lng: n.longitude,
+      extrasWelcome: n.extrasWelcome,
+      expiresAt: n.expiresAt.toISOString(),
+      pledgeCount: n.pledges.length,
+    }));
 
-  return new Response(JSON.stringify(allNeeds), {
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=60",
-    },
-  });
+    return new Response(JSON.stringify(allNeeds), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=60",
+      },
+    });
+  } catch {
+    return new Response(JSON.stringify([]), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
 };
 
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
