@@ -6,7 +6,7 @@ export type CategoryTag = (typeof VALID_CATEGORIES)[number];
 export const categoryStyles: Record<string, string> = {
   shoes: "bg-[#2D4A2D] text-white",
   apparel: "bg-blue-600 text-white",
-  accessories: "bg-amber-600 text-white",
+  accessories: "bg-amber-700 text-white",
   other: "bg-gray-500 text-white",
 };
 

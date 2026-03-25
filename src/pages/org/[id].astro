@@ -33,7 +33,7 @@ const msPerDay = 1000 * 60 * 60 * 24;
 const needsWithComputed = activeNeeds.map((n) => {
   const daysLeft = Math.ceil((n.expiresAt.getTime() - Date.now()) / msPerDay);
   const expiryText = daysLeft <= 0 ? "Expired" : `${daysLeft} days left`;
-  const expiryClass = daysLeft <= 14 && daysLeft > 0 ? "text-amber-600 font-medium" : daysLeft <= 0 ? "text-red-600 font-medium" : "text-gray-500";
+  const expiryClass = daysLeft <= 14 && daysLeft > 0 ? "text-amber-700 font-medium" : daysLeft <= 0 ? "text-red-600 font-medium" : "text-gray-500";
   return {
     id: n.id,
     title: n.title,

@@ -136,10 +136,11 @@ const categoryBtns = document.querySelectorAll<HTMLButtonElement>('.category-btn
 let needCards: NodeListOf<HTMLElement> = document.querySelectorAll<HTMLElement>('.need-card');
 let activeCategory = 'all';
 
-const noResults = document.getElementById('no-results');
+let noResults = document.getElementById('no-results');
 
 function refreshCardRefs() {
   needCards = document.querySelectorAll<HTMLElement>('.need-card');
+  noResults = document.getElementById('no-results');
 }
 
 function filterCards() {

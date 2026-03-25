@@ -20,6 +20,7 @@ export const GET: APIRoute = async () => {
 
   const allNeeds = needsWithOrg.map((n) => ({
     id: n.id,
+    orgId: n.orgId,
     title: n.title,
     categoryTag: n.categoryTag,
     body: n.body,

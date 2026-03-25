@@ -73,7 +73,7 @@ const daysUntilExpiry = Math.ceil((need.expiresAt.getTime() - Date.now()) / msPe
 const isExpiringSoon = daysUntilExpiry <= 14 && daysUntilExpiry > 0;
 const isExpired = daysUntilExpiry <= 0;
 const expiryText = isExpired ? "Expired" : daysUntilExpiry === 1 ? "1 day left" : `${daysUntilExpiry} days left`;
-const expiryClass = isExpiringSoon ? "text-amber-600 font-medium" : isExpired ? "text-red-600 font-medium" : "text-gray-500";
+const expiryClass = isExpiringSoon ? "text-amber-700 font-medium" : isExpired ? "text-red-600 font-medium" : "text-gray-500";
 
 const hasContinuation = need.continuedFromId !== null;
 const continuationUrl = hasContinuation ? `/needs/${need.continuedFromId}` : "";
@@ -162,8 +162,19 @@ const pledgesWithComputed = pledges.map((p) => {
         </span>
       </div>
 
-      {/* Title */}
-      <h1 class="text-2xl font-bold text-gray-900 mb-2 break-words">{need.title}</h1>
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-bold text-gray-900 break-words">{need.title}</h1>
+        <button
+          id="copy-need-link"
+          type="button"
+          class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-[#2D4A2D] hover:text-[#2D4A2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2"
+          aria-describedby="copy-need-link-status"
+        >
+          <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M10 18h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          Copy link
+        </button>
+      </div>
+      <p id="copy-need-link-status" class="sr-only" aria-live="polite"></p>
 
       {/* Org + location + date */}
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4" data-testid="need-meta-row">
@@ -336,4 +347,30 @@ const pledgesWithComputed = pledges.map((p) => {
       )}
     </div>
   </div>
+
+  <script>
+    const copyButton = document.getElementById('copy-need-link');
+    const copyStatus = document.getElementById('copy-need-link-status');
+
+    async function copyNeedLink() {
+      const url = window.location.href;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const input = document.createElement('input');
+          input.value = url;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          input.remove();
+        }
+        if (copyStatus) copyStatus.textContent = 'Link copied to clipboard.';
+      } catch {
+        if (copyStatus) copyStatus.textContent = 'Unable to copy link.';
+      }
+    }
+
+    copyButton?.addEventListener('click', copyNeedLink);
+  </script>
 </Layout>

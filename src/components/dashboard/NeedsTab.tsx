@@ -68,7 +68,7 @@ export default function NeedsTab({ needs }: NeedsTabProps) {
               <span
                 className={`text-xs ${
                   need.daysLeft <= 14 && need.status === "active"
-                    ? "text-amber-600 font-medium"
+                    ? "text-amber-700 font-medium"
                     : "text-gray-500"
                 }`}
               >

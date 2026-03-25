@@ -92,10 +92,23 @@ export default function PledgeForm({
             )}
           </div>
         )}
+        {!userEmail && (
+          <div className="mt-3 rounded-lg border border-green-200 bg-white/70 px-3 py-2 text-green-900">
+            <p className="font-medium">We will follow up by email.</p>
+            <p className="mt-1 text-sm text-green-800">
+              The organizer can respond using the email address you entered. Create an account if you want your future pledges and messages in one dashboard.
+            </p>
+          </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-3">
           {userEmail && (
             <a href="/dashboard" className="font-medium text-green-700 hover:text-green-900 focus-visible:text-green-900 focus-visible:outline-none underline">
               View your pledges &rarr;
+            </a>
+          )}
+          {!userEmail && (
+            <a href="/auth/signin" className="font-medium text-green-700 hover:text-green-900 focus-visible:text-green-900 focus-visible:outline-none underline">
+              Create an account to track pledges &rarr;
             </a>
           )}
           <a href="/" className="font-medium text-green-700 hover:text-green-900 focus-visible:text-green-900 focus-visible:outline-none underline">

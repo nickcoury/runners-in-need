@@ -11,27 +11,39 @@ import {
   verificationTokens,
 } from "../db/schema";
 
+const authSecret = getEnv("AUTH_SECRET");
+const resendApiKey = getEnv("RESEND_API_KEY");
+const googleClientId = getEnv("GOOGLE_CLIENT_ID");
+const googleClientSecret = getEnv("GOOGLE_CLIENT_SECRET");
+const hasDatabaseConfig = !!getEnv("TURSO_DATABASE_URL");
+
 export default defineConfig({
-  secret: getEnv("AUTH_SECRET"),
+  secret: authSecret,
   trustHost: true,
-  adapter: DrizzleAdapter(getDb(), {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
-  }),
+  adapter: hasDatabaseConfig
+    ? DrizzleAdapter(getDb(), {
+        usersTable: users,
+        accountsTable: accounts,
+        sessionsTable: sessions,
+        verificationTokensTable: verificationTokens,
+      })
+    : undefined,
   providers: [
-    Resend({
-      apiKey: getEnv("RESEND_API_KEY"),
-      from: getEnv("EMAIL_FROM") || "noreply@runnersinneed.com",
-    }),
-    Google({
-      clientId: getEnv("GOOGLE_CLIENT_ID"),
-      clientSecret: getEnv("GOOGLE_CLIENT_SECRET"),
-    }),
+    ...(resendApiKey
+      ? [Resend({
+          apiKey: resendApiKey,
+          from: getEnv("EMAIL_FROM") || "noreply@runnersinneed.com",
+        })]
+      : []),
+    ...(googleClientId && googleClientSecret
+      ? [Google({
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        })]
+      : []),
   ],
   session: {
-    strategy: "database",
+    strategy: hasDatabaseConfig ? "database" : "jwt",
   },
   callbacks: {
     session({ session, user }) {

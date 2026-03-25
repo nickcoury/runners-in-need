@@ -4,6 +4,7 @@ import { categoryStyles, categoryLabels } from "../lib/constants";
 
 interface Need {
   id: string;
+  orgId: string;
   title: string;
   categoryTag: string;
   body: string;
@@ -77,7 +78,13 @@ function NeedCard({ need }: { need: Need }) {
         className="text-xs text-gray-500 mb-2"
         data-testid="need-card-org-location"
       >
-        {need.orgName} &middot; {need.location}
+        <a
+          href={`/org/${need.orgId}`}
+          className="hover:text-[#2D4A2D] hover:underline focus:outline-none focus-visible:text-[#2D4A2D] focus-visible:underline"
+        >
+          {need.orgName}
+        </a>{" "}
+        &middot; {need.location}
       </p>
       <p className="text-sm text-gray-600 line-clamp-3 mb-3 whitespace-pre-line flex-1">
         {need.body}
@@ -91,7 +98,7 @@ function NeedCard({ need }: { need: Need }) {
             daysLeft <= 0
               ? "text-red-600 font-medium"
               : daysLeft <= 14
-                ? "text-amber-600 font-medium"
+                ? "text-amber-700 font-medium"
                 : ""
           }
         >
