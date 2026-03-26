@@ -1,4 +1,4 @@
-import { construct } from "drizzle-orm/libsql/driver-core";
+import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client/web";
 import { getEnv } from "../lib/env";
 import * as schema from "./schema";
@@ -40,7 +40,7 @@ function getClient() {
 let _db: ReturnType<typeof createDb> | null = null;
 
 function createDb() {
-  return construct(getClient(), { schema });
+  return drizzle(getClient(), { schema });
 }
 
 export function getDb() {

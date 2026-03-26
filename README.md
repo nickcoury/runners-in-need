@@ -39,6 +39,7 @@ src/
 
 ## Documentation
 
+- [Docs Index](docs/README.md)
 - [TODO — Task List](TODO.md) — Prioritized work items
 - [CLAUDE.md](CLAUDE.md) — AI agent context (project state, preferences, setup)
 - [Product Requirements](docs/PRODUCT.md)
@@ -47,6 +48,8 @@ src/
 - [Market Research](docs/MARKET-RESEARCH.md)
 - [Legal Analysis](docs/LEGAL.md)
 - [Incident Playbook](docs/INCIDENT-PLAYBOOK.md)
+- [Audit Archive](docs/audits/README.md)
+- [Contributing Guide](CONTRIBUTING.md)
 - [Nick's TODOs](NICK-TODOS.md) — Items needing human decisions
 
 ## Scripts
@@ -56,7 +59,17 @@ src/
 | `npm run dev` | Start dev server |
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build |
+| `npm run test:smoke` | Run self-contained local smoke coverage |
+| `npm run test:ci-smoke` | Run preview smoke coverage used in CI |
+| `npm run test:prod-smoke` | Run production smoke coverage |
+| `npm run verify` | Run the default pre-push build + smoke path |
 
 ## Secrets
 
 Copy `.env.example` to `.env` and fill in values. See the example file for all required keys. Keep a backup of your `.env` somewhere secure — it's the only file not tracked in git.
+
+## Long-Term Health
+
+- Use `npm run verify` as the default pre-push path.
+- Keep audits and screenshots under `docs/audits/`.
+- Update `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, and `README.md` when product behavior or operational expectations change.

@@ -29,7 +29,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run CI smoke tests against preview
-        run: npx playwright test --config playwright.ci.config.ts
+        run: npm run test:ci-smoke
         timeout-minutes: 3
 
       - name: Deploy to Cloudflare Workers (production)
@@ -46,5 +46,5 @@ jobs:
 
       - name: Production smoke tests
         if: github.event_name != 'pull_request'
-        run: npx playwright test --config playwright.prod.config.ts
+        run: npm run test:prod-smoke
         timeout-minutes: 3
