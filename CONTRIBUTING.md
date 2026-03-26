@@ -21,6 +21,7 @@ npm run verify
 Use these when needed:
 
 - `npm run test:e2e`: full local Playwright suite
+- `npm run check`: Astro type and route checks
 - `npm run build`: production build validation
 - `npm run test:ci-smoke`: preview smoke coverage used in CI
 - `npm run test:prod-smoke`: production smoke coverage after deploy
@@ -36,4 +37,4 @@ Use these when needed:
 
 - `main` deploys production through GitHub Actions.
 - The `dev` branch is fast-forwarded from `main` and deployed to the Cloudflare Workers dev URL.
-- CI now runs `npm run build` and preview smoke coverage before production deploy.
+- CI now runs `npm run check`, `npm run build`, and preview smoke coverage before production deploy.

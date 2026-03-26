@@ -268,10 +268,11 @@ if (cardGrid) {
 
 function sortByDistance(lat: number, lng: number, label: string) {
   if (!cardGrid || !originalOrder) return;
+  const grid = cardGrid;
   sortLat = lat;
   sortLng = lng;
 
-  const cards = Array.from(cardGrid.querySelectorAll<HTMLElement>('.need-card'));
+  const cards = Array.from(grid.querySelectorAll<HTMLElement>('.need-card'));
   cards.sort((a, b) => {
     const aLat = parseFloat(a.dataset.lat || '');
     const aLng = parseFloat(a.dataset.lng || '');
@@ -281,7 +282,7 @@ function sortByDistance(lat: number, lng: number, label: string) {
     const bDist = isNaN(bLat) || isNaN(bLng) ? Infinity : haversine(lat, lng, bLat, bLng);
     return aDist - bDist;
   });
-  cards.forEach(card => cardGrid.appendChild(card));
+  cards.forEach(card => grid.appendChild(card));
 
   // Update UI
   locationIndicator?.classList.remove('hidden');
@@ -293,9 +294,10 @@ function sortByDistance(lat: number, lng: number, label: string) {
 
 function clearLocationSort() {
   if (!cardGrid || !originalOrder) return;
+  const grid = cardGrid;
   sortLat = null;
   sortLng = null;
-  originalOrder.forEach(card => cardGrid.appendChild(card));
+  originalOrder.forEach(card => grid.appendChild(card));
   locationIndicator?.classList.add('hidden');
   locationIndicator?.classList.remove('flex');
   locationBtn?.classList.remove('border-[#2D4A2D]', 'text-[#2D4A2D]');

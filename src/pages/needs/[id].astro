@@ -35,6 +35,7 @@ if (!needRow) {
 
 const need = needRow ? {
   id: needRow.id,
+  orgId: needRow.orgId,
   title: needRow.title,
   categoryTag: needRow.categoryTag,
   body: needRow.body,
@@ -129,8 +130,8 @@ const pledgesWithComputed = pledges.map((p) => {
 });
 ---
 
-<Layout title={needRow ? need.title : "Page Not Found"} description={needRow ? `${need.title} — ${need.orgName}, ${need.location}` : "This need could not be found."} ogType="article">
-  {needRow ? (
+<Layout title={need?.title ?? "Page Not Found"} description={need ? `${need.title} — ${need.orgName}, ${need.location}` : "This need could not be found."} ogType="article">
+  {need ? (
   <div class="max-w-3xl mx-auto">
     {/* Back link */}
     <a href="/" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none mb-4">
@@ -180,7 +181,7 @@ const pledgesWithComputed = pledges.map((p) => {
 
       {/* Org + location + date */}
       <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mb-4" data-testid="need-meta-row">
-        <a href={`/org/${needRow.orgId}`} class="font-medium text-gray-700 hover:text-[#2D4A2D] hover:underline focus-visible:text-[#2D4A2D] focus-visible:underline focus-visible:outline-none" data-testid="need-org-name">{need.orgName}</a>
+        <a href={`/org/${need.orgId}`} class="font-medium text-gray-700 hover:text-[#2D4A2D] hover:underline focus-visible:text-[#2D4A2D] focus-visible:underline focus-visible:outline-none" data-testid="need-org-name">{need.orgName}</a>
         <span>&middot;</span>
         <span>{need.location}</span>
         <span>&middot;</span>

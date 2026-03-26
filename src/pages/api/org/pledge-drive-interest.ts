@@ -4,7 +4,7 @@ import { schema } from "../../../db";
 import { eq } from "drizzle-orm";
 import { jsonError, requireOrganizer } from "../../../lib/api";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals }): Promise<Response> => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;

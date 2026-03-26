@@ -50,6 +50,7 @@ const image = session.user.image || null;
 const initials = user.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
 
 const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
+const organization = user.organization;
 ---
 
 <Layout title="Profile">
@@ -195,7 +196,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
                 type="text"
                 id="org-name"
                 name="name"
-                value={user.organization.name}
+                value={organization?.name || ''}
                 required
                 minlength="2"
                 maxlength="200"
@@ -211,7 +212,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
                 type="text"
                 id="org-location"
                 name="location"
-                value={user.organization.location}
+                value={organization?.location || ''}
                 required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
               />
@@ -227,7 +228,7 @@ const isOrganizer = userRole === 'organizer' && user.orgId && user.organization;
                 rows="3"
                 maxlength="2000"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
-              >{user.organization.description || ''}</textarea>
+              >{organization?.description || ''}</textarea>
             </div>
 
             <div class="flex items-center gap-3">

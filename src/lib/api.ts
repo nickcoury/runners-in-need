@@ -1,6 +1,14 @@
 import { getDb, schema } from "../db";
 import { eq } from "drizzle-orm";
 
+export type AuthSession = NonNullable<App.Locals["session"]> & {
+  user: AppSessionUser;
+};
+type OrganizerUser = typeof schema.users.$inferSelect;
+type RequireOrganizerResult =
+  | { error: Response }
+  | { session: AuthSession; user: OrganizerUser; db: ReturnType<typeof getDb> };
+
 export function jsonError(message: string, status: number): Response {
   return new Response(JSON.stringify({ error: message }), {
     status,
@@ -8,13 +16,17 @@ export function jsonError(message: string, status: number): Response {
   });
 }
 
-export function requireAuth(locals: App.Locals) {
+export function requireAuth(locals: App.Locals): AuthSession | null {
   const session = locals.session;
-  if (!session?.user?.id) return null;
-  return session;
+  if (!session?.user?.id) {
+    return null;
+  }
+  return session as AuthSession;
 }
 
-export async function requireOrganizer(locals: App.Locals) {
+export async function requireOrganizer(
+  locals: App.Locals
+): Promise<RequireOrganizerResult> {
   const session = requireAuth(locals);
   if (!session) return { error: jsonError("Unauthorized", 401) } as const;
   const db = getDb();

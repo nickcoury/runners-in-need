@@ -58,11 +58,12 @@ src/
 |---------|-------------|
 | `npm run dev` | Start dev server |
 | `npm run build` | Build for production |
+| `npm run check` | Run Astro type and route checks |
 | `npm run preview` | Preview production build |
 | `npm run test:smoke` | Run self-contained local smoke coverage |
 | `npm run test:ci-smoke` | Run preview smoke coverage used in CI |
 | `npm run test:prod-smoke` | Run production smoke coverage |
-| `npm run verify` | Run the default pre-push build + smoke path |
+| `npm run verify` | Run the default pre-push typecheck + smoke path |
 
 ## Secrets
 
@@ -71,5 +72,6 @@ Copy `.env.example` to `.env` and fill in values. See the example file for all r
 ## Long-Term Health
 
 - Use `npm run verify` as the default pre-push path.
+- Keep `npm run check` passing so CI can enforce typed route and page health.
 - Keep audits and screenshots under `docs/audits/`.
 - Update `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, and `README.md` when product behavior or operational expectations change.

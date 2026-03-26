@@ -32,6 +32,10 @@ export default function PledgeForm({
 
   useEffect(() => {
     if (!turnstileSiteKey || !turnstileRef.current) return;
+    const turnstileWindow = window as Window & {
+      turnstile?: TurnstileInstance;
+      onTurnstileLoad?: () => void;
+    };
     // Load Turnstile script if not already present
     const scriptId = "cf-turnstile-script";
     if (!document.getElementById(scriptId)) {
@@ -43,16 +47,16 @@ export default function PledgeForm({
     }
     // Render widget
     const render = () => {
-      if (window.turnstile && turnstileRef.current) {
-        window.turnstile.render(turnstileRef.current, {
+      if (turnstileWindow.turnstile && turnstileRef.current) {
+        turnstileWindow.turnstile.render(turnstileRef.current, {
           sitekey: turnstileSiteKey,
           callback: (token: string) => setTurnstileToken(token),
         });
       }
     };
-    window.onTurnstileLoad = render;
+    turnstileWindow.onTurnstileLoad = render;
     // If script already loaded
-    if (window.turnstile) render();
+    if (turnstileWindow.turnstile) render();
   }, [turnstileSiteKey]);
 
   useEffect(() => {

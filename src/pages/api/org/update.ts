@@ -7,7 +7,7 @@ import { sanitize } from "../../../lib/html";
 import { jsonError, requireOrganizer } from "../../../lib/api";
 import { VALID_DELIVERY_METHODS } from "../../../lib/constants";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals }): Promise<Response> => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;

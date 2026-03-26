@@ -5,7 +5,11 @@ import { eq, inArray, desc } from "drizzle-orm";
 import { createId } from "../../lib/id";
 import { sanitize } from "../../lib/html";
 import { jsonError, requireOrganizer } from "../../lib/api";
-import { VALID_CATEGORIES, VALID_DELIVERY_METHODS } from "../../lib/constants";
+import {
+  VALID_CATEGORIES,
+  VALID_DELIVERY_METHODS,
+  type CategoryTag,
+} from "../../lib/constants";
 
 export const GET: APIRoute = async () => {
   try {
@@ -50,7 +54,7 @@ export const GET: APIRoute = async () => {
   }
 };
 
-export const POST: APIRoute = async ({ request, locals, redirect }) => {
+export const POST: APIRoute = async ({ request, locals }): Promise<Response> => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;
@@ -76,6 +80,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   if (!(VALID_CATEGORIES as readonly string[]).includes(categoryTag)) {
     return jsonError("Invalid category", 400);
   }
+  const validCategory = categoryTag as CategoryTag;
   if (title.length < 5 || title.length > 200) {
     return jsonError("Title must be 5-200 characters", 400);
   }
@@ -106,7 +111,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
     await db.insert(schema.needs).values({
       id: needId,
       orgId,
-      categoryTag,
+      categoryTag: validCategory,
       title: sanitize(title),
       body: sanitize(body),
       extrasWelcome,
@@ -120,7 +125,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
       expiresAt,
     });
 
-    return redirect(`/needs/${needId}`);
+    return Response.redirect(new URL(`/needs/${needId}`, request.url), 302);
   } catch (e) {
     console.error("Need creation failed:", e);
     return jsonError("Internal server error", 500);

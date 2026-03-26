@@ -114,7 +114,7 @@ userMenuBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
   toggleDropdown();
   // Focus first menu item when opening
-  if (!userDropdown?.classList.contains('hidden')) {
+  if (userDropdown && !userDropdown.classList.contains('hidden')) {
     const firstItem = userDropdown.querySelector<HTMLElement>('[role="menuitem"]');
     firstItem?.focus();
   }

@@ -13,8 +13,8 @@ config();
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import * as schema from "../src/db/schema.ts";
+import { createId } from "../src/lib/id.ts";
 
 const client = createClient({
   url: process.env.TURSO_DATABASE_URL!,
@@ -22,10 +22,6 @@ const client = createClient({
 });
 
 const db = drizzle(client, { schema });
-
-function createId(): string {
-  return nanoid(12);
-}
 
 // Sessions expire 30 days from now
 const SESSION_EXPIRY = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -36,6 +32,7 @@ const TEST_USERS = [
     email: "test-donor@example.com",
     name: "Test Donor",
     role: "donor" as const,
+    needsOrg: false,
   },
   {
     id: createId(),
@@ -49,6 +46,7 @@ const TEST_USERS = [
     email: "test-admin@example.com",
     name: "Admin User",
     role: "admin" as const,
+    needsOrg: false,
   },
 ] as const;
 
@@ -124,7 +122,7 @@ async function createTestUsers() {
     }
 
     // Create a session token
-    const sessionToken = nanoid(32);
+    const sessionToken = crypto.randomUUID().replace(/-/g, "");
     await db.insert(schema.sessions).values({
       sessionToken,
       userId,

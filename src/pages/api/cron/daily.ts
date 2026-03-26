@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
 import { getDb, schema } from "../../../db";
 import { and, eq, lte, inArray, isNotNull } from "drizzle-orm";
 import { getEnv } from "../../../lib/env";
-import { createActionToken } from "../../../lib/tokens";
+import { createActionToken, timingSafeEqual } from "../../../lib/tokens";
 import { expireOverdueNeeds } from "../../../lib/expire-needs";
 import {
   sendNeedExpiryReminderEmail,
@@ -25,7 +25,7 @@ const handler: APIRoute = async ({ request }) => {
   const encoder = new TextEncoder();
   const a = encoder.encode(provided);
   const b = encoder.encode(cronSecret);
-  if (a.byteLength !== b.byteLength || !crypto.subtle.timingSafeEqual(a, b)) {
+  if (!timingSafeEqual(a, b)) {
     return json(403, { error: "Forbidden" });
   }
 

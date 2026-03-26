@@ -2,6 +2,19 @@ import { getEnv } from "./env";
 
 const TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+
+  let mismatch = 0;
+  for (let i = 0; i < a.byteLength; i += 1) {
+    mismatch |= a[i] ^ b[i];
+  }
+
+  return mismatch === 0;
+}
+
 async function hmac(data: string): Promise<string> {
   const secret = getEnv("AUTH_SECRET");
   if (!secret) throw new Error("AUTH_SECRET is required");
@@ -45,8 +58,5 @@ export async function verifyActionToken(needId: string, token: string): Promise<
   const encoder = new TextEncoder();
   const a = encoder.encode(providedMac);
   const b = encoder.encode(expectedMac);
-  if (a.byteLength !== b.byteLength) {
-    return false;
-  }
-  return crypto.subtle.timingSafeEqual(a, b);
+  return timingSafeEqual(a, b);
 }

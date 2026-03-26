@@ -40,6 +40,22 @@ async function getSession(req: Request): Promise<Session | null> {
   return data as Session;
 }
 
+function normalizeSession(session: Session): App.Locals["session"] | undefined {
+  if (!session.user?.id || !session.user.name || !session.user.email) {
+    return undefined;
+  }
+
+  return {
+    user: {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      role: (session.user as AppSessionUser).role || "donor",
+      image: session.user.image ?? null,
+    },
+  };
+}
+
 function addSecurityHeaders(response: Response): Response {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
@@ -153,8 +169,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Public endpoints/pages that benefit from session but don't require it
   if (pathname === "/api/pledges" || pathname === "/drives") {
     const session = await getSession(context.request);
-    if (session?.user) {
-      context.locals.session = session;
+    const normalizedSession = session ? normalizeSession(session) : undefined;
+    if (normalizedSession) {
+      context.locals.session = normalizedSession;
     }
     return addSecurityHeaders(await next());
   }
@@ -178,7 +195,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (isAdminRoute(pathname)) {
-    const role = session.user.role;
+    const role = (session.user as AppSessionUser).role;
     if (role !== "admin") {
       if (pathname.startsWith("/api/")) {
         return addSecurityHeaders(new Response(JSON.stringify({ error: "Forbidden" }), {
@@ -191,7 +208,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Store session on locals for downstream use
-  context.locals.session = session;
+  context.locals.session = normalizeSession(session);
 
   return addSecurityHeaders(await next());
 });

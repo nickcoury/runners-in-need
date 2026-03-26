@@ -11,7 +11,16 @@ const { id } = Astro.params;
 const hasDbConfig = !!getEnv("TURSO_DATABASE_URL");
 
 let org: Awaited<ReturnType<ReturnType<typeof getDb>["query"]["organizations"]["findFirst"]>> | null = null;
-let activeNeeds: Awaited<ReturnType<ReturnType<typeof getDb>["query"]["needs"]["findMany"]>> = [];
+let activeNeeds: Array<{
+  id: string;
+  title: string;
+  categoryTag: typeof schema.needs.$inferSelect.categoryTag;
+  body: string;
+  location: string;
+  createdAt: Date;
+  expiresAt: Date;
+  pledges: Array<{ id: string }>;
+}> = [];
 
 if (hasDbConfig) {
   const db = getDb();

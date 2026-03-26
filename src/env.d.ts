@@ -1,5 +1,13 @@
 /// <reference types="astro/client" />
 
+interface AppSessionUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  image?: string | null;
+}
+
 interface TurnstileInstance {
   render(
     element: HTMLElement,
@@ -22,13 +30,7 @@ declare global {
 declare namespace App {
   interface Locals {
     session?: {
-      user?: {
-        id: string;
-        name: string;
-        email: string;
-        role: string;
-        image?: string;
-      };
+      user?: AppSessionUser;
     };
   }
 }

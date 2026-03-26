@@ -1,5 +1,10 @@
 // Sign-in page: fetch CSRF token, populate hidden inputs, enable submit buttons, init Turnstile
 
+const turnstileWindow = window as Window & {
+  turnstile?: TurnstileInstance;
+  onTurnstileLoad?: () => void;
+};
+
 const signInButtons = () =>
   document.querySelectorAll<HTMLButtonElement>('.signin-submit');
 const authEnabled = document.querySelector<HTMLElement>('[data-auth-enabled]')?.dataset.authEnabled !== 'false';
@@ -42,8 +47,8 @@ if (widget) {
       document.head.appendChild(script);
     }
     const render = () => {
-      if (window.turnstile && widget) {
-        window.turnstile.render(widget, {
+      if (turnstileWindow.turnstile && widget) {
+        turnstileWindow.turnstile.render(widget, {
           sitekey,
           callback: (_token: string) => {
             // Token is automatically added to form as cf-turnstile-response hidden input
@@ -51,7 +56,7 @@ if (widget) {
         });
       }
     };
-    window.onTurnstileLoad = render;
-    if (window.turnstile) render();
+    turnstileWindow.onTurnstileLoad = render;
+    if (turnstileWindow.turnstile) render();
   }
 }

@@ -6,7 +6,8 @@ import { getDb, schema } from '../db';
 import { desc } from 'drizzle-orm';
 
 const session = Astro.locals.session;
-const isSignedIn = !!session?.user?.id;
+const sessionUser = session?.user;
+const isSignedIn = !!sessionUser?.id;
 const success = Astro.url.searchParams.get('success') === 'true';
 
 const now = new Date();
@@ -195,7 +196,7 @@ const driveStatusLabels: Record<string, string> = {
               required
               minlength="2"
               maxlength="200"
-              value={session.user.name || ''}
+              value={sessionUser?.name || ''}
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
             />
           </div>
@@ -208,7 +209,7 @@ const driveStatusLabels: Record<string, string> = {
               name="organizerEmail"
               type="email"
               required
-              value={session.user.email || ''}
+              value={sessionUser?.email || ''}
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2D4A2D]/30 focus:border-[#2D4A2D]"
             />
           </div>

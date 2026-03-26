@@ -8,7 +8,8 @@ import { eq } from 'drizzle-orm';
 
 const actionResult = Astro.getActionResult(actions.submitOrganizerRequest);
 const session = Astro.locals.session;
-const isSignedIn = !!session?.user?.id;
+const sessionUser = session?.user;
+const isSignedIn = !!sessionUser?.id;
 
 let existingRequest = null;
 let isAlreadyOrganizer = false;
@@ -17,14 +18,14 @@ let reapplyDate: string | null = null;
 if (isSignedIn) {
   const db = getDb();
   const user = await db.query.users.findFirst({
-    where: eq(schema.users.id, session.user.id),
+    where: eq(schema.users.id, sessionUser.id),
   });
 
   if (user?.role === 'organizer') {
     isAlreadyOrganizer = true;
   } else {
     const request = await db.query.organizerRequests.findFirst({
-      where: eq(schema.organizerRequests.userId, session.user.id),
+      where: eq(schema.organizerRequests.userId, sessionUser.id),
     });
 
     if (request?.status === 'denied' && request.reviewedAt) {

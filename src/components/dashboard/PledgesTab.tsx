@@ -38,7 +38,7 @@ export default function PledgesTab({ pledges, userRole }: PledgesTabProps) {
   }
 
   // Group pledges by needId
-  const pledgesByNeed: Record<string, Pledge[]> = {};
+  const pledgesByNeed: Record<string, DashboardPledge[]> = {};
   for (const p of pledges) {
     if (!pledgesByNeed[p.needId]) pledgesByNeed[p.needId] = [];
     pledgesByNeed[p.needId].push(p);

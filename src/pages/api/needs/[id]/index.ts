@@ -5,14 +5,18 @@ import { schema } from "../../../../db";
 import { eq } from "drizzle-orm";
 import { sanitize } from "../../../../lib/html";
 import { jsonError, requireOrganizer } from "../../../../lib/api";
-import { VALID_CATEGORIES, VALID_DELIVERY_METHODS } from "../../../../lib/constants";
+import {
+  VALID_CATEGORIES,
+  VALID_DELIVERY_METHODS,
+  type CategoryTag,
+} from "../../../../lib/constants";
 
 // Also handle POST (HTML forms can't send PUT)
-export const POST: APIRoute = async (context) => {
+export const POST: APIRoute = async (context): Promise<Response> => {
   return PUT(context);
 };
 
-export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
+export const PUT: APIRoute = async ({ params, request, locals }): Promise<Response> => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;
@@ -44,6 +48,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
   if (!(VALID_CATEGORIES as readonly string[]).includes(categoryTag)) {
     return jsonError("Invalid category", 400);
   }
+  const validCategory = categoryTag as CategoryTag;
   if (title.length < 5 || title.length > 200) {
     return jsonError("Title must be 5-200 characters", 400);
   }
@@ -66,7 +71,7 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
     .set({
       title: sanitize(title),
       body: sanitize(body),
-      categoryTag,
+      categoryTag: validCategory,
       extrasWelcome,
       expiresAt,
       deliveryMethods: deliveryMethods.length > 0 ? JSON.stringify(deliveryMethods) : null,
@@ -75,10 +80,10 @@ export const PUT: APIRoute = async ({ params, request, locals, redirect }) => {
     })
     .where(eq(schema.needs.id, params.id!));
 
-  return redirect(`/needs/${params.id}`);
+  return Response.redirect(new URL(`/needs/${params.id}`, request.url), 302);
 };
 
-export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
+export const DELETE: APIRoute = async ({ params, locals, request }): Promise<Response> => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;
@@ -103,5 +108,5 @@ export const DELETE: APIRoute = async ({ params, locals, redirect }) => {
     })
     .where(eq(schema.needs.id, params.id!));
 
-  return redirect("/dashboard");
+  return Response.redirect(new URL("/dashboard", request.url), 302);
 };
