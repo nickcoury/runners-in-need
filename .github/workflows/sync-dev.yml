@@ -21,7 +21,7 @@ jobs:
           git merge --ff-only origin/main
           git push origin dev
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
