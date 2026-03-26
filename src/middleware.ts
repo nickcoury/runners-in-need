@@ -20,6 +20,10 @@ function isAdminRoute(pathname: string): boolean {
 }
 
 async function getSession(req: Request): Promise<Session | null> {
+  if (!getEnv("AUTH_SECRET")) {
+    return null;
+  }
+
   const { default: authConfig } = await import("./lib/auth");
   const config = { ...authConfig };
   // @ts-ignore

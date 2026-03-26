@@ -2,6 +2,7 @@
 
 const signInButtons = () =>
   document.querySelectorAll<HTMLButtonElement>('.signin-submit');
+const authEnabled = document.querySelector<HTMLElement>('[data-auth-enabled]')?.dataset.authEnabled !== 'false';
 
 function enableSignInButtons() {
   signInButtons().forEach(btn => {
@@ -9,19 +10,23 @@ function enableSignInButtons() {
   });
 }
 
-fetch('/api/auth/csrf')
-  .then(r => {
-    if (!r.ok) throw new Error('csrf fetch failed');
-    return r.json();
-  })
-  .then(data => {
-    document.querySelectorAll<HTMLInputElement>('.signin-form input[name="csrfToken"]')
-      .forEach(input => { input.value = data.csrfToken; });
-    enableSignInButtons();
-  })
-  .catch(() => {
-    enableSignInButtons();
-  });
+if (authEnabled) {
+  fetch('/api/auth/csrf')
+    .then(r => {
+      if (!r.ok) throw new Error('csrf fetch failed');
+      return r.json();
+    })
+    .then(data => {
+      document.querySelectorAll<HTMLInputElement>('.signin-form input[name="csrfToken"]')
+        .forEach(input => { input.value = data.csrfToken; });
+      enableSignInButtons();
+    })
+    .catch(() => {
+      enableSignInButtons();
+    });
+} else {
+  enableSignInButtons();
+}
 
 // Turnstile bot prevention on magic link form
 const widget = document.getElementById('turnstile-widget');

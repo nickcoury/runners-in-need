@@ -9,12 +9,17 @@ const session = Astro.locals.session;
 const isSignedIn = !!session?.user?.id;
 const success = Astro.url.searchParams.get('success') === 'true';
 
-const db = getDb();
 const now = new Date();
+let allDrives: Array<typeof schema.pledgeDrives.$inferSelect> = [];
 
-const allDrives = await db.query.pledgeDrives.findMany({
-  orderBy: [desc(schema.pledgeDrives.eventDate)],
-});
+try {
+  const db = getDb();
+  allDrives = await db.query.pledgeDrives.findMany({
+    orderBy: [desc(schema.pledgeDrives.eventDate)],
+  });
+} catch {
+  allDrives = [];
+}
 
 const upcoming = allDrives.filter(
   (d) => d.eventDate >= now && d.status !== 'cancelled' && d.status !== 'completed'

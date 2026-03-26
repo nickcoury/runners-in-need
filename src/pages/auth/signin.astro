@@ -6,6 +6,7 @@ import { getEnv } from "../../lib/env";
 
 const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
 const turnstileSiteKey = getEnv("TURNSTILE_SITE_KEY") || "";
+const authEnabled = !!getEnv("AUTH_SECRET");
 
 // Map callback URLs to contextual messages
 function getCallbackContext(url: string): string | null {
@@ -28,8 +29,13 @@ const callbackContext = getCallbackContext(callbackUrl);
     <p class="text-sm text-gray-500 text-center mb-6">
       {callbackContext || 'Sign in or create your account \u2014 it\u2019s the same form'}
     </p>
+    {!authEnabled && (
+      <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        Local sign-in is unavailable until `AUTH_SECRET` is configured.
+      </div>
+    )}
 
-    <div class="space-y-4">
+    <div class="space-y-4" data-auth-enabled={authEnabled ? "true" : "false"}>
       {/* Magic link */}
       <form method="POST" action="/api/auth/signin/resend" class="signin-form space-y-3">
         <input type="hidden" name="csrfToken" value="" />
