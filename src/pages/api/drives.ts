@@ -8,7 +8,6 @@ import { jsonError, requireAuth } from "../../lib/api";
 export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const session = requireAuth(locals);
   if (!session) return jsonError("Unauthorized", 401);
-
   const form = await request.formData();
   const organizerName = form.get("organizerName") as string;
   const organizerEmail = form.get("organizerEmail") as string;

@@ -71,6 +71,24 @@ function addSecurityHeaders(response: Response): Response {
   return response;
 }
 
+function isLoopbackHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
+function isAllowedOrigin(origin: string, requestUrl: URL): boolean {
+  const originUrl = new URL(origin);
+  if (originUrl.protocol !== requestUrl.protocol) return false;
+  if (originUrl.host === requestUrl.host) return true;
+
+  if (import.meta.env.PROD) return false;
+
+  return (
+    originUrl.port === requestUrl.port &&
+    isLoopbackHost(originUrl.hostname) &&
+    isLoopbackHost(requestUrl.hostname)
+  );
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
   const method = context.request.method;
@@ -86,9 +104,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         return addSecurityHeaders(new Response("CSRF check failed", { status: 403 }));
       }
     } else {
-      const requestHost = context.url.host;
-      const originHost = new URL(origin).host;
-      if (originHost !== requestHost) {
+      if (!isAllowedOrigin(origin, context.url)) {
         return addSecurityHeaders(new Response("CSRF check failed", { status: 403 }));
       }
     }

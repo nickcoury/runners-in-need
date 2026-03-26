@@ -54,13 +54,8 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;
+  const form = await request.formData();
 
-  let form: FormData;
-  try {
-    form = await request.formData();
-  } catch {
-    return jsonError("Invalid form data", 400);
-  }
   const orgId = form.get("orgId") as string;
   const categoryTag = form.get("categoryTag") as string;
   const title = form.get("title") as string;

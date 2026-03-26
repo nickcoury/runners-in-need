@@ -9,9 +9,10 @@ import { eq } from "drizzle-orm";
 import { categoryStyles, categoryLabels, pledgeStatusStyles, pledgeStatusLabels, deliveryMethodLabels } from "../../lib/constants";
 
 const { id } = Astro.params;
-const db = getDb();
+const hasDbConfig = !!getEnv("TURSO_DATABASE_URL");
+const db = hasDbConfig ? getDb() : null;
 
-const needRow = await db.query.needs.findFirst({
+const needRow = db ? await db.query.needs.findFirst({
   where: eq(schema.needs.id, id!),
   with: {
     organization: true,
@@ -26,13 +27,13 @@ const needRow = await db.query.needs.findFirst({
     },
     continuedFrom: true,
   },
-});
+}) : null;
 
 if (!needRow) {
-  return Astro.redirect("/404");
+  Astro.response.status = 404;
 }
 
-const need = {
+const need = needRow ? {
   id: needRow.id,
   title: needRow.title,
   categoryTag: needRow.categoryTag,
@@ -46,9 +47,9 @@ const need = {
   continuedFromId: needRow.continuedFrom?.id ?? null,
   continuedFromTitle: needRow.continuedFrom?.title ?? null,
   createdAt: needRow.createdAt,
-};
+} : null;
 
-const pledges = needRow.pledges.map((p) => ({
+const pledges = needRow ? needRow.pledges.map((p) => ({
   id: p.id,
   donorName: p.donorName || "Anonymous",
   description: p.description,
@@ -62,52 +63,52 @@ const pledges = needRow.pledges.map((p) => ({
     body: m.body,
     createdAt: m.createdAt,
   })),
-}));
+})) : [];
 
 // Precompute all derived values
-const categoryStyle = categoryStyles[need.categoryTag] || categoryStyles.other;
-const categoryLabel = categoryLabels[need.categoryTag] || "Other";
+const categoryStyle = need ? categoryStyles[need.categoryTag] || categoryStyles.other : categoryStyles.other;
+const categoryLabel = need ? categoryLabels[need.categoryTag] || "Other" : "Other";
 
 const msPerDay = 1000 * 60 * 60 * 24;
-const daysUntilExpiry = Math.ceil((need.expiresAt.getTime() - Date.now()) / msPerDay);
+const daysUntilExpiry = need ? Math.ceil((need.expiresAt.getTime() - Date.now()) / msPerDay) : 0;
 const isExpiringSoon = daysUntilExpiry <= 14 && daysUntilExpiry > 0;
 const isExpired = daysUntilExpiry <= 0;
 const expiryText = isExpired ? "Expired" : daysUntilExpiry === 1 ? "1 day left" : `${daysUntilExpiry} days left`;
 const expiryClass = isExpiringSoon ? "text-amber-700 font-medium" : isExpired ? "text-red-600 font-medium" : "text-gray-500";
 
-const hasContinuation = need.continuedFromId !== null;
-const continuationUrl = hasContinuation ? `/needs/${need.continuedFromId}` : "";
+const hasContinuation = !!need?.continuedFromId;
+const continuationUrl = hasContinuation ? `/needs/${need?.continuedFromId}` : "";
 
-const createdDateStr = need.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-const expiresDateStr = need.expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+const createdDateStr = need?.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) ?? "";
+const expiresDateStr = need?.expiresAt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) ?? "";
 
-const pledgeCountText = need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges`;
+const pledgeCountText = need ? need.pledgeCount === 1 ? "1 pledge" : `${need.pledgeCount} pledges` : "0 pledges";
 
 // Check if current user can message on pledges
 const session = Astro.locals.session;
 const currentUserId = session?.user?.id;
 let currentUserOrgId: string | null = null;
 if (currentUserId) {
-  const currentUser = await db.query.users.findFirst({
+  const currentUser = db ? await db.query.users.findFirst({
     where: eq(schema.users.id, currentUserId),
     columns: { orgId: true },
-  });
+  }) : null;
   currentUserOrgId = currentUser?.orgId ?? null;
 }
-const isOrgMember = currentUserOrgId === needRow.orgId;
+const isOrgMember = currentUserOrgId === needRow?.orgId;
 
-const showShipping = needRow.organization?.showShippingAddress && !!needRow.organization?.shippingAddress;
-const shippingAddress = needRow.organization?.shippingAddress || "";
-const shippingAttn = needRow.organization?.shippingAttn || "";
+const showShipping = !!needRow?.organization?.showShippingAddress && !!needRow.organization?.shippingAddress;
+const shippingAddress = needRow?.organization?.shippingAddress || "";
+const shippingAttn = needRow?.organization?.shippingAttn || "";
 
 // Resolve delivery methods: need-level override > org defaults
-const effectiveDeliveryMethods: string[] = needRow.deliveryMethods
+const effectiveDeliveryMethods: string[] = needRow?.deliveryMethods
   ? JSON.parse(needRow.deliveryMethods)
-  : needRow.organization?.deliveryMethods
+  : needRow?.organization?.deliveryMethods
     ? JSON.parse(needRow.organization.deliveryMethods)
     : [];
-const effectiveDeliveryInstructions = needRow.deliveryInstructions
-  || needRow.organization?.deliveryInstructions
+const effectiveDeliveryInstructions = needRow?.deliveryInstructions
+  || needRow?.organization?.deliveryInstructions
   || "";
 
 const pledgesWithComputed = pledges.map((p) => {
@@ -123,12 +124,13 @@ const pledgesWithComputed = pledges.map((p) => {
     });
     return { ...m, timeStr };
   });
-  const canMessage = isOrgMember || (currentUserId && needRow.pledges.find((np) => np.id === p.id)?.donorId === currentUserId);
+  const canMessage = isOrgMember || (currentUserId && needRow?.pledges.find((np) => np.id === p.id)?.donorId === currentUserId);
   return { ...p, badge, label, dateStr, messagesWithDates, canMessage: !!canMessage };
 });
 ---
 
-<Layout title={need.title} description={`${need.title} — ${need.orgName}, ${need.location}`} ogType="article">
+<Layout title={needRow ? need.title : "Page Not Found"} description={needRow ? `${need.title} — ${need.orgName}, ${need.location}` : "This need could not be found."} ogType="article">
+  {needRow ? (
   <div class="max-w-3xl mx-auto">
     {/* Back link */}
     <a href="/" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2D4A2D] focus-visible:text-[#2D4A2D] focus-visible:outline-none mb-4">
@@ -347,6 +349,21 @@ const pledgesWithComputed = pledges.map((p) => {
       )}
     </div>
   </div>
+  ) : (
+    <div class="max-w-xl mx-auto text-center py-20">
+      <p class="text-6xl font-bold text-[#2D4A2D]">404</p>
+      <h1 class="text-2xl font-semibold mt-4 mb-2">Need not found</h1>
+      <p class="text-gray-600 mb-6">
+        This need is unavailable or may have been fulfilled, expired, or removed.
+      </p>
+      <a
+        href="/"
+        class="inline-block bg-[#2D4A2D] text-white px-6 py-2.5 rounded-lg hover:bg-[#1f351f] focus-visible:ring-2 focus-visible:ring-[#2D4A2D]/50 focus-visible:ring-offset-2 focus-visible:outline-none transition-colors text-sm font-medium"
+      >
+        Back to browse
+      </a>
+    </div>
+  )}
 
   <script>
     const copyButton = document.getElementById('copy-need-link');

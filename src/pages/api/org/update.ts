@@ -11,7 +11,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const auth = await requireOrganizer(locals);
   if ("error" in auth) return auth.error;
   const { user, db } = auth;
-
   const form = await request.formData();
   const orgId = form.get("orgId") as string;
   const name = form.get("name") as string;
